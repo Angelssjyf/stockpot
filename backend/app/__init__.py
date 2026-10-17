@@ -13,6 +13,10 @@ def create_app(config_class=Config):
 
     db.init_app(app)
 
+    from .cli import register_cli
+
+    register_cli(app)
+
     @app.get("/api/health")
     def health():
         """Comprueba que la API está viva y que se conecta a MySQL."""
