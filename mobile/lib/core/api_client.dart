@@ -22,6 +22,9 @@ class ApiClient {
 
   Map<String, String> get _encabezados => {
         'Content-Type': 'application/json',
+        // Evita que el plan gratis de ngrok responda con su página de advertencia
+        // en vez de los datos de la API. En localhost no tiene ningún efecto.
+        'ngrok-skip-browser-warning': 'true',
         if (token != null) 'Authorization': 'Bearer $token',
       };
 
