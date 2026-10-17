@@ -21,3 +21,6 @@ build/
 Thumbs.db
 .DS_Store
 .idea/
+
+# Dominio personal de ngrok de cada integrante (lo lee publicar.bat)
+ngrok-dominio.txt

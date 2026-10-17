@@ -6,4 +6,5 @@ SQLAlchemy==2.1.5
 PyMySQL==1.2.3
 cryptography==50.0.2
 python-dotenv==1.2.4
+waitress==3.0.2
 pytest==9.1.1

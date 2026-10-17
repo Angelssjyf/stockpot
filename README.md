@@ -113,6 +113,24 @@ http://127.0.0.1:5000/api/health debe responder con la versión de MySQL y los 6
 **Para programar la app** con recarga instantánea, en vez de compilar: deja `iniciar.bat`
 abierto y en otra terminal ejecuta `cd mobile` y luego `flutter run -d chrome`.
 
+### Publicar con un enlace (ngrok)
+
+Para que el equipo o el docente abran StockPot desde su celular o PC:
+
+1. Instala [ngrok](https://ngrok.com/download) y vincula tu cuenta una sola vez:
+   `ngrok config add-authtoken <tu-token>` (el token está en dashboard.ngrok.com).
+2. Cierra `iniciar.bat` si está abierto.
+3. Doble clic en **`publicar.bat`**: abre el servidor de producción (Waitress, **sin modo debug**)
+   y ngrok. Comparte el enlace `https://...` que aparece en **Forwarding**.
+4. Para dejar de publicar, cierra las dos ventanas.
+
+**Enlace fijo (opcional):** reclama tu dominio gratuito en dashboard.ngrok.com → *Domains* y
+escríbelo en un archivo `ngrok-dominio.txt` junto a `publicar.bat` (solo el dominio, por ejemplo
+`mi-stockpot.ngrok-free.app`). Así el enlace no cambia cada vez.
+
+> ⚠️ Mientras el enlace esté activo, cualquiera que lo tenga puede ver la pantalla de login.
+> Usa contraseñas fuertes y cierra `publicar.bat` cuando no lo estén usando.
+
 ### 7. Correr las pruebas
 
 ```powershell
