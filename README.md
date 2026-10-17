@@ -104,32 +104,34 @@ Necesitas además **Flutter** instalado (`flutter --version`).
 
 1. Doble clic en **`compilar-app.bat`**: compila la app web. Solo hace falta la primera vez y
    cada vez que cambie el código de `mobile/`.
-2. Doble clic en **`iniciar.bat`**: enciende el servidor y abre **http://127.0.0.1:5000** con la
-   pantalla de login. Para apagarlo, cierra la ventana negra.
+2. Doble clic en **`iniciar.bat`**: enciende **todo de una vez**:
+   - el servidor de producción **Waitress** (sin modo debug),
+   - el **enlace público de ngrok**, si está instalado; aparece en verde y se copia al portapapeles,
+   - y abre **http://127.0.0.1:5000** en tu navegador con la pantalla de login.
+3. Para apagar todo, cierra la ventana negra del servidor y la de ngrok.
 
-Flask entrega la app y la API desde la misma dirección. Para comprobar solo la API:
-http://127.0.0.1:5000/api/health debe responder con la versión de MySQL y los 6 roles.
+Para comprobar solo la API: http://127.0.0.1:5000/api/health debe responder con la versión de
+MySQL y los 6 roles.
 
-**Para programar la app** con recarga instantánea, en vez de compilar: deja `iniciar.bat`
-abierto y en otra terminal ejecuta `cd mobile` y luego `flutter run -d chrome`.
-
-### Publicar con un enlace (ngrok)
-
-Para que el equipo o el docente abran StockPot desde su celular o PC:
+### Enlace público con ngrok
 
 1. Instala [ngrok](https://ngrok.com/download) y vincula tu cuenta una sola vez:
    `ngrok config add-authtoken <tu-token>` (el token está en dashboard.ngrok.com).
-2. Cierra `iniciar.bat` si está abierto.
-3. Doble clic en **`publicar.bat`**: abre el servidor de producción (Waitress, **sin modo debug**)
-   y ngrok. Comparte el enlace `https://...` que aparece en **Forwarding**.
-4. Para dejar de publicar, cierra las dos ventanas.
+2. **Enlace fijo (recomendado):** reclama tu dominio gratuito en dashboard.ngrok.com → *Domains*
+   y escríbelo en un archivo `ngrok-dominio.txt` junto a `iniciar.bat` (solo el dominio, por ejemplo
+   `mi-stockpot.ngrok-free.app`). Si no existe ese archivo, el enlace cambia cada vez.
 
-**Enlace fijo (opcional):** reclama tu dominio gratuito en dashboard.ngrok.com → *Domains* y
-escríbelo en un archivo `ngrok-dominio.txt` junto a `publicar.bat` (solo el dominio, por ejemplo
-`mi-stockpot.ngrok-free.app`). Así el enlace no cambia cada vez.
+Quien abra el enlace verá primero una advertencia de ngrok: debe tocar **Visit Site**.
 
-> ⚠️ Mientras el enlace esté activo, cualquiera que lo tenga puede ver la pantalla de login.
-> Usa contraseñas fuertes y cierra `publicar.bat` cuando no lo estén usando.
+> ⚠️ Mientras `iniciar.bat` esté abierto, cualquiera con el enlace puede ver la pantalla de
+> login. Usa contraseñas fuertes y cierra las ventanas cuando no lo estén usando.
+
+### Para programar
+
+- **Backend con recarga automática:** en vez de `iniciar.bat`, ejecuta en `backend`:
+  `python run.py` (modo debug, **solo local, nunca con ngrok**).
+- **App con recarga instantánea:** con el servidor encendido, en otra terminal:
+  `cd mobile` y luego `flutter run -d chrome`.
 
 ### 7. Correr las pruebas
 
