@@ -13,8 +13,7 @@ frontend/                                              backend/                 
 |---|---|
 | Base de datos | MySQL 8.4 LTS + MySQL Workbench |
 | Backend (API REST) | Python 3.11, Flask, SQLAlchemy, Flask-JWT-Extended |
-| Presentación (interfaz web) | HTML, CSS y JavaScript *(en construcción)* |
-| App móvil (opcional, al final) | Flutter / Dart: login y menú hechos en `mobile/` |
+| Presentación (interfaz web) | HTML, CSS y JavaScript (sin frameworks) |
 | Pruebas | pytest |
 | Control de versiones | Git + GitHub con GitFlow |
 
@@ -41,8 +40,12 @@ stockpot/
 │   │   ├── modules/     Un módulo por cada requisito de la EDT (auth, usuarios...)
 │   │   └── utils/       Código compartido (control de permisos)
 │   └── tests/           Pruebas automáticas (casos CP-XX.X-n)
-├── frontend/            Interfaz web: HTML, CSS y JavaScript (la sirve Flask)
-├── mobile/              App Flutter opcional para Android (para el final del proyecto)
+├── frontend/            Interfaz web (la sirve Flask)
+│   ├── index.html       Inicio de sesión
+│   ├── menu.html        Menú de módulos según el rol
+│   ├── usuarios.html    Gestión de usuarios y roles
+│   ├── css/estilos.css  Diseño de toda la interfaz
+│   └── js/              Lógica de cada pantalla (api.js habla con la API)
 └── docs/                Documentación (modelo de datos)
 ```
 
@@ -132,9 +135,8 @@ Quien abra el enlace verá primero una advertencia de ngrok: debe tocar **Visit 
 
 - **Backend con recarga automática:** en vez de `iniciar.bat`, ejecuta en `backend`:
   `python run.py` (modo debug, **solo local, nunca con ngrok**).
-- **Interfaz web:** edita los archivos de `frontend/` y recarga el navegador (F5).
-- **App Flutter (opcional):** con el servidor encendido, en otra terminal:
-  `cd mobile` y luego `flutter run -d chrome`.
+- **Interfaz web:** edita los archivos de `frontend/` y recarga el navegador (F5). Si no ves
+  el cambio, recarga forzando con `Ctrl+F5`.
 
 ### 7. Correr las pruebas
 

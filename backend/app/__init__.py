@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 from sqlalchemy import text
 
 from .config import Config
-from .extensions import cors, db, jwt
+from .extensions import db, jwt
 
 
 def create_app(config_class=Config):
@@ -14,11 +14,6 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     jwt.init_app(app)
-    cors.init_app(
-        app,
-        resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}},
-        allow_headers=["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
-    )
 
     # Mensajes en español cuando falta el token, es inválido o venció (HTTP 401)
     @jwt.unauthorized_loader

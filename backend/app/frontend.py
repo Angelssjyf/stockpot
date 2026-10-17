@@ -1,12 +1,18 @@
 """Entrega la interfaz web (frontend/: HTML, CSS y JavaScript) desde el mismo servidor Flask.
 
-Así la app y la API viven en la misma dirección: se abre http://127.0.0.1:5000 (o el
+Así la interfaz y la API viven en la misma dirección: se abre http://127.0.0.1:5000 (o el
 enlace de ngrok) y aparece la pantalla de login, con un solo servidor encendido.
 """
 
+import mimetypes
 from pathlib import Path
 
 from flask import jsonify, send_from_directory
+
+# En algunos Windows el registro asocia .js a "text/plain" y el navegador se niega a
+# ejecutar los módulos JavaScript. Se fijan los tipos correctos.
+mimetypes.add_type("text/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
 
 
 def register_frontend(app):
@@ -26,8 +32,7 @@ def register_frontend(app):
                 503,
             )
 
-        archivo = carpeta / ruta
-        if archivo.is_file():
+        if (carpeta / ruta).is_file():
             return send_from_directory(carpeta, ruta)
-        # Cualquier otra dirección la maneja la app Flutter
+        # Una dirección que no existe lleva a la pantalla de inicio de sesión
         return send_from_directory(carpeta, "index.html")

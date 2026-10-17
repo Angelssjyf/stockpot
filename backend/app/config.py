@@ -29,10 +29,6 @@ class Config:
     JWT_SECRET_KEY = SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
 
-    # Orígenes que pueden llamar a la API desde un navegador (CORS).
-    # En desarrollo: páginas abiertas en localhost con cualquier puerto (Live Server, flutter run).
-    CORS_ORIGINS = [r"http://localhost:\d+", r"http://127\.0\.0\.1:\d+"]
-
     # Carpeta de la interfaz web (HTML, CSS y JavaScript). Flask la entrega en "/"
     FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
 

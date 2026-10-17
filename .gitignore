@@ -11,12 +11,6 @@ __pycache__/
 .ruff_cache/
 instance/
 
-# Flutter / Dart
-.dart_tool/
-build/
-.flutter-plugins
-.flutter-plugins-dependencies
-
 # Sistema operativo y editores
 Thumbs.db
 .DS_Store
