@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 from sqlalchemy import text
 
 from .config import Config
-from .extensions import db, jwt
+from .extensions import cors, db, jwt
 
 
 def create_app(config_class=Config):
@@ -14,6 +14,7 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     jwt.init_app(app)
+    cors.init_app(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
 
     # Mensajes en español cuando falta el token, es inválido o venció (HTTP 401)
     @jwt.unauthorized_loader
@@ -48,5 +49,10 @@ def create_app(config_class=Config):
             return jsonify(api="ok", mysql=version, roles=roles)
         except Exception as error:
             return jsonify(api="ok", mysql="error", detalle=str(error.__class__.__name__)), 500
+
+    # La app Flutter compilada se entrega en "/" (debe ir al final, después de la API)
+    from .frontend import register_frontend
+
+    register_frontend(app)
 
     return app
