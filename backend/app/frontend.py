@@ -1,4 +1,4 @@
-"""Entrega la app Flutter compilada (mobile/build/web) desde el mismo servidor Flask.
+"""Entrega la interfaz web (frontend/: HTML, CSS y JavaScript) desde el mismo servidor Flask.
 
 Así la app y la API viven en la misma dirección: se abre http://127.0.0.1:5000 (o el
 enlace de ngrok) y aparece la pantalla de login, con un solo servidor encendido.
@@ -21,8 +21,8 @@ def register_frontend(app):
 
         if not (carpeta / "index.html").exists():
             return (
-                "<h2>La app web todavía no está compilada.</h2>"
-                "<p>Ejecuta <code>flutter build web</code> en la carpeta <code>mobile</code>.</p>",
+                "<h2>No se encontró la interfaz web.</h2>"
+                "<p>Falta el archivo <code>frontend/index.html</code>.</p>",
                 503,
             )
 

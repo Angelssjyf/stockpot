@@ -54,7 +54,7 @@ def create_app(config_class=Config):
         except Exception as error:
             return jsonify(api="ok", mysql="error", detalle=str(error.__class__.__name__)), 500
 
-    # La app Flutter compilada se entrega en "/" (debe ir al final, después de la API)
+    # La interfaz web (frontend/) se entrega en "/" (debe ir al final, después de la API)
     from .frontend import register_frontend
 
     register_frontend(app)

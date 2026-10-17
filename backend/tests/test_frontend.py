@@ -1,4 +1,4 @@
-"""Casos de prueba: Flask entrega la app Flutter compilada en la misma dirección que la API."""
+"""Casos de prueba: Flask entrega la interfaz web en la misma dirección que la API."""
 
 import pytest
 
@@ -52,4 +52,4 @@ def test_cp_web_5_sin_compilar_avisa(tmp_path):
 
     r = create_app(Config).test_client().get("/")
     assert r.status_code == 503
-    assert b"flutter build web" in r.data
+    assert b"frontend/index.html" in r.data
