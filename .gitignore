@@ -1,0 +1,23 @@
+# Credenciales y configuración local: NUNCA se suben al repositorio
+.env
+*.env.local
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+instance/
+
+# Flutter / Dart
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Sistema operativo y editores
+Thumbs.db
+.DS_Store
+.idea/

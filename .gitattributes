@@ -1,0 +1,13 @@
+# Todos los archivos de texto se guardan en el repositorio con saltos de
+# línea LF, sin importar si cada integrante usa Windows, Mac o Linux.
+* text=auto eol=lf
+
+# Scripts de Windows sí necesitan CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Archivos binarios: Git no debe modificarlos
+*.png binary
+*.jpg binary
+*.ico binary
