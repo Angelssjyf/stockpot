@@ -30,8 +30,10 @@ def create_app(config_class=Config):
 
     # Módulos (blueprints): cada uno con su prefijo de URL
     from .modules.auth.routes import bp as auth_bp
+    from .modules.usuarios.routes import bp as usuarios_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(usuarios_bp, url_prefix="/api")
 
     from .cli import register_cli
 
