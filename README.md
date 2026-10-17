@@ -98,13 +98,20 @@ flask crear-admin
 
 Te pedirá correo, nombre y contraseña (mínimo 8 caracteres). Con ese usuario inicias sesión.
 
-### 6. Ejecutar
+### 6. Compilar la app y ejecutar
 
-```powershell
-python run.py
-```
+Necesitas además **Flutter** instalado (`flutter --version`).
 
-Abre http://127.0.0.1:5000/api/health: debe responder con la versión de MySQL y los 6 roles.
+1. Doble clic en **`compilar-app.bat`**: compila la app web. Solo hace falta la primera vez y
+   cada vez que cambie el código de `mobile/`.
+2. Doble clic en **`iniciar.bat`**: enciende el servidor y abre **http://127.0.0.1:5000** con la
+   pantalla de login. Para apagarlo, cierra la ventana negra.
+
+Flask entrega la app y la API desde la misma dirección. Para comprobar solo la API:
+http://127.0.0.1:5000/api/health debe responder con la versión de MySQL y los 6 roles.
+
+**Para programar la app** con recarga instantánea, en vez de compilar: deja `iniciar.bat`
+abierto y en otra terminal ejecuta `cd mobile` y luego `flutter run -d chrome`.
 
 ### 7. Correr las pruebas
 

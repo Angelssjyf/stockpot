@@ -1,5 +1,6 @@
 """Extensiones compartidas por toda la aplicación."""
 
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 
@@ -8,3 +9,6 @@ db = SQLAlchemy()
 
 # Maneja la creación y verificación de los tokens de inicio de sesión
 jwt = JWTManager()
+
+# Permite que la app Flutter en el navegador (otro puerto) llame a la API
+cors = CORS()
