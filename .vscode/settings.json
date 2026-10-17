@@ -1,0 +1,7 @@
+{
+  // Las extensiones de Java no deben tratar mobile/android como proyecto Java:
+  // esa carpeta la maneja Flutter.
+  "java.import.gradle.enabled": false,
+  "java.import.maven.enabled": false,
+  "gradle.autoDetect": "off"
+}
