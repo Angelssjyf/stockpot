@@ -97,3 +97,81 @@ def test_cp_seg_5_mesero_no_crea_usuarios(client, mesero_headers, nuevo_mesero):
     """CP-SEG-5 | Seguridad | Un MESERO (sin usuarios.gestionar) no puede crear usuarios → 403."""
     r = client.post("/api/usuarios", headers=mesero_headers, json=nuevo_mesero)
     assert r.status_code == 403
+
+
+# ------------------------------------------------------- RF-01.3 Modificar
+
+
+@pytest.fixture()
+def ana(client, admin_headers, nuevo_mesero):
+    """Usuaria MESERO ya registrada; devuelve su JSON (incluye el id)."""
+    return client.post("/api/usuarios", headers=admin_headers, json=nuevo_mesero).get_json()
+
+
+def test_cp_01_3_1_modificar_datos(client, admin_headers, ana):
+    """CP-01.3-1 | RF-01.3 | Modificar teléfono y apellido; lo demás no cambia."""
+    r = client.put(f"/api/usuarios/{ana['id']}", headers=admin_headers,
+                   json={"telefono": "3001234567", "apellido": "Gómez"})
+    assert r.status_code == 200
+    body = r.get_json()
+    assert body["telefono"] == "3001234567"
+    assert body["apellido"] == "Gómez"
+    assert body["nombre"] == "Ana" and body["rol"] == "MESERO"
+
+
+def test_cp_01_3_2_cambiar_contrasena(client, admin_headers, ana):
+    """CP-01.3-2 | RF-01.3 | Cambiar la contraseña: la nueva sirve y la anterior ya no."""
+    client.put(f"/api/usuarios/{ana['id']}", headers=admin_headers, json={"password": "NuevaClave99"})
+    login = lambda clave: client.post(  # noqa: E731
+        "/api/auth/login", json={"email": "ana@stockpot.test", "password": clave})
+    assert login("NuevaClave99").status_code == 200
+    assert login("Clave12345").status_code == 401
+
+
+def test_cp_01_3_3_desactivar_usuario(client, admin_headers, ana):
+    """CP-01.3-3 | RF-01.3 | Un usuario desactivado ya no puede iniciar sesión."""
+    r = client.put(f"/api/usuarios/{ana['id']}", headers=admin_headers, json={"activo": False})
+    assert r.get_json()["activo"] is False
+    login = client.post("/api/auth/login", json={"email": "ana@stockpot.test", "password": "Clave12345"})
+    assert login.status_code == 403
+
+
+def test_cp_01_3_4_no_desactivarse_a_si_mismo(client, admin_headers):
+    """CP-01.3-4 | RF-01.3 | El administrador no puede desactivar su propio usuario → 409."""
+    yo = client.get("/api/auth/me", headers=admin_headers).get_json()
+    r = client.put(f"/api/usuarios/{yo['id']}", headers=admin_headers, json={"activo": False})
+    assert r.status_code == 409
+
+
+def test_cp_01_3_5_correo_de_otro_usuario(client, admin_headers, ana):
+    """CP-01.3-5 | RF-01.3 | Cambiar el correo por uno que ya usa otro usuario → 409."""
+    r = client.put(f"/api/usuarios/{ana['id']}", headers=admin_headers,
+                   json={"email": "admin@stockpot.test"})
+    assert r.status_code == 409
+
+
+def test_cp_01_3_6_error_no_guarda_cambios_parciales(client, admin_headers, ana):
+    """CP-01.3-6 | RF-01.3 | Si un campo es inválido, no se guarda ningún cambio."""
+    r = client.put(f"/api/usuarios/{ana['id']}", headers=admin_headers,
+                   json={"nombre": "Cambiado", "password": "corta"})
+    assert r.status_code == 422
+    actual = client.get(f"/api/usuarios/{ana['id']}", headers=admin_headers).get_json()
+    assert actual["nombre"] == "Ana"
+
+
+def test_cp_01_3_7_usuario_inexistente(client, admin_headers):
+    """CP-01.3-7 | RF-01.3 | Modificar un usuario que no existe → 404."""
+    r = client.put("/api/usuarios/999", headers=admin_headers, json={"telefono": "1"})
+    assert r.status_code == 404
+
+
+def test_cp_01_3_8_nombre_vacio(client, admin_headers, ana):
+    """CP-01.3-8 | RF-01.3 | Dejar el nombre vacío → 422."""
+    r = client.put(f"/api/usuarios/{ana['id']}", headers=admin_headers, json={"nombre": "  "})
+    assert r.status_code == 422
+
+
+def test_cp_seg_6_mesero_no_modifica_usuarios(client, admin_headers, ana, mesero_headers):
+    """CP-SEG-6 | Seguridad | Un MESERO no puede modificar usuarios → 403."""
+    r = client.put(f"/api/usuarios/{ana['id']}", headers=mesero_headers, json={"telefono": "1"})
+    assert r.status_code == 403

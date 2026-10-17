@@ -5,7 +5,7 @@ from sqlalchemy import or_
 
 from ...extensions import db
 from ...models import Rol, Usuario
-from ...utils.auth import permiso_requerido
+from ...utils.auth import permiso_requerido, usuario_actual
 
 bp = Blueprint("usuarios", __name__)
 
@@ -67,3 +67,69 @@ def crear_usuario():
     db.session.commit()
 
     return jsonify(usuario.to_dict()), 201  # 201 = creado
+
+
+@bp.get("/usuarios/<int:usuario_id>")
+@permiso_requerido("usuarios.ver")
+def obtener_usuario(usuario_id):
+    """RF-01.2 Consultar el detalle de un usuario."""
+    usuario = db.session.get(Usuario, usuario_id)
+    if usuario is None:
+        return jsonify(error="El usuario no existe"), 404
+    return jsonify(usuario.to_dict())
+
+
+@bp.put("/usuarios/<int:usuario_id>")
+@permiso_requerido("usuarios.gestionar")
+def modificar_usuario(usuario_id):
+    """RF-01.3 Modificar usuarios.
+
+    Solo se cambian los campos que vienen en la petición. La contraseña es opcional.
+    El rol se cambia aparte (RF-01.5), con su propio permiso.
+    """
+    usuario = db.session.get(Usuario, usuario_id)
+    if usuario is None:
+        return jsonify(error="El usuario no existe"), 404
+
+    data = request.get_json(silent=True) or {}
+
+    def rechazar(mensaje, codigo):
+        """Deshace los cambios ya aplicados en memoria y responde con el error."""
+        db.session.rollback()
+        return jsonify(error=mensaje), codigo
+
+    # Campos de texto obligatorios: si vienen, no pueden quedar vacíos
+    for campo in ("nombre", "apellido"):
+        if campo in data:
+            valor = (data[campo] or "").strip()
+            if not valor:
+                return rechazar(f"El campo '{campo}' no puede quedar vacío", 422)
+            setattr(usuario, campo, valor)
+
+    if "telefono" in data:
+        usuario.telefono = (data["telefono"] or "").strip() or None
+
+    if "email" in data:
+        email = (data["email"] or "").strip().lower()
+        if "@" not in email:
+            return rechazar("El correo no es válido", 422)
+        otro = Usuario.query.filter_by(email=email).first()
+        if otro and otro.id != usuario.id:
+            return rechazar("Ya existe un usuario con ese correo", 409)
+        usuario.email = email
+
+    if data.get("password"):
+        if len(data["password"]) < 8:
+            return rechazar("La contraseña debe tener al menos 8 caracteres", 422)
+        usuario.set_password(data["password"])
+
+    if "activo" in data:
+        if not isinstance(data["activo"], bool):
+            return rechazar("'activo' debe ser true o false", 422)
+        # Evita que el administrador se bloquee a sí mismo
+        if data["activo"] is False and usuario.id == usuario_actual().id:
+            return rechazar("No puedes desactivar tu propio usuario", 409)
+        usuario.activo = data["activo"]
+
+    db.session.commit()
+    return jsonify(usuario.to_dict())
