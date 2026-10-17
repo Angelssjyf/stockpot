@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy import or_
 
 from ...extensions import db
-from ...models import Rol, Usuario
+from ...models import Permiso, Rol, Usuario
 from ...utils.auth import permiso_requerido, usuario_actual
 
 bp = Blueprint("usuarios", __name__)
@@ -133,3 +133,89 @@ def modificar_usuario(usuario_id):
 
     db.session.commit()
     return jsonify(usuario.to_dict())
+
+
+# =====================================================================
+#  Roles y permisos
+#  Nota: los permisos viajan dentro del token, así que los cambios de rol
+#  o de permisos aplican cuando el usuario vuelve a iniciar sesión.
+# =====================================================================
+
+ROL_ADMIN = "ADMINISTRADOR"
+
+
+def _es_ultimo_admin_activo(usuario):
+    """True si el usuario es el único ADMINISTRADOR activo del sistema."""
+    if usuario.rol.nombre != ROL_ADMIN or not usuario.activo:
+        return False
+    admins_activos = (
+        Usuario.query.join(Rol).filter(Rol.nombre == ROL_ADMIN, Usuario.activo.is_(True)).count()
+    )
+    return admins_activos == 1
+
+
+@bp.patch("/usuarios/<int:usuario_id>/rol")
+@permiso_requerido("roles.gestionar")
+def asignar_rol(usuario_id):
+    """RF-01.5 Asignar roles: cambia el rol de un usuario."""
+    usuario = db.session.get(Usuario, usuario_id)
+    if usuario is None:
+        return jsonify(error="El usuario no existe"), 404
+
+    data = request.get_json(silent=True) or {}
+    rol = db.session.get(Rol, data.get("rol_id")) if data.get("rol_id") else None
+    if rol is None or not rol.activo:
+        return jsonify(error="El rol indicado no existe"), 422
+
+    # Nunca dejar el sistema sin un administrador activo
+    if rol.nombre != ROL_ADMIN and _es_ultimo_admin_activo(usuario):
+        return jsonify(error="No puedes quitarle el rol al último administrador activo"), 409
+
+    usuario.rol = rol
+    db.session.commit()
+    return jsonify(usuario.to_dict())
+
+
+@bp.get("/roles")
+@permiso_requerido("usuarios.ver", "roles.gestionar")
+def listar_roles():
+    """RF-01.6 Consultar los roles con sus permisos."""
+    roles = Rol.query.order_by(Rol.id).all()
+    return jsonify([r.to_dict() for r in roles])
+
+
+@bp.get("/permisos")
+@permiso_requerido("roles.gestionar")
+def listar_permisos():
+    """RF-01.6 Consultar todos los permisos disponibles, agrupables por módulo."""
+    permisos = Permiso.query.order_by(Permiso.modulo, Permiso.codigo).all()
+    return jsonify([p.to_dict() for p in permisos])
+
+
+@bp.put("/roles/<int:rol_id>/permisos")
+@permiso_requerido("roles.gestionar")
+def asignar_permisos(rol_id):
+    """RF-01.6 Gestionar permisos de acceso: reemplaza la lista de permisos de un rol.
+
+    Body: {"permisos": ["pedidos.ver", "pedidos.gestionar", ...]}
+    """
+    rol = db.session.get(Rol, rol_id)
+    if rol is None:
+        return jsonify(error="El rol no existe"), 404
+
+    # El administrador siempre conserva todos los permisos
+    if rol.nombre == ROL_ADMIN:
+        return jsonify(error="Los permisos del rol ADMINISTRADOR no se pueden modificar"), 409
+
+    codigos = (request.get_json(silent=True) or {}).get("permisos")
+    if not isinstance(codigos, list):
+        return jsonify(error="'permisos' debe ser una lista de códigos"), 422
+
+    permisos = Permiso.query.filter(Permiso.codigo.in_(codigos)).all()
+    desconocidos = sorted(set(codigos) - {p.codigo for p in permisos})
+    if desconocidos:
+        return jsonify(error="Hay permisos que no existen", desconocidos=desconocidos), 422
+
+    rol.permisos = permisos
+    db.session.commit()
+    return jsonify(rol.to_dict())

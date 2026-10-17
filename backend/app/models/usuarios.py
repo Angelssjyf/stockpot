@@ -24,6 +24,14 @@ class Permiso(db.Model):
     modulo = db.Column(db.String(40), nullable=False)
     descripcion = db.Column(db.String(255))
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "modulo": self.modulo,
+            "descripcion": self.descripcion,
+        }
+
 
 class Rol(db.Model):
     __tablename__ = "roles"
