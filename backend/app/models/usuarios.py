@@ -31,7 +31,7 @@ class Rol(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False, unique=True)
     descripcion = db.Column(db.String(255))
-    activo = db.Column(db.Boolean, nullable=False, default=True)
+    activo = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     # rol.permisos devuelve la lista de objetos Permiso del rol
@@ -57,7 +57,7 @@ class Usuario(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     telefono = db.Column(db.String(20))
     rol_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    activo = db.Column(db.Boolean, nullable=False, default=True)
+    activo = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
     ultimo_acceso = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())

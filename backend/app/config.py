@@ -27,3 +27,16 @@ class Config:
     # y vencen a las 8 horas (una jornada de trabajo).
     JWT_SECRET_KEY = SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
+
+
+class TestConfig(Config):
+    """Configuración para las pruebas automáticas (pytest).
+
+    Usa una base SQLite en memoria: se crea al iniciar cada prueba y desaparece
+    al terminar, así las pruebas nunca tocan la base MySQL real.
+    """
+
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_ENGINE_OPTIONS = {}
+    SECRET_KEY = JWT_SECRET_KEY = "clave-solo-para-pruebas-con-32-caracteres-o-mas"
