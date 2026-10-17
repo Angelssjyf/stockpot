@@ -5,15 +5,15 @@ gestiona los pedidos, comunica las áreas de atención y cocina, y genera inform
 el consumo y las ventas.
 
 ```
-App Flutter  ──HTTP/JSON + token JWT──►  API Flask (Python)  ──SQLAlchemy──►  MySQL 8.4
-(web / Android)                          backend/                             database/
+Página web (HTML/CSS/JS)  ──HTTP/JSON + token JWT──►  API Flask (Python)  ──SQLAlchemy──►  MySQL 8.4
+frontend/                                              backend/                             database/
 ```
 
 | Capa | Tecnología |
 |---|---|
 | Base de datos | MySQL 8.4 LTS + MySQL Workbench |
 | Backend (API REST) | Python 3.11, Flask, SQLAlchemy, Flask-JWT-Extended |
-| App cliente | Flutter / Dart *(en construcción)* |
+| Presentación (interfaz web) | HTML, CSS y JavaScript (sin frameworks) |
 | Pruebas | pytest |
 | Control de versiones | Git + GitHub con GitFlow |
 
@@ -40,6 +40,12 @@ stockpot/
 │   │   ├── modules/     Un módulo por cada requisito de la EDT (auth, usuarios...)
 │   │   └── utils/       Código compartido (control de permisos)
 │   └── tests/           Pruebas automáticas (casos CP-XX.X-n)
+├── frontend/            Interfaz web (la sirve Flask)
+│   ├── index.html       Inicio de sesión
+│   ├── menu.html        Menú de módulos según el rol
+│   ├── usuarios.html    Gestión de usuarios y roles
+│   ├── css/estilos.css  Diseño de toda la interfaz
+│   └── js/              Lógica de cada pantalla (api.js habla con la API)
 └── docs/                Documentación (modelo de datos)
 ```
 
@@ -98,17 +104,16 @@ flask crear-admin
 
 Te pedirá correo, nombre y contraseña (mínimo 8 caracteres). Con ese usuario inicias sesión.
 
-### 6. Compilar la app y ejecutar
+### 6. Ejecutar
 
-Necesitas además **Flutter** instalado (`flutter --version`).
-
-1. Doble clic en **`compilar-app.bat`**: compila la app web. Solo hace falta la primera vez y
-   cada vez que cambie el código de `mobile/`.
-2. Doble clic en **`iniciar.bat`**: enciende **todo de una vez**:
+1. Doble clic en **`iniciar.bat`**: enciende **todo de una vez**:
    - el servidor de producción **Waitress** (sin modo debug),
    - el **enlace público de ngrok**, si está instalado; aparece en verde y se copia al portapapeles,
-   - y abre **http://127.0.0.1:5000** en tu navegador con la pantalla de login.
-3. Para apagar todo, cierra la ventana negra del servidor y la de ngrok.
+   - y abre **http://127.0.0.1:5000** en tu navegador con la interfaz web.
+2. Para apagar todo, cierra la ventana negra del servidor y la de ngrok.
+
+La interfaz web no se compila: al cambiar un archivo de `frontend/`, basta con recargar el
+navegador (F5).
 
 Para comprobar solo la API: http://127.0.0.1:5000/api/health debe responder con la versión de
 MySQL y los 6 roles.
@@ -130,8 +135,8 @@ Quien abra el enlace verá primero una advertencia de ngrok: debe tocar **Visit 
 
 - **Backend con recarga automática:** en vez de `iniciar.bat`, ejecuta en `backend`:
   `python run.py` (modo debug, **solo local, nunca con ngrok**).
-- **App con recarga instantánea:** con el servidor encendido, en otra terminal:
-  `cd mobile` y luego `flutter run -d chrome`.
+- **Interfaz web:** edita los archivos de `frontend/` y recarga el navegador (F5). Si no ves
+  el cambio, recarga forzando con `Ctrl+F5`.
 
 ### 7. Correr las pruebas
 

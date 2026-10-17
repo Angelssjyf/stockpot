@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Usuarios</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Usuarios</h1>
+  </header>
+
+  <!-- RF-01.2 Consultar usuarios -->
+  <main class="contenido">
+    <form class="campo buscador" id="form-buscar" role="search">
+      <span class="icono" aria-hidden="true">search</span>
+      <input id="buscar" type="search" placeholder="Buscar por nombre, apellido o correo"
+             aria-label="Buscar usuarios">
+      <button type="button" class="boton-icono" id="limpiar" title="Limpiar">
+        <span class="icono" aria-hidden="true">close</span>
+      </button>
+    </form>
+
+    <div class="estado" id="estado" hidden>
+      <p id="estado-texto"></p>
+      <button type="button" class="boton-texto" id="reintentar" hidden>Reintentar</button>
+    </div>
+    <ul class="lista" id="lista"></ul>
+  </main>
+
+  <button type="button" class="boton-principal boton-flotante" id="boton-nuevo" hidden>
+    <span class="icono" aria-hidden="true">person_add</span> Nuevo
+  </button>
+
+  <!-- RF-01.1 Registrar usuarios / RF-01.3 Modificar usuarios -->
+  <dialog id="dialogo-usuario">
+    <form id="form-usuario" novalidate>
+      <h2 id="titulo-formulario">Nuevo usuario</h2>
+
+      <label class="etiqueta" for="f-nombre">Nombre *</label>
+      <div class="campo" id="campo-nombre"><input id="f-nombre" autocomplete="off"></div>
+      <small class="error-campo" id="error-nombre"></small>
+
+      <label class="etiqueta" for="f-apellido">Apellido *</label>
+      <div class="campo" id="campo-apellido"><input id="f-apellido" autocomplete="off"></div>
+      <small class="error-campo" id="error-apellido"></small>
+
+      <label class="etiqueta" for="f-email">Correo *</label>
+      <div class="campo" id="campo-email"><input id="f-email" type="email" autocomplete="off"></div>
+      <small class="error-campo" id="error-email"></small>
+
+      <label class="etiqueta" for="f-telefono">Teléfono</label>
+      <div class="campo"><input id="f-telefono" type="tel" autocomplete="off"></div>
+
+      <label class="etiqueta" for="f-password" id="etiqueta-password">Contraseña *</label>
+      <div class="campo" id="campo-password">
+        <input id="f-password" type="password" autocomplete="new-password">
+      </div>
+      <small class="ayuda-campo" id="ayuda-password">Mínimo 8 caracteres</small>
+      <small class="error-campo" id="error-password"></small>
+
+      <!-- Al crear: elegir el rol -->
+      <div id="bloque-rol-nuevo">
+        <label class="etiqueta" for="f-rol">Rol *</label>
+        <div class="campo" id="campo-rol">
+          <select id="f-rol"><option value="">Elige un rol</option></select>
+        </div>
+        <small class="error-campo" id="error-rol"></small>
+      </div>
+
+      <!-- Al editar: rol actual (se cambia aparte, RF-01.5) y activo/inactivo -->
+      <div id="bloque-edicion">
+        <div class="dato-rol">
+          <div>
+            <div>Rol</div>
+            <div class="valor" id="rol-actual"></div>
+          </div>
+          <button type="button" class="boton-texto" id="cambiar-rol" hidden>
+            <span class="icono" aria-hidden="true">swap_horiz</span> Cambiar
+          </button>
+        </div>
+        <label class="interruptor">
+          <span>Usuario activo<small>Un usuario inactivo no puede iniciar sesión</small></span>
+          <input type="checkbox" id="f-activo">
+        </label>
+      </div>
+
+      <div class="alerta-error" id="error-formulario" role="alert" hidden></div>
+
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="cancelar">Cancelar</button>
+        <button type="submit" class="boton-principal" id="guardar">
+          <span class="icono" aria-hidden="true">save</span> Guardar
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- RF-01.5 Asignar roles -->
+  <dialog id="dialogo-rol">
+    <h2>Elige el nuevo rol</h2>
+    <div class="opciones-rol" id="opciones-rol"></div>
+    <div class="acciones">
+      <button type="button" class="boton-texto" id="cancelar-rol">Cancelar</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="js/usuarios.js"></script>
+</body>
+</html>

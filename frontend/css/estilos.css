@@ -1,0 +1,526 @@
+/* =====================================================================
+   StockPot - estilos de la interfaz web
+   Mismos colores y formas que el diseño original (Material 3, tono naranja-café).
+   ===================================================================== */
+
+:root {
+  --primario: #8f4c2c;          /* botones, íconos, enlaces */
+  --primario-hover: #7a3f22;
+  --sobre-primario: #ffffff;
+  --contenedor-primario: #ffdbcc;
+  --sobre-contenedor-primario: #351000;
+  --fondo: #fff8f6;
+  --superficie: #ffffff;
+  --superficie-variante: #f5ded5;
+  --texto: #231a16;
+  --texto-suave: #53443d;
+  --borde: #d8c2b9;
+  --error: #ba1a1a;
+  --contenedor-error: #ffdad6;
+  --sobre-contenedor-error: #410002;
+  --sombra: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  --radio: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+h1, h2 {
+  margin: 0;
+  font-weight: 500;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Íconos (fuente Material Symbols de Google) */
+.icono {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------ Botones */
+.boton-principal {
+  background: var(--primario);
+  color: var(--sobre-primario);
+  border: none;
+  border-radius: 999px;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.boton-principal:hover {
+  background: var(--primario-hover);
+}
+
+.boton-principal:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.boton-texto {
+  background: none;
+  border: none;
+  color: var(--primario);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.boton-texto:hover {
+  background: var(--contenedor-primario);
+}
+
+.boton-icono {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+}
+
+.boton-icono:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ------------------------------------------------------------ Campos */
+.campo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  padding: 0 8px 0 12px;
+  background: var(--superficie);
+}
+
+.campo:focus-within {
+  border-color: var(--primario);
+  box-shadow: 0 0 0 1px var(--primario);
+}
+
+.campo.invalido {
+  border-color: var(--error);
+}
+
+.campo .icono {
+  color: var(--texto-suave);
+}
+
+.campo input,
+.campo select {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 14px 0;
+  background: transparent;
+  color: var(--texto);
+  min-width: 0;
+}
+
+.etiqueta {
+  display: block;
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin: 14px 0 4px;
+}
+
+.error-campo {
+  display: block;
+  color: var(--error);
+  font-size: 12px;
+  min-height: 16px;
+  margin: 4px 0 0 12px;
+}
+
+.ayuda-campo {
+  display: block;
+  color: var(--texto-suave);
+  font-size: 12px;
+  margin: 4px 0 0 12px;
+}
+
+.alerta-error {
+  background: var(--contenedor-error);
+  color: var(--sobre-contenedor-error);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+/* ------------------------------------------------------------ Login */
+.pantalla-centrada {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login {
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.login .icono-logo {
+  font-size: 80px;
+  color: var(--primario);
+}
+
+.login h1 {
+  font-size: 32px;
+  margin-top: 8px;
+}
+
+.login .subtitulo {
+  color: var(--texto-suave);
+  margin: 4px 0 32px;
+}
+
+.login form {
+  text-align: left;
+}
+
+.login .boton-principal {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* ------------------------------------------------------------ Barra superior */
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--fondo);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-height: 64px;
+}
+
+.barra h1 {
+  font-size: 22px;
+  flex: 1;
+}
+
+.barra .usuario-actual {
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.barra a.boton-icono {
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.contenido {
+  padding: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ------------------------------------------------------------ Menú de módulos */
+.modulos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* 2 columnas en celular */
+  gap: 12px;
+}
+
+.tarjeta-modulo {
+  aspect-ratio: 1;
+  background: var(--superficie);
+  border: none;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px;
+  color: var(--texto);
+}
+
+.tarjeta-modulo:hover {
+  background: var(--superficie-variante);
+}
+
+.tarjeta-modulo .icono {
+  font-size: 44px;
+  color: var(--primario);
+}
+
+/* ------------------------------------------------------------ Lista de usuarios */
+.buscador {
+  margin-bottom: 8px;
+}
+
+.estado {
+  text-align: center;
+  color: var(--texto-suave);
+  padding: 48px 16px;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--superficie-variante);
+}
+
+.fila:last-child {
+  border-bottom: none;
+}
+
+.fila.editable {
+  cursor: pointer;
+}
+
+.fila.editable:hover {
+  background: var(--fondo);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--contenedor-primario);
+  color: var(--sobre-contenedor-primario);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.fila .datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.fila .nombre {
+  font-size: 16px;
+}
+
+.fila .correo {
+  font-size: 14px;
+  color: var(--texto-suave);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.chip {
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+/* Botón flotante "Nuevo" */
+.boton-flotante {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  padding: 16px 20px;
+}
+
+/* ------------------------------------------------------------ Ventanas (dialog) */
+dialog {
+  border: none;
+  border-radius: 28px;
+  padding: 24px;
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+dialog h2 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.dato-rol {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.dato-rol .valor {
+  color: var(--texto-suave);
+}
+
+.opciones-rol {
+  display: flex;
+  flex-direction: column;
+}
+
+.opciones-rol button {
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 16px;
+  padding: 14px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--texto);
+}
+
+.opciones-rol button:hover {
+  background: var(--fondo);
+}
+
+/* Interruptor (activo / inactivo) */
+.interruptor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  cursor: pointer;
+}
+
+.interruptor small {
+  display: block;
+  color: var(--texto-suave);
+}
+
+.interruptor input {
+  appearance: none;
+  width: 52px;
+  height: 32px;
+  border-radius: 16px;
+  background: var(--superficie-variante);
+  border: 2px solid var(--borde);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.interruptor input::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--texto-suave);
+  transition: all 0.2s;
+}
+
+.interruptor input:checked {
+  background: var(--primario);
+  border-color: var(--primario);
+}
+
+.interruptor input:checked::after {
+  left: 24px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  background: var(--sobre-primario);
+}
+
+/* ------------------------------------------------------------ Aviso inferior */
+.aviso {
+  position: fixed;
+  left: 50%;
+  bottom: 96px; /* por encima del botón flotante "Nuevo" */
+  transform: translateX(-50%) translateY(200px);
+  background: #3a2f2a;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 4px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  transition: transform 0.25s;
+  z-index: 100;
+}
+
+.aviso.visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ------------------------------------------------------------ Celular */
+@media (max-width: 600px) {
+  .barra .usuario-actual {
+    display: none;
+  }
+
+  .fila .chips {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}

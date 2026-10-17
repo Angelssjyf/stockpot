@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Menú</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <h1>StockPot</h1>
+    <span class="usuario-actual" id="usuario-actual"></span>
+    <button type="button" class="boton-icono" id="cerrar-sesion" title="Cerrar sesión">
+      <span class="icono" aria-hidden="true">logout</span>
+    </button>
+  </header>
+
+  <!-- Menú principal: solo los módulos que el rol del usuario puede ver -->
+  <main class="contenido">
+    <nav class="modulos" id="modulos" aria-label="Módulos"></nav>
+  </main>
+
+  <script type="module" src="js/menu.js"></script>
+</body>
+</html>

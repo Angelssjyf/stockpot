@@ -86,17 +86,3 @@ def test_cp_seg_3_contrasena_cifrada(app):
     assert usuario.password_hash.startswith("scrypt:")
     assert usuario.check_password("MiClave123")
     assert not usuario.check_password("otra")
-
-
-def test_cp_seg_8_cors_permite_flutter_local(client):
-    """CP-SEG-8 | Seguridad | La app Flutter web en localhost (cualquier puerto) puede llamar a la API."""
-    r = client.options("/api/auth/login", headers={
-        "Origin": "http://localhost:54321", "Access-Control-Request-Method": "POST"})
-    assert r.headers.get("Access-Control-Allow-Origin") == "http://localhost:54321"
-
-
-def test_cp_seg_9_cors_bloquea_otros_sitios(client):
-    """CP-SEG-9 | Seguridad | Una página de otro dominio no recibe permiso CORS."""
-    r = client.options("/api/auth/login", headers={
-        "Origin": "https://sitio-malicioso.com", "Access-Control-Request-Method": "POST"})
-    assert "Access-Control-Allow-Origin" not in r.headers

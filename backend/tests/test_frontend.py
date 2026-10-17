@@ -1,4 +1,4 @@
-"""Casos de prueba: Flask entrega la app Flutter compilada en la misma dirección que la API."""
+"""Casos de prueba: Flask entrega la interfaz web en la misma dirección que la API."""
 
 import pytest
 
@@ -8,9 +8,9 @@ from app.config import TestConfig
 
 @pytest.fixture()
 def client_con_app(tmp_path):
-    """Cliente con una app web falsa (index.html + main.dart.js) en una carpeta temporal."""
+    """Cliente con una app web falsa (index.html + app.js) en una carpeta temporal."""
     (tmp_path / "index.html").write_text("<html>StockPot app</html>", encoding="utf-8")
-    (tmp_path / "main.dart.js").write_text("console.log('app')", encoding="utf-8")
+    (tmp_path / "app.js").write_text("console.log('app')", encoding="utf-8")
 
     class Config(TestConfig):
         FRONTEND_DIR = tmp_path
@@ -27,7 +27,7 @@ def test_cp_web_1_raiz_entrega_la_app(client_con_app):
 
 def test_cp_web_2_entrega_archivos_de_la_app(client_con_app):
     """CP-WEB-2 | Despliegue | Los archivos de la app (JavaScript) se entregan tal cual."""
-    r = client_con_app.get("/main.dart.js")
+    r = client_con_app.get("/app.js")
     assert r.status_code == 200
     assert b"console.log" in r.data
 
@@ -52,4 +52,39 @@ def test_cp_web_5_sin_compilar_avisa(tmp_path):
 
     r = create_app(Config).test_client().get("/")
     assert r.status_code == 503
-    assert b"flutter build web" in r.data
+    assert b"frontend/index.html" in r.data
+
+
+# ------------------------------------------------- Interfaz web real (carpeta frontend/)
+
+
+@pytest.fixture()
+def client_real():
+    """Cliente que sirve la carpeta frontend/ real del proyecto."""
+    return create_app(TestConfig).test_client()
+
+
+@pytest.mark.parametrize("pagina", ["/", "/menu.html", "/usuarios.html"])
+def test_cp_web_6_paginas_existen(client_real, pagina):
+    """CP-WEB-6 | Interfaz web | Las páginas de login, menú y usuarios existen y se entregan."""
+    r = client_real.get(pagina)
+    assert r.status_code == 200
+    assert r.mimetype == "text/html"
+    assert b"StockPot" in r.data
+
+
+@pytest.mark.parametrize(
+    "archivo", ["/js/api.js", "/js/ui.js", "/js/login.js", "/js/menu.js", "/js/usuarios.js"]
+)
+def test_cp_web_7_javascript_con_tipo_correcto(client_real, archivo):
+    """CP-WEB-7 | Interfaz web | Los .js se entregan como JavaScript (si no, el navegador no los ejecuta)."""
+    r = client_real.get(archivo)
+    assert r.status_code == 200
+    assert r.mimetype == "text/javascript"
+
+
+def test_cp_web_8_css_con_tipo_correcto(client_real):
+    """CP-WEB-8 | Interfaz web | Los estilos se entregan como CSS."""
+    r = client_real.get("/css/estilos.css")
+    assert r.status_code == 200
+    assert r.mimetype == "text/css"

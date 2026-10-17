@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Iniciar sesión</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <!-- RF-01.4 Iniciar sesión -->
+  <main class="pantalla-centrada">
+    <div class="login">
+      <span class="icono icono-logo" aria-hidden="true">soup_kitchen</span>
+      <h1>StockPot</h1>
+      <p class="subtitulo">Gestión para restaurantes</p>
+
+      <form id="form-login" novalidate>
+        <label class="campo" id="campo-email">
+          <span class="icono" aria-hidden="true">mail</span>
+          <input id="email" type="email" placeholder="Correo" aria-label="Correo"
+                 autocomplete="email">
+        </label>
+        <small class="error-campo" id="error-email"></small>
+
+        <label class="campo" id="campo-password">
+          <span class="icono" aria-hidden="true">lock</span>
+          <input id="password" type="password" placeholder="Contraseña" aria-label="Contraseña"
+                 autocomplete="current-password">
+          <button type="button" class="boton-icono" id="ver-clave" title="Mostrar contraseña">
+            <span class="icono" aria-hidden="true">visibility</span>
+          </button>
+        </label>
+        <small class="error-campo" id="error-password"></small>
+
+        <div class="alerta-error" id="error-login" role="alert" hidden></div>
+
+        <button type="submit" class="boton-principal" id="boton-ingresar">Ingresar</button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

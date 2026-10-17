@@ -20,8 +20,8 @@ if not exist ".env" (
     pause
     exit /b 1
 )
-if not exist "..\mobile\build\web\index.html" (
-    echo [ERROR] La app web no esta compilada: ejecuta  compilar-app.bat  primero.
+if not exist "..\frontend\index.html" (
+    echo [ERROR] Falta la interfaz web: no existe frontend\index.html
     pause
     exit /b 1
 )
