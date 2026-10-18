@@ -99,6 +99,10 @@ h1, h2 {
   background: var(--contenedor-primario);
 }
 
+a.boton-texto {
+  text-decoration: none;
+}
+
 .boton-icono {
   background: none;
   border: none;
@@ -522,5 +526,126 @@ dialog h2 {
   .fila .chips {
     flex-direction: column;
     align-items: flex-end;
+  }
+}
+
+
+/* ------------------------------------------------------------ Estados con color */
+.chip.estado-PENDIENTE { background: #fff3cd; border-color: #e6c870; color: #5c4400; }
+.chip.estado-ENVIADA   { background: #d7e8ff; border-color: #8fb4e8; color: #0b3a75; }
+.chip.estado-RECIBIDA  { background: #d7f5dd; border-color: #86c995; color: #14532d; }
+.chip.estado-CANCELADA { background: #f1e5e3; border-color: #cdb5b0; color: #6b4a43; }
+
+/* ------------------------------------------------------------ Secciones de una ficha */
+dialog.ancho {
+  width: min(680px, calc(100vw - 32px));
+}
+
+.seccion {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--superficie-variante);
+}
+
+.seccion h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.nota {
+  color: var(--texto-suave);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* Líneas editables (insumos de un proveedor, líneas de una orden) */
+.lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.linea {
+  display: grid;
+  grid-template-columns: 1fr 120px 40px;
+  gap: 8px;
+  align-items: center;
+}
+
+.linea.con-cantidad {
+  grid-template-columns: 1fr 90px 110px 40px;
+}
+
+.linea .campo {
+  padding-left: 8px;
+}
+
+.linea .campo input,
+.linea .campo select {
+  padding: 10px 0;
+  font-size: 14px;
+}
+
+.linea .texto-linea {
+  font-size: 14px;
+}
+
+.total {
+  text-align: right;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+/* Lista simple dentro de una ficha (historial, detalle de una orden) */
+.mini-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mini-lista li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--superficie-variante);
+  font-size: 14px;
+}
+
+.mini-lista li:last-child {
+  border-bottom: none;
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.filtros .campo {
+  flex: 1;
+}
+
+.datos-orden {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  font-size: 14px;
+}
+
+.datos-orden dt {
+  color: var(--texto-suave);
+}
+
+.datos-orden dd {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .linea.con-cantidad {
+    grid-template-columns: 1fr 70px 90px 36px;
   }
 }

@@ -3,13 +3,13 @@ import { cerrarSesion, exigirSesion } from './api.js';
 import { crear, mostrarAviso } from './ui.js';
 
 /**
- * Los 11 módulos de StockPot, en el orden de las iteraciones.
+ * Los 11 módulos de StockPot, en el orden de las iteraciones..
  * permiso: el permiso mínimo para ver el módulo (cargados en database/02_seed.sql).
  * pagina: la pantalla del módulo; null = todavía en construcción.
  */
 const MODULOS = [
   { titulo: 'Usuarios', icono: 'group', permiso: 'usuarios.ver', pagina: 'usuarios.html' },
-  { titulo: 'Proveedores', icono: 'local_shipping', permiso: 'proveedores.ver', pagina: null },
+  { titulo: 'Proveedores', icono: 'local_shipping', permiso: 'proveedores.ver', pagina: 'proveedores.html' },
   { titulo: 'Inventario', icono: 'inventory_2', permiso: 'inventario.ver', pagina: 'insumos.html' },
   { titulo: 'Menú', icono: 'restaurant_menu', permiso: 'productos.ver', pagina: null },
   { titulo: 'Pedidos', icono: 'receipt_long', permiso: 'pedidos.ver', pagina: null },
