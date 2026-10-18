@@ -64,9 +64,9 @@ def client_real():
     return create_app(TestConfig).test_client()
 
 
-@pytest.mark.parametrize("pagina", ["/", "/menu.html", "/usuarios.html"])
+@pytest.mark.parametrize("pagina", ["/", "/menu.html", "/usuarios.html", "/insumos.html"])
 def test_cp_web_6_paginas_existen(client_real, pagina):
-    """CP-WEB-6 | Interfaz web | Las páginas de login, menú y usuarios existen y se entregan."""
+    """CP-WEB-6 | Interfaz web | Las páginas de la interfaz existen y se entregan."""
     r = client_real.get(pagina)
     assert r.status_code == 200
     assert r.mimetype == "text/html"
@@ -74,7 +74,9 @@ def test_cp_web_6_paginas_existen(client_real, pagina):
 
 
 @pytest.mark.parametrize(
-    "archivo", ["/js/api.js", "/js/ui.js", "/js/login.js", "/js/menu.js", "/js/usuarios.js"]
+    "archivo",
+    ["/js/api.js", "/js/ui.js", "/js/login.js", "/js/menu.js", "/js/usuarios.js",
+     "/js/insumos.js"],
 )
 def test_cp_web_7_javascript_con_tipo_correcto(client_real, archivo):
     """CP-WEB-7 | Interfaz web | Los .js se entregan como JavaScript (si no, el navegador no los ejecuta)."""

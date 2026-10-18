@@ -10,7 +10,7 @@ import { crear, mostrarAviso } from './ui.js';
 const MODULOS = [
   { titulo: 'Usuarios', icono: 'group', permiso: 'usuarios.ver', pagina: 'usuarios.html' },
   { titulo: 'Proveedores', icono: 'local_shipping', permiso: 'proveedores.ver', pagina: null },
-  { titulo: 'Inventario', icono: 'inventory_2', permiso: 'inventario.ver', pagina: null },
+  { titulo: 'Inventario', icono: 'inventory_2', permiso: 'inventario.ver', pagina: 'insumos.html' },
   { titulo: 'Menú', icono: 'restaurant_menu', permiso: 'productos.ver', pagina: null },
   { titulo: 'Pedidos', icono: 'receipt_long', permiso: 'pedidos.ver', pagina: null },
   { titulo: 'Cocina', icono: 'soup_kitchen', permiso: 'cocina.ver', pagina: null },
