@@ -71,6 +71,8 @@ En MySQL Workbench, conectado como `root`, ejecuta en este orden (rayo ⚡):
 2. `database/02_seed.sql`: roles y permisos.
 3. `database/03_usuario_app.sql`: **antes de ejecutarlo**, cambia `CAMBIA_ESTA_CLAVE` por una
    contraseña tuya, solo en el editor de Workbench. No guardes el archivo con la clave.
+4. *(Opcional)* `database/04_datos_ejemplo.sql`: 12 insumos y 3 proveedores de ejemplo para
+   probar el sistema. Se puede ejecutar más de una vez sin duplicar datos.
 
 Verifica con `SHOW TABLES FROM stockpot;`: deben salir 9 tablas.
 

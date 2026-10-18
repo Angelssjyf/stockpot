@@ -36,3 +36,22 @@ export function crear(etiqueta, { className, texto, ...atributos } = {}, hijos =
 export function iniciales(nombre, apellido) {
   return `${nombre[0] ?? ''}${apellido[0] ?? ''}`.toUpperCase();
 }
+
+
+/** Formatos colombianos para mostrar datos: dinero, cantidades y fechas. */
+export const formato = {
+  /** 181500 -> "$ 181.500" */
+  dinero: (valor) =>
+    new Intl.NumberFormat('es-CO', {
+      style: 'currency', currency: 'COP', maximumFractionDigits: 0,
+    }).format(valor),
+  /** 12.5 -> "12,5" */
+  cantidad: (valor) => new Intl.NumberFormat('es-CO', { maximumFractionDigits: 3 }).format(valor),
+  /** "2026-10-20" o "2026-10-17T15:30:00" -> "20 oct 2026" */
+  fecha: (iso) => {
+    if (!iso) return '—';
+    // Una fecha sin hora se toma como hora local (si no, el navegador la corre un día)
+    const fecha = new Date(iso.length === 10 ? `${iso}T00:00:00` : iso);
+    return fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+  },
+};
