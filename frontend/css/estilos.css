@@ -1004,3 +1004,95 @@ input[type="search"]::-webkit-search-cancel-button {
     box-shadow: none;
   }
 }
+
+/* ------------------------------------------------------------ Reportes (RF-11) */
+.pestanas-desplazables {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.pestanas-desplazables button {
+  white-space: nowrap;
+}
+
+.titulo-reporte {
+  margin: 8px 0 0;
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  margin-bottom: 16px;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tabla th,
+.tabla td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--superficie-variante);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabla th {
+  background: var(--superficie-variante);
+  font-weight: 500;
+}
+
+.tabla .numero {
+  text-align: right;
+}
+
+.grafica {
+  width: 100%;
+  height: auto;
+}
+
+.grafica rect {
+  fill: var(--primario);
+}
+
+.grafica text {
+  font-size: 11px;
+  fill: var(--texto-suave);
+}
+
+.recomendaciones {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.recomendaciones li {
+  margin-bottom: 6px;
+}
+
+@media print {
+  .contenido {
+    max-width: none;
+  }
+
+  .panel,
+  .tarjeta-resumen,
+  .tabla-contenedor {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+}
+
+/* Los campos de fecha de los filtros se encogen en el celular (no desbordan la pantalla) */
+.filtros .campo {
+  min-width: 0;
+}
+
+.filtros .campo input {
+  min-width: 0;
+  width: 100%;
+}
