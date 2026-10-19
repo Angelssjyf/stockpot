@@ -18,3 +18,7 @@ Thumbs.db
 
 # Dominio personal de ngrok de cada integrante (lo lee iniciar.bat)
 ngrok-dominio.txt
+
+# Reportes de cobertura de pruebas (pytest-cov)
+.coverage
+htmlcov/
