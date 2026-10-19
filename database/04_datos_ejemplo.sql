@@ -121,3 +121,12 @@ FROM (
 ) AS r
 JOIN productos p ON p.codigo = r.producto
 JOIN insumos   i ON i.codigo = r.insumo;
+
+-- ---------------------------------------------------------------------
+-- Clientes de ejemplo para domicilios (RF-08.2).
+-- Requiere la tabla clientes (01_schema.sql actual o script 07).
+-- ---------------------------------------------------------------------
+INSERT IGNORE INTO clientes (nombre, telefono, direccion, barrio, referencia) VALUES
+ ('María Gómez',     '3001234567', 'Calle 45 # 27-30',     'Cabecera',     'Edificio Torres del Parque, apto 502'),
+ ('Carlos Pérez',    '3109876543', 'Carrera 33 # 52-14',   'La Aurora',    'Casa esquinera de portón negro'),
+ ('Laura Martínez',  '3157654321', 'Avenida Quebradaseca # 18-40', 'San Francisco', NULL);
