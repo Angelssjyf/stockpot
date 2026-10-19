@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Caja</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Caja y pagos</h1>
+  </header>
+
+  <main class="contenido">
+    <div class="pestanas" role="tablist">
+      <button type="button" role="tab" id="tab-cobrar" aria-selected="true">Por cobrar</button>
+      <button type="button" role="tab" id="tab-mostrador" aria-selected="false">Venta de mostrador</button>
+      <button type="button" role="tab" id="tab-pagos" aria-selected="false">Pagos</button>
+    </div>
+
+    <!-- RF-09.4 Órdenes abiertas con saldo -->
+    <section id="vista-cobrar">
+      <p class="nota" id="estado-cobrar" hidden></p>
+      <ul class="lista" id="lista-cobrar"></ul>
+    </section>
+
+    <!-- RF-10.1 Venta de mostrador: pedido y pago en un paso -->
+    <section id="vista-mostrador" hidden>
+      <div class="tarjeta-formulario">
+        <h3>Productos</h3>
+        <div class="lineas" id="m-lineas"></div>
+        <div class="linea">
+          <div class="campo"><select id="m-producto" aria-label="Producto a agregar"></select></div>
+          <div class="campo"><input id="m-cantidad" type="number" min="1" step="1" value="1" aria-label="Cantidad"></div>
+          <button type="button" class="boton-icono" id="m-agregar" title="Agregar producto">
+            <span class="icono" aria-hidden="true">add_circle</span>
+          </button>
+        </div>
+        <small class="error-campo" id="error-m-productos"></small>
+        <p class="total" id="m-total">Total: $ 0</p>
+
+        <div id="m-pago"></div>
+        <div class="alerta-error" id="error-mostrador" role="alert" hidden></div>
+        <div class="acciones">
+          <button type="button" class="boton-principal" id="m-cobrar">
+            <span class="icono" aria-hidden="true">point_of_sale</span> Cobrar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RF-09.7 Historial de pagos -->
+    <section id="vista-pagos" hidden>
+      <form class="filtros" id="form-pagos">
+        <div class="campo"><input type="date" id="p-desde" aria-label="Desde"></div>
+        <div class="campo"><input type="date" id="p-hasta" aria-label="Hasta"></div>
+        <button type="submit" class="boton-icono" title="Consultar">
+          <span class="icono" aria-hidden="true">search</span>
+        </button>
+      </form>
+      <section class="resumen" id="resumen-pagos"></section>
+      <p class="nota" id="estado-pagos" hidden></p>
+      <ul class="lista" id="lista-pagos"></ul>
+    </section>
+  </main>
+
+  <!-- RF-09.3 Cuenta, RF-09.1 Registrar pago, RF-09.4 Estado y anulación -->
+  <dialog id="dialogo-cuenta" class="ancho">
+    <h2 id="cuenta-titulo"></h2>
+    <p class="nota" id="cuenta-cliente"></p>
+    <ul class="mini-lista" id="cuenta-lineas"></ul>
+    <dl class="datos-orden costos" id="cuenta-totales"></dl>
+
+    <section class="seccion" id="bloque-pagos-hechos" hidden>
+      <h3>Pagos registrados</h3>
+      <ul class="mini-lista" id="cuenta-pagos"></ul>
+    </section>
+
+    <section class="seccion" id="bloque-nuevo-pago" hidden>
+      <h3>Registrar pago</h3>
+      <div id="c-pago"></div>
+    </section>
+
+    <div class="alerta-error" id="error-cuenta" role="alert" hidden></div>
+    <div class="acciones" id="cuenta-acciones"></div>
+  </dialog>
+
+  <script type="module" src="js/caja.js"></script>
+</body>
+</html>

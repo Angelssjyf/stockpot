@@ -5,9 +5,11 @@ from .ordenes import Cliente, DetalleOrden, Domicilio, Orden
 from .productos import Producto, Receta
 from .proveedores import DetalleOrdenCompra, OrdenCompra, Proveedor, ProveedorInsumo
 from .usuarios import Permiso, Rol, Usuario, rol_permisos
+from .ventas import Consumo, Pago, Venta
 
 __all__ = [
     "Cliente",
+    "Consumo",
     "DetalleOrden",
     "DetalleOrdenCompra",
     "Domicilio",
@@ -15,6 +17,7 @@ __all__ = [
     "MovimientoInventario",
     "Orden",
     "OrdenCompra",
+    "Pago",
     "Permiso",
     "Producto",
     "Proveedor",
@@ -22,5 +25,6 @@ __all__ = [
     "Receta",
     "Rol",
     "Usuario",
+    "Venta",
     "rol_permisos",
 ]

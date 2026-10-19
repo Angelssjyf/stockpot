@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Ventas</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Ventas y consumo</h1>
+  </header>
+
+  <main class="contenido">
+    <form class="filtros" id="form-fechas">
+      <div class="campo"><input type="date" id="desde" aria-label="Desde"></div>
+      <div class="campo"><input type="date" id="hasta" aria-label="Hasta"></div>
+      <button type="submit" class="boton-icono" title="Consultar">
+        <span class="icono" aria-hidden="true">search</span>
+      </button>
+    </form>
+
+    <!-- RF-10.2 Resumen de ventas del periodo -->
+    <section class="resumen" id="resumen"></section>
+
+    <div class="dos-columnas paneles">
+      <!-- RF-10.5 Productos más vendidos -->
+      <section class="panel">
+        <h3>Productos más vendidos</h3>
+        <ul class="barras" id="mas-vendidos"></ul>
+      </section>
+      <!-- RF-10.6 Consumo de insumos -->
+      <section class="panel">
+        <h3>Consumo de insumos</h3>
+        <ul class="mini-lista" id="consumo"></ul>
+        <p class="total" id="consumo-total"></p>
+      </section>
+    </div>
+
+    <!-- RF-10.2 Ventas -->
+    <h3>Ventas</h3>
+    <p class="nota" id="estado" hidden></p>
+    <ul class="lista" id="lista"></ul>
+  </main>
+
+  <!-- RF-10.4 Productos de la venta y RF-10.3 consumo -->
+  <dialog id="dialogo-venta" class="ancho">
+    <h2 id="venta-titulo"></h2>
+    <dl class="datos-orden" id="venta-datos"></dl>
+    <section class="seccion">
+      <h3>Productos vendidos</h3>
+      <ul class="mini-lista" id="venta-productos"></ul>
+    </section>
+    <section class="seccion">
+      <h3>Insumos consumidos</h3>
+      <ul class="mini-lista" id="venta-consumos"></ul>
+    </section>
+    <div class="acciones">
+      <button type="button" class="boton-texto" id="cerrar-venta">Cerrar</button>
+      <button type="button" class="boton-principal" id="ver-comprobante">
+        <span class="icono" aria-hidden="true">receipt</span> Comprobante
+      </button>
+    </div>
+  </dialog>
+
+  <script type="module" src="js/ventas.js"></script>
+</body>
+</html>
