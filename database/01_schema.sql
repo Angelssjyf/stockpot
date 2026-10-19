@@ -90,7 +90,7 @@ CREATE TABLE proveedores (
 );
 
 -- ---------------------------------------------------------------------
--- ILF04 Insumos (versión básica; se completa en la Iteración 2)
+-- ILF04 Insumos
 -- Materias primas que se compran y se gastan al preparar los platos.
 -- Se crea ahora porque las órdenes de compra necesitan saber qué se compra.
 -- ---------------------------------------------------------------------
@@ -100,6 +100,8 @@ CREATE TABLE insumos (
     nombre          VARCHAR(120)   NOT NULL,
     unidad_medida   ENUM('KG','G','L','ML','UNIDAD') NOT NULL,
     stock_actual    DECIMAL(12,3)  NOT NULL DEFAULT 0,
+    stock_minimo    DECIMAL(12,3)  NOT NULL DEFAULT 0,  -- RF-03.7 nivel de alerta
+    costo_unitario  DECIMAL(12,2)  NOT NULL DEFAULT 0,  -- último costo de compra
     activo          BOOLEAN        NOT NULL DEFAULT TRUE,
     created_at      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_insumo_stock CHECK (stock_actual >= 0)  -- nunca stock negativo
@@ -152,4 +154,31 @@ CREATE TABLE detalle_orden_compra (
     CONSTRAINT fk_doc_orden  FOREIGN KEY (orden_compra_id) REFERENCES ordenes_compra(id) ON DELETE CASCADE,
     CONSTRAINT fk_doc_insumo FOREIGN KEY (insumo_id)       REFERENCES insumos(id),
     CONSTRAINT chk_doc_cantidad CHECK (cantidad > 0)
+);
+
+
+-- =====================================================================
+--  ITERACIÓN 2 - Inventario completo
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- ILF05 Movimientos de inventario (RF-03.4 entradas, RF-03.5 salidas)
+-- Cada cambio de stock deja un registro: qué, cuánto, por qué, quién y cuándo.
+-- ---------------------------------------------------------------------
+CREATE TABLE movimientos_inventario (
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    insumo_id         INT           NOT NULL,
+    tipo              ENUM('ENTRADA','SALIDA') NOT NULL,
+    motivo            ENUM('COMPRA','AJUSTE','DEVOLUCION','CONSUMO','MERMA') NOT NULL,
+    cantidad          DECIMAL(12,3) NOT NULL,
+    stock_resultante  DECIMAL(12,3) NOT NULL,       -- stock después del movimiento
+    orden_compra_id   INT,                          -- si viene de una compra recibida
+    usuario_id        INT           NOT NULL,       -- quién lo registró
+    observacion       VARCHAR(255),
+    created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mov_insumo  FOREIGN KEY (insumo_id)       REFERENCES insumos(id),
+    CONSTRAINT fk_mov_oc      FOREIGN KEY (orden_compra_id) REFERENCES ordenes_compra(id),
+    CONSTRAINT fk_mov_usuario FOREIGN KEY (usuario_id)      REFERENCES usuarios(id),
+    CONSTRAINT chk_mov_cantidad CHECK (cantidad > 0),
+    INDEX idx_mov_fecha (created_at)
 );

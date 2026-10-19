@@ -55,3 +55,20 @@ FROM (
 ) AS d
 JOIN proveedores p ON p.nit = d.nit
 JOIN insumos i ON i.codigo = d.codigo;
+
+-- ---------------------------------------------------------------------
+-- Niveles mínimos (RF-03.7) y costo unitario de los insumos de ejemplo.
+-- Requiere las columnas de la Iteración 2 (01_schema.sql actual o 05).
+-- ---------------------------------------------------------------------
+UPDATE insumos SET stock_minimo = 10,  costo_unitario = 4200  WHERE codigo = 'INS-001';
+UPDATE insumos SET stock_minimo = 5,   costo_unitario = 13000 WHERE codigo = 'INS-002';
+UPDATE insumos SET stock_minimo = 4,   costo_unitario = 26000 WHERE codigo = 'INS-003';
+UPDATE insumos SET stock_minimo = 10,  costo_unitario = 1800  WHERE codigo = 'INS-004';
+UPDATE insumos SET stock_minimo = 3,   costo_unitario = 3500  WHERE codigo = 'INS-005';
+UPDATE insumos SET stock_minimo = 3,   costo_unitario = 2800  WHERE codigo = 'INS-006';
+UPDATE insumos SET stock_minimo = 4,   costo_unitario = 9500  WHERE codigo = 'INS-007';
+UPDATE insumos SET stock_minimo = 1,   costo_unitario = 1500  WHERE codigo = 'INS-008';
+UPDATE insumos SET stock_minimo = 30,  costo_unitario = 550   WHERE codigo = 'INS-009';
+UPDATE insumos SET stock_minimo = 10,  costo_unitario = 4800  WHERE codigo = 'INS-010';
+UPDATE insumos SET stock_minimo = 24,  costo_unitario = 2200  WHERE codigo = 'INS-011';
+UPDATE insumos SET stock_minimo = 3,   costo_unitario = 4000  WHERE codigo = 'INS-012';
