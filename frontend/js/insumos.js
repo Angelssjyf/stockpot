@@ -1,38 +1,108 @@
-// Módulo de inventario: RF-03.1 Registrar, RF-03.2 Consultar y RF-03.3 Modificar insumos.
+// Módulo de inventario (RF-03.1 a RF-03.8): insumos, existencias, movimientos y alertas.
 import { api, exigirSesion } from './api.js';
-import { crear, mostrarAviso } from './ui.js';
+import { crear, formato, mostrarAviso } from './ui.js';
 
 const yo = await exigirSesion('inventario.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('inventario.gestionar');
 
 const $ = (id) => document.getElementById(id);
 
-/** Formato colombiano para cantidades: 12,5 · 1.250 */
-const formatoCantidad = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 3 });
-
 function textoStock(insumo) {
-  return `${formatoCantidad.format(insumo.stock_actual)} ${insumo.unidad_medida}`;
+  return `${formato.cantidad(insumo.stock_actual)} ${insumo.unidad_medida}`;
+}
+
+/** Fecha y hora cortas para el historial: "18 oct, 7:40 p. m." */
+function fechaHora(iso) {
+  return new Date(iso).toLocaleString('es-CO', {
+    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
+  });
 }
 
 // =====================================================================
-//  RF-03.2 Consultar insumos: lista con buscador
+//  RF-03.6 Existencias (resumen) y RF-03.8 Alertas de stock
 // =====================================================================
+
+function tarjetaResumen(icono, titulo, valor, clase = '') {
+  return crear('div', { className: `tarjeta-resumen ${clase}` }, [
+    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
+    crear('div', { className: 'valor', texto: valor }),
+    crear('div', { texto: titulo }),
+  ]);
+}
+
+async function cargarResumen() {
+  try {
+    const [existencias, alertas] = await Promise.all([
+      api('GET', '/inventario/existencias'),
+      api('GET', '/inventario/alertas'),
+    ]);
+    const r = existencias.resumen;
+    $('resumen').replaceChildren(
+      tarjetaResumen('inventory_2', 'Insumos activos', String(r.total_insumos)),
+      tarjetaResumen('trending_down', 'En el mínimo', String(r.bajos), r.bajos ? 'aviso-bajo' : ''),
+      tarjetaResumen('block', 'Agotados', String(r.agotados), r.agotados ? 'aviso-agotado' : ''),
+      tarjetaResumen('payments', 'Valor del inventario', formato.dinero(r.valor_total)),
+    );
+
+    $('alertas').hidden = alertas.length === 0;
+    $('lista-alertas').replaceChildren(...alertas.map(filaDeAlerta));
+  } catch (error) {
+    $('resumen').replaceChildren(crear('p', { className: 'nota', texto: error.message }));
+  }
+}
+
+/** Una alerta: al tocarla abre la ficha del insumo para reponerlo ahí mismo. */
+function filaDeAlerta(alerta) {
+  const fila = crear('li', { className: 'alerta-item', tabindex: '0', role: 'button' }, [
+    crear('span', { texto: `${alerta.nombre} · ${textoStock(alerta)} (mínimo ${formato.cantidad(alerta.stock_minimo)})` }),
+    crear('span', { className: `chip estado-${alerta.estado_stock}`,
+                    texto: alerta.estado_stock === 'AGOTADO' ? 'Agotado' : `Faltan ${formato.cantidad(alerta.faltante)}` }),
+  ]);
+  fila.addEventListener('click', () => abrirFormulario(alerta));
+  fila.addEventListener('keydown', (evento) => {
+    if (evento.key === 'Enter') abrirFormulario(alerta); // también con teclado
+  });
+  return fila;
+}
+
+// =====================================================================
+//  RF-03.2 Consultar insumos: lista con búsqueda mientras se escribe
+// =====================================================================
+
+let insumos = []; // todos los insumos, ya ordenados por nombre desde la API
 
 async function cargar() {
   mostrarEstado('Cargando…');
   $('lista').replaceChildren();
   try {
-    const texto = encodeURIComponent($('buscar').value.trim());
-    const insumos = await api('GET', `/insumos?q=${texto}`);
-    if (insumos.length === 0) {
-      mostrarEstado('No se encontraron insumos');
-    } else {
-      $('estado').hidden = true;
-      $('lista').replaceChildren(...insumos.map(filaDeInsumo));
-    }
+    insumos = await api('GET', '/insumos');
+    pintarLista();
   } catch (error) {
     mostrarEstado(error.message, true);
   }
+}
+
+/** Quita tildes y mayúsculas: así "limon" encuentra "Limón". */
+function normalizar(texto) {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+/** Muestra solo los insumos cuyo código o nombre contiene lo escrito en el buscador. */
+function pintarLista() {
+  const texto = normalizar($('buscar').value.trim());
+  const visibles = insumos.filter((i) => normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
+  if (visibles.length === 0) {
+    mostrarEstado(insumos.length ? 'No se encontraron insumos' : 'Todavía no hay insumos');
+  } else {
+    $('estado').hidden = true;
+    $('lista').replaceChildren(...visibles.map(filaDeInsumo));
+  }
+}
+
+/** Recarga todo: resumen, alertas y lista (después de cualquier cambio). */
+function recargar() {
+  cargarResumen();
+  cargar();
 }
 
 function mostrarEstado(texto, conReintentar = false) {
@@ -41,12 +111,12 @@ function mostrarEstado(texto, conReintentar = false) {
   $('reintentar').hidden = !conReintentar;
 }
 
-/** Una fila: código, nombre, stock actual e "Inactivo" si aplica. */
+/** Una fila: código, nombre y el stock con color según su estado (OK, BAJO, AGOTADO). */
 function filaDeInsumo(insumo) {
-  const chips = [crear('span', { className: 'chip', texto: textoStock(insumo) })];
+  const chips = [crear('span', { className: `chip estado-${insumo.estado_stock}`, texto: textoStock(insumo) })];
   if (!insumo.activo) chips.unshift(crear('span', { className: 'chip', texto: 'Inactivo' }));
 
-  const fila = crear('li', { className: puedeGestionar ? 'fila editable' : 'fila' }, [
+  const fila = crear('li', { className: 'fila editable' }, [
     crear('div', { className: 'avatar' }, [
       crear('span', { className: 'icono', texto: 'inventory_2', 'aria-hidden': 'true' }),
     ]),
@@ -56,22 +126,21 @@ function filaDeInsumo(insumo) {
     ]),
     crear('div', { className: 'chips' }, chips),
   ]);
-  if (puedeGestionar) fila.addEventListener('click', () => abrirFormulario(insumo));
+  fila.addEventListener('click', () => abrirFormulario(insumo));
   return fila;
 }
 
-$('form-buscar').addEventListener('submit', (evento) => {
-  evento.preventDefault();
-  cargar();
-});
+$('buscar').addEventListener('input', pintarLista); // filtra con cada letra
+$('form-buscar').addEventListener('submit', (evento) => evento.preventDefault());
 $('limpiar').addEventListener('click', () => {
   $('buscar').value = '';
-  cargar();
+  pintarLista();
+  $('buscar').focus();
 });
 $('reintentar').addEventListener('click', cargar);
 
 // =====================================================================
-//  RF-03.1 Registrar y RF-03.3 Modificar: un solo formulario
+//  RF-03.1 Registrar, RF-03.3 Modificar y RF-03.7 Niveles mínimos
 // =====================================================================
 
 const dialogo = $('dialogo-insumo');
@@ -82,26 +151,42 @@ if (puedeGestionar) {
   $('boton-nuevo').addEventListener('click', () => abrirFormulario(null));
 }
 
+/** Quien solo puede ver (por ejemplo el COCINERO) abre la ficha sin poder editarla. */
+function soloLectura(activar) {
+  for (const id of ['f-codigo', 'f-nombre', 'f-unidad', 'f-minimo', 'f-costo', 'f-activo']) {
+    $(id).disabled = activar;
+  }
+  $('guardar').hidden = activar;
+  $('botones-movimiento').hidden = activar;
+}
+
 function abrirFormulario(insumo) {
   insumoEditado = insumo;
   const esEdicion = insumo !== null;
 
   $('form-insumo').reset();
-  for (const campo of ['codigo', 'nombre', 'unidad']) marcarCampo(campo, '');
+  for (const campo of ['codigo', 'nombre', 'unidad', 'minimo', 'costo']) marcarCampo(campo, '');
   $('error-formulario').hidden = true;
+  soloLectura(!puedeGestionar);
 
-  $('titulo-formulario').textContent = esEdicion ? 'Editar insumo' : 'Nuevo insumo';
+  $('titulo-formulario').textContent = !esEdicion ? 'Nuevo insumo'
+    : puedeGestionar ? 'Editar insumo' : insumo.nombre;
   $('bloque-edicion').hidden = !esEdicion;
 
   if (esEdicion) {
     $('f-codigo').value = insumo.codigo;
     $('f-nombre').value = insumo.nombre;
     $('f-unidad').value = insumo.unidad_medida;
+    $('f-minimo').value = insumo.stock_minimo;
+    $('f-costo').value = insumo.costo_unitario;
     $('f-activo').checked = insumo.activo;
     $('stock-actual').textContent = textoStock(insumo);
+    $('boton-entrada').disabled = !insumo.activo;
+    $('boton-salida').disabled = !insumo.activo;
+    cargarHistorial(insumo);
   }
 
-  dialogo.showModal();
+  if (!dialogo.open) dialogo.showModal();
 }
 
 function marcarCampo(nombre, mensaje) {
@@ -111,10 +196,13 @@ function marcarCampo(nombre, mensaje) {
 
 function validar() {
   const obligatorio = (valor) => (valor.trim() ? '' : 'Campo obligatorio');
+  const noNegativo = (valor) => (valor === '' || Number(valor) >= 0 ? '' : 'No puede ser negativo');
   const errores = {
     codigo: obligatorio($('f-codigo').value),
     nombre: obligatorio($('f-nombre').value),
     unidad: $('f-unidad').value ? '' : 'Elige una unidad',
+    minimo: noNegativo($('f-minimo').value),
+    costo: noNegativo($('f-costo').value),
   };
   for (const [campo, mensaje] of Object.entries(errores)) marcarCampo(campo, mensaje);
   return Object.values(errores).every((mensaje) => !mensaje);
@@ -129,6 +217,8 @@ $('form-insumo').addEventListener('submit', async (evento) => {
     codigo: $('f-codigo').value.trim(),
     nombre: $('f-nombre').value.trim(),
     unidad_medida: $('f-unidad').value,
+    stock_minimo: Number($('f-minimo').value || 0), // RF-03.7
+    costo_unitario: Number($('f-costo').value || 0),
   };
 
   $('guardar').disabled = true;
@@ -141,7 +231,7 @@ $('form-insumo').addEventListener('submit', async (evento) => {
     }
     dialogo.close();
     mostrarAviso(insumoEditado ? 'Insumo actualizado' : 'Insumo registrado');
-    cargar();
+    recargar();
   } catch (error) {
     $('error-formulario').textContent = error.message; // por ejemplo "Ya existe un insumo con ese código"
     $('error-formulario').hidden = false;
@@ -152,4 +242,94 @@ $('form-insumo').addEventListener('submit', async (evento) => {
 
 $('cancelar').addEventListener('click', () => dialogo.close());
 
-cargar();
+// =====================================================================
+//  RF-03.4 Entradas y RF-03.5 Salidas: historial y registro
+// =====================================================================
+
+const NOMBRES_MOTIVO = {
+  COMPRA: 'Compra', AJUSTE: 'Ajuste', DEVOLUCION: 'Devolución', CONSUMO: 'Consumo', MERMA: 'Merma',
+};
+// Los mismos motivos que acepta la API para un movimiento manual
+const MOTIVOS = { ENTRADA: ['COMPRA', 'AJUSTE', 'DEVOLUCION'], SALIDA: ['CONSUMO', 'MERMA', 'AJUSTE'] };
+
+async function cargarHistorial(insumo) {
+  const lista = $('historial');
+  lista.replaceChildren(crear('li', { className: 'nota', texto: 'Cargando movimientos…' }));
+  try {
+    const movimientos = await api('GET', `/insumos/${insumo.id}/movimientos`);
+    if (movimientos.length === 0) {
+      lista.replaceChildren(crear('li', { className: 'nota', texto: 'Todavía no hay movimientos' }));
+      return;
+    }
+    lista.replaceChildren(...movimientos.map((m) => {
+      const signo = m.tipo === 'ENTRADA' ? '+' : '−';
+      const detalle = [NOMBRES_MOTIVO[m.motivo], m.orden_compra, m.observacion].filter(Boolean).join(' · ');
+      return crear('li', {}, [
+        crear('div', {}, [
+          crear('div', { texto: detalle }),
+          crear('small', { className: 'nota', texto: `${fechaHora(m.fecha)} · ${m.usuario}` }),
+        ]),
+        crear('div', { className: 'cantidad-movimiento' }, [
+          crear('div', { className: `movimiento-${m.tipo}`, texto: `${signo}${formato.cantidad(m.cantidad)}` }),
+          crear('small', { className: 'nota', texto: `Queda ${formato.cantidad(m.stock_resultante)}` }),
+        ]),
+      ]);
+    }));
+  } catch (error) {
+    lista.replaceChildren(crear('li', { className: 'nota', texto: error.message }));
+  }
+}
+
+const dialogoMovimiento = $('dialogo-movimiento');
+let tipoMovimiento = 'ENTRADA';
+
+function abrirMovimiento(tipo) {
+  tipoMovimiento = tipo;
+  $('form-movimiento').reset();
+  marcarCampo('cantidad', '');
+  $('error-movimiento').hidden = true;
+
+  $('titulo-movimiento').textContent = tipo === 'ENTRADA' ? 'Registrar entrada' : 'Registrar salida';
+  $('insumo-movimiento').textContent = `${insumoEditado.nombre} · hay ${textoStock(insumoEditado)}`;
+  $('m-unidad').textContent = insumoEditado.unidad_medida;
+  $('m-motivo').replaceChildren(...MOTIVOS[tipo].map(
+    (motivo) => crear('option', { value: motivo, texto: NOMBRES_MOTIVO[motivo] }),
+  ));
+  dialogoMovimiento.showModal();
+}
+
+$('boton-entrada').addEventListener('click', () => abrirMovimiento('ENTRADA'));
+$('boton-salida').addEventListener('click', () => abrirMovimiento('SALIDA'));
+$('cancelar-movimiento').addEventListener('click', () => dialogoMovimiento.close());
+
+$('form-movimiento').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  $('error-movimiento').hidden = true;
+  const cantidad = Number($('m-cantidad').value);
+  if (!(cantidad > 0)) {
+    marcarCampo('cantidad', 'Escribe una cantidad mayor que cero');
+    return;
+  }
+  marcarCampo('cantidad', '');
+
+  $('guardar-movimiento').disabled = true;
+  try {
+    const respuesta = await api('POST', `/insumos/${insumoEditado.id}/movimientos`, {
+      tipo: tipoMovimiento,
+      motivo: $('m-motivo').value,
+      cantidad,
+      observacion: $('m-observacion').value.trim(),
+    });
+    dialogoMovimiento.close();
+    mostrarAviso(tipoMovimiento === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada');
+    abrirFormulario(respuesta.insumo); // la ficha muestra el nuevo stock y el historial
+    recargar();
+  } catch (error) {
+    $('error-movimiento').textContent = error.message; // por ejemplo "Stock insuficiente…"
+    $('error-movimiento').hidden = false;
+  } finally {
+    $('guardar-movimiento').disabled = false;
+  }
+});
+
+recargar();
