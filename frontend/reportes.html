@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Reportes</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra no-imprimir">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Reportes y estadísticas</h1>
+  </header>
+
+  <main class="contenido">
+    <div class="no-imprimir">
+      <form class="filtros" id="form-fechas">
+        <div class="campo"><input type="date" id="desde" aria-label="Desde"></div>
+        <div class="campo"><input type="date" id="hasta" aria-label="Hasta"></div>
+        <button type="submit" class="boton-icono" title="Generar">
+          <span class="icono" aria-hidden="true">refresh</span>
+        </button>
+      </form>
+      <div class="categorias" id="atajos" role="group" aria-label="Periodo"></div>
+
+      <div class="pestanas pestanas-desplazables" role="tablist" id="pestanas"></div>
+    </div>
+
+    <h2 class="titulo-reporte" id="titulo-reporte"></h2>
+    <p class="nota" id="periodo"></p>
+    <div class="alerta-error" id="error" role="alert" hidden></div>
+    <section id="contenido-reporte"></section>
+
+    <div class="acciones no-imprimir" id="acciones-reporte">
+      <button type="button" class="boton-texto" id="descargar">
+        <span class="icono" aria-hidden="true">download</span> Descargar CSV (Excel)
+      </button>
+      <button type="button" class="boton-principal" id="imprimir">
+        <span class="icono" aria-hidden="true">print</span> Imprimir / PDF
+      </button>
+    </div>
+  </main>
+
+  <script type="module" src="js/reportes.js"></script>
+</body>
+</html>
