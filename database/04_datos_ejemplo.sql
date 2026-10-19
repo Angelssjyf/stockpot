@@ -72,3 +72,52 @@ UPDATE insumos SET stock_minimo = 30,  costo_unitario = 550   WHERE codigo = 'IN
 UPDATE insumos SET stock_minimo = 10,  costo_unitario = 4800  WHERE codigo = 'INS-010';
 UPDATE insumos SET stock_minimo = 24,  costo_unitario = 2200  WHERE codigo = 'INS-011';
 UPDATE insumos SET stock_minimo = 3,   costo_unitario = 4000  WHERE codigo = 'INS-012';
+
+-- ---------------------------------------------------------------------
+-- Productos de la carta (RF-04.1) y sus recetas (RF-04.4).
+-- Requiere las tablas de productos (01_schema.sql actual o script 06).
+-- Cantidades por UNA porción, en la unidad de cada insumo.
+-- ---------------------------------------------------------------------
+INSERT IGNORE INTO productos (codigo, nombre, descripcion, categoria, precio_venta) VALUES
+ ('PRD-001', 'Bandeja de pollo',      'Pechuga a la plancha con arroz y papa',  'PLATO_FUERTE', 22000),
+ ('PRD-002', 'Carne asada',           'Carne de res con papa y ensalada',       'PLATO_FUERTE', 26000),
+ ('PRD-003', 'Huevos pericos',        'Huevos con tomate y cebolla',            'ENTRADA',       9000),
+ ('PRD-004', 'Papas a la francesa',   'Porción de papas fritas',                'ADICIONAL',     7000),
+ ('PRD-005', 'Porción de arroz',      'Arroz blanco',                           'ADICIONAL',     4000),
+ ('PRD-006', 'Gaseosa 400 ml',        NULL,                                     'BEBIDA',        4500),
+ ('PRD-007', 'Limonada natural',      'Vaso de 400 ml',                         'BEBIDA',        6000),
+ ('PRD-008', 'Arroz con leche',       'Postre de la casa',                      'POSTRE',        7000);
+
+INSERT IGNORE INTO recetas (producto_id, insumo_id, cantidad)
+SELECT p.id, i.id, r.cantidad
+FROM (
+           SELECT 'PRD-001' COLLATE utf8mb4_unicode_ci AS producto,
+                  'INS-002' COLLATE utf8mb4_unicode_ci AS insumo, 0.250 AS cantidad
+ UNION ALL SELECT 'PRD-001', 'INS-001', 0.150
+ UNION ALL SELECT 'PRD-001', 'INS-004', 0.200
+ UNION ALL SELECT 'PRD-001', 'INS-007', 0.030
+ UNION ALL SELECT 'PRD-001', 'INS-008', 0.005
+ UNION ALL SELECT 'PRD-002', 'INS-003', 0.250
+ UNION ALL SELECT 'PRD-002', 'INS-004', 0.250
+ UNION ALL SELECT 'PRD-002', 'INS-005', 0.050
+ UNION ALL SELECT 'PRD-002', 'INS-006', 0.050
+ UNION ALL SELECT 'PRD-002', 'INS-007', 0.030
+ UNION ALL SELECT 'PRD-002', 'INS-008', 0.005
+ UNION ALL SELECT 'PRD-003', 'INS-009', 3.000
+ UNION ALL SELECT 'PRD-003', 'INS-005', 0.050
+ UNION ALL SELECT 'PRD-003', 'INS-006', 0.030
+ UNION ALL SELECT 'PRD-003', 'INS-007', 0.010
+ UNION ALL SELECT 'PRD-003', 'INS-008', 0.002
+ UNION ALL SELECT 'PRD-004', 'INS-004', 0.300
+ UNION ALL SELECT 'PRD-004', 'INS-007', 0.050
+ UNION ALL SELECT 'PRD-004', 'INS-008', 0.003
+ UNION ALL SELECT 'PRD-005', 'INS-001', 0.150
+ UNION ALL SELECT 'PRD-005', 'INS-007', 0.010
+ UNION ALL SELECT 'PRD-005', 'INS-008', 0.003
+ UNION ALL SELECT 'PRD-006', 'INS-011', 1.000
+ UNION ALL SELECT 'PRD-007', 'INS-012', 0.100
+ UNION ALL SELECT 'PRD-008', 'INS-001', 0.050
+ UNION ALL SELECT 'PRD-008', 'INS-010', 0.200
+) AS r
+JOIN productos p ON p.codigo = r.producto
+JOIN insumos   i ON i.codigo = r.insumo;

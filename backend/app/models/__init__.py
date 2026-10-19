@@ -1,6 +1,7 @@
 """Reúne todos los modelos para importarlos desde app.models."""
 
 from .inventario import Insumo, MovimientoInventario
+from .productos import Producto, Receta
 from .proveedores import DetalleOrdenCompra, OrdenCompra, Proveedor, ProveedorInsumo
 from .usuarios import Permiso, Rol, Usuario, rol_permisos
 
@@ -10,8 +11,10 @@ __all__ = [
     "MovimientoInventario",
     "OrdenCompra",
     "Permiso",
+    "Producto",
     "Proveedor",
     "ProveedorInsumo",
+    "Receta",
     "Rol",
     "Usuario",
     "rol_permisos",

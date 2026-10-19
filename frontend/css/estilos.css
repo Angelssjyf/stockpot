@@ -568,13 +568,13 @@ dialog.ancho {
 
 .linea {
   display: grid;
-  grid-template-columns: 1fr 120px 40px;
+  grid-template-columns: minmax(0, 1fr) 120px 40px; /* minmax: un nombre largo no desborda */
   gap: 8px;
   align-items: center;
 }
 
 .linea.con-cantidad {
-  grid-template-columns: 1fr 90px 110px 40px;
+  grid-template-columns: minmax(0, 1fr) 90px 110px 40px;
 }
 
 .linea .campo {
@@ -585,6 +585,8 @@ dialog.ancho {
 .linea .campo select {
   padding: 10px 0;
   font-size: 14px;
+  min-width: 0;
+  width: 100%;
 }
 
 .linea .texto-linea {
@@ -646,7 +648,11 @@ dialog.ancho {
 
 @media (max-width: 600px) {
   .linea.con-cantidad {
-    grid-template-columns: 1fr 70px 90px 36px;
+    grid-template-columns: minmax(0, 1fr) 70px 90px 36px;
+  }
+
+  .linea {
+    grid-template-columns: minmax(0, 1fr) 90px 36px;
   }
 }
 
@@ -752,4 +758,70 @@ input[type="search"]::-webkit-search-cancel-button {
   .dos-columnas {
     grid-template-columns: 1fr; /* en el celular, mínimo y costo uno debajo del otro */
   }
+}
+
+/* ------------------------------------------------------------ Productos y menú (RF-04) */
+.categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.chip.filtro {
+  background: var(--superficie);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chip.filtro[aria-pressed="true"] {
+  background: var(--contenedor-primario);
+  border-color: var(--primario);
+  color: var(--sobre-contenedor-primario);
+}
+
+/* Interruptor pequeño de "disponible hoy" en cada fila de la lista */
+.interruptor-mini {
+  appearance: none;
+  width: 40px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--superficie-variante);
+  border: 2px solid var(--borde);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+  transition: background 0.2s;
+}
+
+.interruptor-mini::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--texto-suave);
+  transition: all 0.2s;
+}
+
+.interruptor-mini:checked {
+  background: var(--primario);
+  border-color: var(--primario);
+}
+
+.interruptor-mini:checked::after {
+  left: 20px;
+  background: var(--sobre-primario);
+}
+
+.fila.no-disponible .datos {
+  opacity: 0.5; /* agotado por hoy */
+}
+
+.costos {
+  margin-top: 12px;
 }
