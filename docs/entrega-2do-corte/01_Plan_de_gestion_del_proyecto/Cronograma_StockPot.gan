@@ -1,0 +1,801 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="StockPot – Cronograma (2.º corte, avance 70 %)" company="Universidad Simón Bolívar – Cúcuta" webLink="https://github.com/Angelssjyf/stockpot" view-date="2026-08-03" view-index="0" gantt-divider-location="420" resource-divider-location="300" version="3.2.3247" locale="es">
+<description><![CDATA[Cronograma de StockPot (10/08/2026 – 13/11/2026). Jornada de lunes a sábado; domingos y festivos no laborables.
+Avance al 19/10/2026: Iteraciones 1, 2 y 4 completas (70 % = 233 de 330 PF); Iteración 3 con análisis y diseño completos y codificación/pruebas pendientes (30 %).]]></description>
+<view zooming-state="default:4" id="gantt-chart">
+<field id="tpd3" name="Nombre" width="300" order="0"/>
+<field id="tpd4" name="Fecha de inicio" width="80" order="1"/>
+<field id="tpd5" name="Fecha de fin" width="80" order="2"/>
+<field id="tpd7" name="Progreso" width="60" order="3"/>
+</view>
+<view id="resource-table">
+<field id="0" name="Nombre" width="210" order="0"/>
+<field id="1" name="Rol por defecto" width="86" order="1"/>
+</view>
+<calendars>
+<day-types>
+<day-type id="0"/>
+<day-type id="1"/>
+<default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="0"/>
+<only-show-weekends value="false"/>
+<overriden-day-types/>
+<days/>
+</day-types>
+<date year="2026" month="8" date="17" type="HOLIDAY"/>
+<date year="2026" month="10" date="12" type="HOLIDAY"/>
+<date year="2026" month="11" date="2" type="HOLIDAY"/>
+</calendars>
+<tasks empty-milestones="true">
+<taskproperties>
+<taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+<taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+<taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+<taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+<taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+<taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+<taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+<taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+<taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+<taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+</taskproperties>
+<task id="33" name="Sprint 1 – Iteración 1: Usuarios y roles + Proveedores" color="#8f4c2c" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+  <task id="34" name="Análisis" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="false">
+    <task id="1" name="Reunión de inicio de la iteración" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+      <depend id="2" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="2" name="Revisar los requerimientos de usuarios y proveedores" color="#8cb6ce" meeting="false" start="2026-08-11" duration="2" complete="100" expand="true">
+      <depend id="3" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="3" name="Validar el alcance de la iteración" color="#8cb6ce" meeting="false" start="2026-08-13" duration="2" complete="100" expand="true">
+      <depend id="4" type="2" difference="0" hardness="Strong"/>
+      <depend id="5" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="4" name="Analizar gestión de usuarios y roles" color="#8cb6ce" meeting="false" start="2026-08-15" duration="3" complete="100" expand="true">
+      <depend id="6" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="5" name="Analizar gestión de proveedores y compras" color="#8cb6ce" meeting="false" start="2026-08-15" duration="4" complete="100" expand="true">
+      <depend id="6" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="6" name="Definir requerimientos funcionales y no funcionales de la iteración" color="#8cb6ce" meeting="false" start="2026-08-21" duration="3" complete="100" expand="true">
+      <depend id="7" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="7" name="Validar y ajustar los requerimientos" color="#8cb6ce" meeting="false" start="2026-08-25" duration="2" complete="100" expand="true">
+      <depend id="8" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="8" name="Elaborar documento de análisis de la iteración" color="#8cb6ce" meeting="false" start="2026-08-27" duration="2" complete="100" expand="true">
+      <depend id="9" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="9" name="Entrega del documento de análisis" color="#8cb6ce" meeting="false" start="2026-08-29" duration="1" complete="100" expand="true">
+      <depend id="10" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="35" name="Diseño" color="#a3c586" meeting="false" start="2026-09-10" duration="1" complete="100" expand="false">
+    <task id="10" name="Definir arquitectura de la solución" color="#a3c586" meeting="false" start="2026-09-10" duration="2" complete="100" expand="true">
+      <depend id="11" type="2" difference="0" hardness="Strong"/>
+      <depend id="12" type="2" difference="0" hardness="Strong"/>
+      <depend id="13" type="2" difference="0" hardness="Strong"/>
+      <depend id="14" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="11" name="Diseñar la base de datos de usuarios y roles" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="15" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="12" name="Diseñar la base de datos de proveedores y compras" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="15" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="13" name="Diseñar interfaces del módulo de usuarios" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="15" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="14" name="Diseñar interfaces del módulo de proveedores" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="15" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="15" name="Validar el diseño de la iteración" color="#a3c586" meeting="false" start="2026-09-17" duration="2" complete="100" expand="true">
+      <depend id="16" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="16" name="Elaborar documento de diseño" color="#a3c586" meeting="false" start="2026-09-19" duration="2" complete="100" expand="true">
+      <depend id="17" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="17" name="Entrega del documento de diseño" color="#a3c586" meeting="false" start="2026-09-22" duration="1" complete="100" expand="true">
+      <depend id="18" type="2" difference="0" hardness="Strong"/>
+      <depend id="21" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="36" name="Codificación" color="#e7a85f" meeting="false" start="2026-09-23" duration="1" complete="100" expand="false">
+    <task id="18" name="Codificar registro de usuarios" color="#e7a85f" meeting="false" start="2026-09-23" duration="5" complete="100" expand="true">
+      <depend id="19" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="19" name="Codificar consulta y modificación de usuarios" color="#e7a85f" meeting="false" start="2026-09-29" duration="5" complete="100" expand="true">
+      <depend id="20" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="20" name="Codificar inicio de sesión, roles y permisos" color="#e7a85f" meeting="false" start="2026-10-05" duration="5" complete="100" expand="true">
+      <depend id="26" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="21" name="Codificar registro y consulta de proveedores" color="#e7a85f" meeting="false" start="2026-09-23" duration="5" complete="100" expand="true">
+      <depend id="22" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="22" name="Codificar productos suministrados" color="#e7a85f" meeting="false" start="2026-09-29" duration="4" complete="100" expand="true">
+      <depend id="23" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="23" name="Codificar órdenes de compra" color="#e7a85f" meeting="false" start="2026-10-03" duration="6" complete="100" expand="true">
+      <depend id="24" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="24" name="Codificar actualización de órdenes de compra" color="#e7a85f" meeting="false" start="2026-10-10" duration="3" complete="100" expand="true">
+      <depend id="25" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="25" name="Relacionar compras con inventario" color="#e7a85f" meeting="false" start="2026-10-15" duration="5" complete="100" expand="true">
+      <depend id="26" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="26" name="Integrar módulos de usuarios y proveedores" color="#e7a85f" meeting="false" start="2026-10-21" duration="3" complete="100" expand="true">
+      <depend id="27" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="27" name="Entrega del código fuente de la iteración" color="#e7a85f" meeting="true" start="2026-10-24" duration="0" complete="100" expand="true">
+      <depend id="28" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="37" name="Pruebas" color="#c78fc2" meeting="false" start="2026-10-26" duration="1" complete="100" expand="false">
+    <task id="28" name="Diseñar casos de prueba de la iteración" color="#c78fc2" meeting="false" start="2026-10-26" duration="2" complete="100" expand="true">
+      <depend id="29" type="2" difference="0" hardness="Strong"/>
+      <depend id="30" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="29" name="Ejecutar pruebas funcionales de usuarios y roles" color="#c78fc2" meeting="false" start="2026-10-28" duration="3" complete="100" expand="true">
+      <depend id="31" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="30" name="Ejecutar pruebas funcionales de proveedores" color="#c78fc2" meeting="false" start="2026-10-28" duration="4" complete="100" expand="true">
+      <depend id="31" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="31" name="Realizar correcciones y pruebas de regresión" color="#c78fc2" meeting="false" start="2026-11-03" duration="4" complete="100" expand="true">
+      <depend id="32" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="32" name="Entrega de resultados de las pruebas" color="#c78fc2" meeting="true" start="2026-11-07" duration="0" complete="100" expand="true">
+    </task>
+  </task>
+</task>
+<task id="76" name="Sprint 2 – Iteración 2: Inventario + Productos y menú" color="#8f4c2c" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+  <task id="77" name="Análisis" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="false">
+    <task id="38" name="Reunión de inicio de la iteración" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+      <depend id="39" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="39" name="Revisar los requerimientos de inventario y productos" color="#8cb6ce" meeting="false" start="2026-08-11" duration="2" complete="100" expand="true">
+      <depend id="40" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="40" name="Validar el alcance de la iteración" color="#8cb6ce" meeting="false" start="2026-08-13" duration="2" complete="100" expand="true">
+      <depend id="41" type="2" difference="0" hardness="Strong"/>
+      <depend id="42" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="41" name="Analizar gestión de inventario" color="#8cb6ce" meeting="false" start="2026-08-15" duration="4" complete="100" expand="true">
+      <depend id="43" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="42" name="Analizar gestión de productos y menú" color="#8cb6ce" meeting="false" start="2026-08-15" duration="3" complete="100" expand="true">
+      <depend id="43" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="43" name="Analizar integración entre inventario y productos" color="#8cb6ce" meeting="false" start="2026-08-21" duration="4" complete="100" expand="true">
+      <depend id="44" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="44" name="Definir requerimientos funcionales y no funcionales" color="#8cb6ce" meeting="false" start="2026-08-26" duration="3" complete="100" expand="true">
+      <depend id="45" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="45" name="Validar y ajustar los requerimientos" color="#8cb6ce" meeting="false" start="2026-08-29" duration="2" complete="100" expand="true">
+      <depend id="46" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="46" name="Elaborar documento de análisis de la iteración" color="#8cb6ce" meeting="false" start="2026-09-01" duration="2" complete="100" expand="true">
+      <depend id="47" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="47" name="Entrega del documento de análisis" color="#8cb6ce" meeting="false" start="2026-09-03" duration="1" complete="100" expand="true">
+      <depend id="48" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="78" name="Diseño" color="#a3c586" meeting="false" start="2026-09-10" duration="1" complete="100" expand="false">
+    <task id="48" name="Definir arquitectura de la solución" color="#a3c586" meeting="false" start="2026-09-10" duration="2" complete="100" expand="true">
+      <depend id="49" type="2" difference="0" hardness="Strong"/>
+      <depend id="50" type="2" difference="0" hardness="Strong"/>
+      <depend id="51" type="2" difference="0" hardness="Strong"/>
+      <depend id="52" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="49" name="Diseñar la base de datos de inventario" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="53" type="2" difference="0" hardness="Strong"/>
+      <depend id="54" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="50" name="Diseñar la base de datos de productos y menú" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="53" type="2" difference="0" hardness="Strong"/>
+      <depend id="54" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="51" name="Diseñar interfaces del módulo de inventario" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="53" type="2" difference="0" hardness="Strong"/>
+      <depend id="54" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="52" name="Diseñar interfaces del módulo de productos y menú" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="53" type="2" difference="0" hardness="Strong"/>
+      <depend id="54" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="53" name="Diseñar integración entre inventario y productos" color="#a3c586" meeting="false" start="2026-09-17" duration="4" complete="100" expand="true">
+      <depend id="54" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="54" name="Validar el diseño de la iteración" color="#a3c586" meeting="false" start="2026-09-22" duration="2" complete="100" expand="true">
+      <depend id="55" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="55" name="Elaborar documento de diseño" color="#a3c586" meeting="false" start="2026-09-24" duration="2" complete="100" expand="true">
+      <depend id="56" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="56" name="Entrega del documento de diseño" color="#a3c586" meeting="false" start="2026-09-26" duration="1" complete="100" expand="true">
+      <depend id="57" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="79" name="Codificación" color="#e7a85f" meeting="false" start="2026-09-28" duration="1" complete="100" expand="false">
+    <task id="57" name="Codificar registro y consulta de insumos" color="#e7a85f" meeting="false" start="2026-09-28" duration="5" complete="100" expand="true">
+      <depend id="58" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="58" name="Codificar modificación de insumos" color="#e7a85f" meeting="false" start="2026-10-03" duration="3" complete="100" expand="true">
+      <depend id="59" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="59" name="Codificar entradas de inventario" color="#e7a85f" meeting="false" start="2026-10-07" duration="5" complete="100" expand="true">
+      <depend id="60" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="60" name="Codificar salidas de inventario" color="#e7a85f" meeting="false" start="2026-10-14" duration="5" complete="100" expand="true">
+      <depend id="61" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="61" name="Codificar consulta de existencias y niveles mínimos" color="#e7a85f" meeting="false" start="2026-10-20" duration="3" complete="100" expand="true">
+      <depend id="62" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="62" name="Codificar alertas de stock" color="#e7a85f" meeting="false" start="2026-10-23" duration="4" complete="100" expand="true">
+      <depend id="63" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="63" name="Codificar actualización automática del inventario" color="#e7a85f" meeting="false" start="2026-10-28" duration="6" complete="100" expand="true">
+      <depend id="64" type="2" difference="0" hardness="Strong"/>
+      <depend id="68" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="64" name="Codificar registro de productos y platos" color="#e7a85f" meeting="false" start="2026-11-05" duration="4" complete="100" expand="true">
+      <depend id="65" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="65" name="Codificar consulta y modificación de productos" color="#e7a85f" meeting="false" start="2026-11-10" duration="4" complete="100" expand="true">
+      <depend id="66" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="66" name="Codificar asociación de insumos a productos o platos" color="#e7a85f" meeting="false" start="2026-11-14" duration="5" complete="100" expand="true">
+      <depend id="67" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="67" name="Codificar precios y disponibilidad de productos" color="#e7a85f" meeting="false" start="2026-11-20" duration="3" complete="100" expand="true">
+      <depend id="68" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="68" name="Integrar módulos de inventario y productos" color="#e7a85f" meeting="false" start="2026-11-24" duration="5" complete="100" expand="true">
+      <depend id="69" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="69" name="Entrega del código fuente de la iteración" color="#e7a85f" meeting="true" start="2026-11-30" duration="0" complete="100" expand="true">
+      <depend id="70" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="80" name="Pruebas" color="#c78fc2" meeting="false" start="2026-12-01" duration="1" complete="100" expand="false">
+    <task id="70" name="Diseñar casos de prueba de la iteración" color="#c78fc2" meeting="false" start="2026-12-01" duration="2" complete="100" expand="true">
+      <depend id="71" type="2" difference="0" hardness="Strong"/>
+      <depend id="72" type="2" difference="0" hardness="Strong"/>
+      <depend id="73" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="71" name="Ejecutar pruebas funcionales de inventario" color="#c78fc2" meeting="false" start="2026-12-03" duration="4" complete="100" expand="true">
+      <depend id="74" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="72" name="Ejecutar pruebas funcionales de productos y menú" color="#c78fc2" meeting="false" start="2026-12-03" duration="3" complete="100" expand="true">
+      <depend id="74" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="73" name="Ejecutar pruebas de integración inventario-productos" color="#c78fc2" meeting="false" start="2026-12-03" duration="4" complete="100" expand="true">
+      <depend id="74" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="74" name="Realizar correcciones y pruebas de regresión" color="#c78fc2" meeting="false" start="2026-12-08" duration="4" complete="100" expand="true">
+      <depend id="75" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="75" name="Entrega de resultados de las pruebas" color="#c78fc2" meeting="true" start="2026-12-12" duration="0" complete="100" expand="true">
+    </task>
+  </task>
+</task>
+<task id="127" name="Sprint 3 – Iteración 3: Pedidos + Cocina + Reservas (30 % pendiente)" color="#8f4c2c" meeting="false" start="2026-08-10" duration="1" complete="0" expand="true">
+  <task id="128" name="Análisis" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="false">
+    <task id="81" name="Reunión de inicio de la iteración" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+      <depend id="82" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="82" name="Revisar los requerimientos de pedidos, cocina y reservas" color="#8cb6ce" meeting="false" start="2026-08-11" duration="2" complete="100" expand="true">
+      <depend id="83" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="83" name="Validar el alcance de la iteración" color="#8cb6ce" meeting="false" start="2026-08-13" duration="2" complete="100" expand="true">
+      <depend id="84" type="2" difference="0" hardness="Strong"/>
+      <depend id="85" type="2" difference="0" hardness="Strong"/>
+      <depend id="86" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="84" name="Analizar gestión de pedidos" color="#8cb6ce" meeting="false" start="2026-08-15" duration="4" complete="100" expand="true">
+      <depend id="87" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="85" name="Analizar gestión de cocina" color="#8cb6ce" meeting="false" start="2026-08-15" duration="3" complete="100" expand="true">
+      <depend id="87" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="86" name="Analizar gestión de reservas" color="#8cb6ce" meeting="false" start="2026-08-15" duration="3" complete="100" expand="true">
+      <depend id="88" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="87" name="Analizar integración entre pedidos y cocina" color="#8cb6ce" meeting="false" start="2026-08-21" duration="4" complete="100" expand="true">
+      <depend id="89" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="88" name="Analizar integración entre reservas y mesas" color="#8cb6ce" meeting="false" start="2026-08-20" duration="3" complete="100" expand="true">
+      <depend id="89" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="89" name="Definir requerimientos funcionales y no funcionales" color="#8cb6ce" meeting="false" start="2026-08-26" duration="3" complete="100" expand="true">
+      <depend id="90" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="90" name="Validar y ajustar los requerimientos" color="#8cb6ce" meeting="false" start="2026-08-29" duration="2" complete="100" expand="true">
+      <depend id="91" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="91" name="Elaborar documento de análisis de la iteración" color="#8cb6ce" meeting="false" start="2026-09-01" duration="2" complete="100" expand="true">
+      <depend id="92" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="92" name="Entrega del documento de análisis" color="#8cb6ce" meeting="false" start="2026-09-03" duration="1" complete="100" expand="true">
+      <depend id="93" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="129" name="Diseño" color="#a3c586" meeting="false" start="2026-09-10" duration="1" complete="100" expand="false">
+    <task id="93" name="Definir arquitectura de la solución" color="#a3c586" meeting="false" start="2026-09-10" duration="2" complete="100" expand="true">
+      <depend id="94" type="2" difference="0" hardness="Strong"/>
+      <depend id="95" type="2" difference="0" hardness="Strong"/>
+      <depend id="96" type="2" difference="0" hardness="Strong"/>
+      <depend id="97" type="2" difference="0" hardness="Strong"/>
+      <depend id="98" type="2" difference="0" hardness="Strong"/>
+      <depend id="99" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="94" name="Diseñar la base de datos de pedidos" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="100" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="95" name="Diseñar la base de datos de cocina" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="100" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="96" name="Diseñar la base de datos de reservas" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="101" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="97" name="Diseñar interfaces del módulo de pedidos" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="100" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="98" name="Diseñar interfaces del módulo de cocina" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="100" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="99" name="Diseñar interfaces del módulo de reservas" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="101" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="100" name="Diseñar integración entre pedidos y cocina" color="#a3c586" meeting="false" start="2026-09-17" duration="4" complete="100" expand="true">
+      <depend id="102" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="101" name="Diseñar integración entre reservas y mesas" color="#a3c586" meeting="false" start="2026-09-16" duration="3" complete="100" expand="true">
+      <depend id="102" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="102" name="Validar el diseño de la iteración" color="#a3c586" meeting="false" start="2026-09-22" duration="2" complete="100" expand="true">
+      <depend id="103" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="103" name="Elaborar documento de diseño" color="#a3c586" meeting="false" start="2026-09-24" duration="2" complete="100" expand="true">
+      <depend id="104" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="104" name="Entrega del documento de diseño" color="#a3c586" meeting="false" start="2026-09-26" duration="1" complete="100" expand="true">
+      <depend id="105" type="2" difference="0" hardness="Strong"/>
+      <depend id="114" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="130" name="Codificación" color="#e7a85f" meeting="false" start="2026-09-28" duration="1" complete="0" expand="false">
+    <task id="105" name="Codificar registro y modificación de pedidos" color="#e7a85f" meeting="false" start="2026-09-28" duration="5" complete="0" expand="true">
+      <depend id="106" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="106" name="Codificar asociación de pedidos a mesas" color="#e7a85f" meeting="false" start="2026-10-03" duration="3" complete="0" expand="true">
+      <depend id="107" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="107" name="Codificar productos y confirmación del pedido" color="#e7a85f" meeting="false" start="2026-10-07" duration="5" complete="0" expand="true">
+      <depend id="108" type="2" difference="0" hardness="Strong"/>
+      <depend id="109" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="108" name="Codificar consulta y estado de pedidos" color="#e7a85f" meeting="false" start="2026-10-14" duration="3" complete="0" expand="true">
+      <depend id="110" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="109" name="Codificar validación de disponibilidad de insumos" color="#e7a85f" meeting="false" start="2026-10-14" duration="5" complete="0" expand="true">
+      <depend id="110" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="110" name="Codificar envío de pedidos a cocina" color="#e7a85f" meeting="false" start="2026-10-20" duration="4" complete="0" expand="true">
+      <depend id="111" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="111" name="Codificar recepción y visualización de órdenes en cocina" color="#e7a85f" meeting="false" start="2026-10-24" duration="4" complete="0" expand="true">
+      <depend id="112" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="112" name="Codificar organización y actualización de órdenes" color="#e7a85f" meeting="false" start="2026-10-29" duration="4" complete="0" expand="true">
+      <depend id="113" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="113" name="Codificar estados de pedidos y notificaciones" color="#e7a85f" meeting="false" start="2026-11-04" duration="5" complete="0" expand="true">
+      <depend id="118" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="114" name="Codificar registro y consulta de reservas" color="#e7a85f" meeting="false" start="2026-09-28" duration="4" complete="0" expand="true">
+      <depend id="115" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="115" name="Codificar modificación y cancelación de reservas" color="#e7a85f" meeting="false" start="2026-10-02" duration="3" complete="0" expand="true">
+      <depend id="116" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="116" name="Codificar fecha, hora y asociación con mesas" color="#e7a85f" meeting="false" start="2026-10-06" duration="4" complete="0" expand="true">
+      <depend id="117" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="117" name="Codificar disponibilidad y estados de reservas" color="#e7a85f" meeting="false" start="2026-10-10" duration="4" complete="0" expand="true">
+      <depend id="118" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="118" name="Integrar módulos de pedidos, cocina y reservas" color="#e7a85f" meeting="false" start="2026-11-10" duration="5" complete="0" expand="true">
+      <depend id="119" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="119" name="Entrega del código fuente de la iteración" color="#e7a85f" meeting="true" start="2026-11-16" duration="0" complete="0" expand="true">
+      <depend id="120" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="131" name="Pruebas" color="#c78fc2" meeting="false" start="2026-11-17" duration="1" complete="0" expand="false">
+    <task id="120" name="Diseñar casos de prueba de la iteración" color="#c78fc2" meeting="false" start="2026-11-17" duration="2" complete="0" expand="true">
+      <depend id="121" type="2" difference="0" hardness="Strong"/>
+      <depend id="122" type="2" difference="0" hardness="Strong"/>
+      <depend id="123" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="121" name="Ejecutar pruebas funcionales de pedidos" color="#c78fc2" meeting="false" start="2026-11-19" duration="4" complete="0" expand="true">
+      <depend id="124" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="122" name="Ejecutar pruebas funcionales de cocina" color="#c78fc2" meeting="false" start="2026-11-19" duration="3" complete="0" expand="true">
+      <depend id="124" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="123" name="Ejecutar pruebas funcionales de reservas" color="#c78fc2" meeting="false" start="2026-11-19" duration="3" complete="0" expand="true">
+      <depend id="124" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="124" name="Ejecutar pruebas de integración" color="#c78fc2" meeting="false" start="2026-11-24" duration="4" complete="0" expand="true">
+      <depend id="125" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="125" name="Realizar correcciones y pruebas de regresión" color="#c78fc2" meeting="false" start="2026-11-28" duration="4" complete="0" expand="true">
+      <depend id="126" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="126" name="Entrega de resultados de las pruebas" color="#c78fc2" meeting="true" start="2026-12-03" duration="0" complete="0" expand="true">
+    </task>
+  </task>
+</task>
+<task id="182" name="Sprint 4 – Iteración 4: Domicilios + Pagos + Ventas/Consumo + Reportes" color="#8f4c2c" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+  <task id="183" name="Análisis" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="false">
+    <task id="132" name="Reunión de inicio de la iteración" color="#8cb6ce" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+      <depend id="133" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="133" name="Revisar los requerimientos de domicilios, pagos, ventas y reportes" color="#8cb6ce" meeting="false" start="2026-08-11" duration="2" complete="100" expand="true">
+      <depend id="134" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="134" name="Validar el alcance de la iteración" color="#8cb6ce" meeting="false" start="2026-08-13" duration="2" complete="100" expand="true">
+      <depend id="135" type="2" difference="0" hardness="Strong"/>
+      <depend id="136" type="2" difference="0" hardness="Strong"/>
+      <depend id="137" type="2" difference="0" hardness="Strong"/>
+      <depend id="138" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="135" name="Analizar gestión de domicilios" color="#8cb6ce" meeting="false" start="2026-08-15" duration="4" complete="100" expand="true">
+      <depend id="139" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="136" name="Analizar gestión de pagos" color="#8cb6ce" meeting="false" start="2026-08-15" duration="3" complete="100" expand="true">
+      <depend id="139" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="137" name="Analizar gestión de ventas y consumo" color="#8cb6ce" meeting="false" start="2026-08-15" duration="4" complete="100" expand="true">
+      <depend id="140" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="138" name="Analizar gestión de reportes y estadísticas" color="#8cb6ce" meeting="false" start="2026-08-15" duration="4" complete="100" expand="true">
+      <depend id="140" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="139" name="Analizar integración entre domicilios y pagos" color="#8cb6ce" meeting="false" start="2026-08-21" duration="4" complete="100" expand="true">
+      <depend id="141" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="140" name="Analizar integración entre ventas, consumo y reportes" color="#8cb6ce" meeting="false" start="2026-08-21" duration="4" complete="100" expand="true">
+      <depend id="141" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="141" name="Definir requerimientos funcionales y no funcionales" color="#8cb6ce" meeting="false" start="2026-08-26" duration="3" complete="100" expand="true">
+      <depend id="142" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="142" name="Validar y ajustar los requerimientos" color="#8cb6ce" meeting="false" start="2026-08-29" duration="2" complete="100" expand="true">
+      <depend id="143" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="143" name="Elaborar documento de análisis de la iteración" color="#8cb6ce" meeting="false" start="2026-09-01" duration="2" complete="100" expand="true">
+      <depend id="144" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="144" name="Entrega del documento de análisis" color="#8cb6ce" meeting="false" start="2026-09-03" duration="1" complete="100" expand="true">
+      <depend id="145" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="184" name="Diseño" color="#a3c586" meeting="false" start="2026-09-10" duration="1" complete="100" expand="false">
+    <task id="145" name="Definir arquitectura de la solución" color="#a3c586" meeting="false" start="2026-09-10" duration="2" complete="100" expand="true">
+      <depend id="146" type="2" difference="0" hardness="Strong"/>
+      <depend id="147" type="2" difference="0" hardness="Strong"/>
+      <depend id="148" type="2" difference="0" hardness="Strong"/>
+      <depend id="149" type="2" difference="0" hardness="Strong"/>
+      <depend id="150" type="2" difference="0" hardness="Strong"/>
+      <depend id="151" type="2" difference="0" hardness="Strong"/>
+      <depend id="152" type="2" difference="0" hardness="Strong"/>
+      <depend id="153" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="146" name="Diseñar la base de datos de domicilios" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="147" name="Diseñar la base de datos de pagos" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="148" name="Diseñar la base de datos de ventas y consumo" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="149" name="Diseñar la estructura de reportes y estadísticas" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="150" name="Diseñar interfaces del módulo de domicilios" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="151" name="Diseñar interfaces del módulo de pagos" color="#a3c586" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="152" name="Diseñar interfaces de ventas y consumo" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="153" name="Diseñar interfaces de reportes y estadísticas" color="#a3c586" meeting="false" start="2026-09-12" duration="4" complete="100" expand="true">
+      <depend id="154" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="154" name="Diseñar integración entre los módulos" color="#a3c586" meeting="false" start="2026-09-17" duration="4" complete="100" expand="true">
+      <depend id="155" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="155" name="Validar el diseño de la iteración" color="#a3c586" meeting="false" start="2026-09-22" duration="2" complete="100" expand="true">
+      <depend id="156" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="156" name="Elaborar documento de diseño" color="#a3c586" meeting="false" start="2026-09-24" duration="2" complete="100" expand="true">
+      <depend id="157" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="157" name="Entrega del documento de diseño" color="#a3c586" meeting="false" start="2026-09-26" duration="1" complete="100" expand="true">
+      <depend id="158" type="2" difference="0" hardness="Strong"/>
+      <depend id="163" type="2" difference="0" hardness="Strong"/>
+      <depend id="167" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="185" name="Codificación" color="#e7a85f" meeting="false" start="2026-09-28" duration="1" complete="100" expand="false">
+    <task id="158" name="Codificar registro de pedidos a domicilio" color="#e7a85f" meeting="false" start="2026-09-28" duration="5" complete="100" expand="true">
+      <depend id="159" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="159" name="Codificar información del cliente y dirección" color="#e7a85f" meeting="false" start="2026-10-03" duration="4" complete="100" expand="true">
+      <depend id="160" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="160" name="Codificar consulta y asignación de domicilios" color="#e7a85f" meeting="false" start="2026-10-08" duration="4" complete="100" expand="true">
+      <depend id="161" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="161" name="Codificar actualización y registro de entrega" color="#e7a85f" meeting="false" start="2026-10-14" duration="4" complete="100" expand="true">
+      <depend id="162" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="162" name="Codificar historial de domicilios" color="#e7a85f" meeting="false" start="2026-10-19" duration="3" complete="100" expand="true">
+      <depend id="172" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="163" name="Codificar registro y método de pago" color="#e7a85f" meeting="false" start="2026-09-28" duration="4" complete="100" expand="true">
+      <depend id="164" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="164" name="Codificar cálculo y consulta del estado del pago" color="#e7a85f" meeting="false" start="2026-10-02" duration="4" complete="100" expand="true">
+      <depend id="165" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="165" name="Codificar asociación y comprobante de pago" color="#e7a85f" meeting="false" start="2026-10-07" duration="5" complete="100" expand="true">
+      <depend id="166" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="166" name="Codificar historial de pagos" color="#e7a85f" meeting="false" start="2026-10-14" duration="3" complete="100" expand="true">
+      <depend id="172" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="167" name="Codificar registro y consulta de ventas" color="#e7a85f" meeting="false" start="2026-09-28" duration="4" complete="100" expand="true">
+      <depend id="168" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="168" name="Codificar consumo y relación con productos" color="#e7a85f" meeting="false" start="2026-10-02" duration="4" complete="100" expand="true">
+      <depend id="169" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="169" name="Codificar consultas de productos más vendidos e historial" color="#e7a85f" meeting="false" start="2026-10-07" duration="4" complete="100" expand="true">
+      <depend id="170" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="170" name="Codificar reportes de inventario, ventas y consumo" color="#e7a85f" meeting="false" start="2026-10-13" duration="5" complete="100" expand="true">
+      <depend id="171" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="171" name="Codificar consultas y estadísticas" color="#e7a85f" meeting="false" start="2026-10-19" duration="5" complete="100" expand="true">
+      <depend id="172" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="172" name="Integrar módulos de domicilios, pagos, ventas y reportes" color="#e7a85f" meeting="false" start="2026-10-24" duration="5" complete="100" expand="true">
+      <depend id="173" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="173" name="Entrega del código fuente de la iteración" color="#e7a85f" meeting="true" start="2026-10-30" duration="0" complete="100" expand="true">
+      <depend id="174" type="2" difference="0" hardness="Strong"/>
+    </task>
+  </task>
+  <task id="186" name="Pruebas" color="#c78fc2" meeting="false" start="2026-10-31" duration="1" complete="100" expand="false">
+    <task id="174" name="Diseñar casos de prueba de la iteración" color="#c78fc2" meeting="false" start="2026-10-31" duration="2" complete="100" expand="true">
+      <depend id="175" type="2" difference="0" hardness="Strong"/>
+      <depend id="176" type="2" difference="0" hardness="Strong"/>
+      <depend id="177" type="2" difference="0" hardness="Strong"/>
+      <depend id="178" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="175" name="Ejecutar pruebas funcionales de domicilios" color="#c78fc2" meeting="false" start="2026-11-04" duration="4" complete="100" expand="true">
+      <depend id="179" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="176" name="Ejecutar pruebas funcionales de pagos" color="#c78fc2" meeting="false" start="2026-11-04" duration="3" complete="100" expand="true">
+      <depend id="179" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="177" name="Ejecutar pruebas funcionales de ventas y consumo" color="#c78fc2" meeting="false" start="2026-11-04" duration="4" complete="100" expand="true">
+      <depend id="179" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="178" name="Ejecutar pruebas funcionales de reportes y estadísticas" color="#c78fc2" meeting="false" start="2026-11-04" duration="4" complete="100" expand="true">
+      <depend id="179" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="179" name="Ejecutar pruebas de integración" color="#c78fc2" meeting="false" start="2026-11-09" duration="4" complete="100" expand="true">
+      <depend id="180" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="180" name="Realizar correcciones y pruebas de regresión" color="#c78fc2" meeting="false" start="2026-11-13" duration="4" complete="100" expand="true">
+      <depend id="181" type="2" difference="0" hardness="Strong"/>
+    </task>
+    <task id="181" name="Entrega de resultados de las pruebas" color="#c78fc2" meeting="true" start="2026-11-18" duration="0" complete="100" expand="true">
+    </task>
+  </task>
+</task>
+<task id="187" name="ENTREGA 2.º CORTE: 70 % del software (Iteraciones 1, 2 y 4)" color="#ba1a1a" meeting="true" start="2026-10-20" duration="0" complete="100" expand="true"/>
+<task id="188" name="ENTREGA FINAL Y SUSTENTACIÓN (100 %)" color="#ba1a1a" meeting="true" start="2026-11-13" duration="0" complete="0" expand="true"/>
+</tasks>
+<resources>
+<resource id="0" name="Mateo" function="Default:1" contacts="" phone=""/>
+<resource id="1" name="Jhorman" function="Default:1" contacts="" phone=""/>
+<resource id="2" name="Yovany" function="Default:1" contacts="" phone=""/>
+<resource id="3" name="Ángel" function="Default:1" contacts="" phone=""/>
+</resources>
+<allocations>
+<allocation task-id="1" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="2" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="3" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="4" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="5" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="6" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="7" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="8" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="9" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="10" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="11" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="12" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="13" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="14" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="15" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="16" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="17" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="18" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="19" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="20" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="21" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="22" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="23" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="24" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="25" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="26" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="27" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="28" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="29" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="30" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="31" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="32" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="38" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="39" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="40" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="41" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="42" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="43" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="44" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="45" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="46" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="47" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="48" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="49" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="50" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="51" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="52" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="53" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="54" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="55" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="56" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="57" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="58" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="59" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="60" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="61" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="62" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="63" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="64" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="65" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="66" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="67" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="68" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="69" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="70" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="71" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="72" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="73" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="74" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="75" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="81" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="82" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="83" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="84" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="85" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="86" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="87" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="88" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="89" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="90" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="91" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="92" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="93" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="94" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="95" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="96" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="97" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="98" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="99" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="100" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="101" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="102" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="103" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="104" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="105" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="106" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="107" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="108" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="109" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="110" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="111" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="112" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="113" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="114" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="115" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="116" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="117" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="118" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="119" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="120" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="121" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="122" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="123" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="124" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="125" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="126" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="132" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="133" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="134" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="135" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="136" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="137" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="138" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="139" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="140" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="141" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="142" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="143" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="144" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="145" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="146" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="147" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="148" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="149" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="150" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="151" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="152" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="153" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="154" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="155" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="156" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="157" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="158" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="159" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="160" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="161" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="162" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="163" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="164" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="165" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="166" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="167" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="168" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="169" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="170" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="171" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="172" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="173" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="174" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="175" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="176" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="177" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="178" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="179" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="180" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="181" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+</allocations>
+<vacations/>
+<previousTasks/>
+<roles roleset-name="Default"/>
+<roles>
+<role id="1" name="Desarrollador"/>
+</roles>
+</project>
