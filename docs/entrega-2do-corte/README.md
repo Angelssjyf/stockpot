@@ -7,7 +7,7 @@ Software IEEE 1058** (secciones de procesos de gestión, procesos técnicos y pr
 
 | Carpeta | Sección IEEE 1058 | Contenido |
 |---|---|---|
-| `01_Plan_de_gestion_del_proyecto` | 5. Planes del proceso de gestión (inicio, calendario, control) | Acta de constitución (Project Charter) con el **70 % entregado y el 30 % pendiente** · Cronograma de GanttProject (`.gan`) con el avance real · Excel de puntos de función y PERT con la hoja **Avance 2.º corte** · Enlace de Jira |
+| `01_Plan_de_gestion_del_proyecto` | 5. Planes del proceso de gestión (inicio, calendario, control) | Acta de constitución (Project Charter) con el **70 % entregado y el 30 % pendiente** · Cronograma de GanttProject (`.gan`, con imagen `.png` para verlo sin instalar nada) con el avance real tomado de Jira · Excel de puntos de función y PERT con la hoja **Avance 2.º corte** · Enlace de Jira |
 | `02_Metodos_herramientas_y_tecnicas` | 6.2 Métodos, herramientas y técnicas | Prompts utilizados y herramientas de IA (Claude Code y ChatGPT) |
 | `03_Verificacion_y_validacion` | 7.2 Plan de verificación y validación | Plan de pruebas (casos CRUD, formato de la docente) · Matriz de criterios de aceptación v1 · Informe de pruebas realizadas |
 | `04_Aceptacion_del_producto` | 6.4 Plan de aceptación del producto | FORMATO 2: Acta de Aceptación del Cliente (UAT), lista para firmar en la sustentación |
