@@ -650,8 +650,6 @@ dialog.ancho {
   }
 }
 
-
-
 /* ------------------------------------------------------------ Inventario (RF-03.4 a RF-03.8) */
 .resumen {
   display: grid;
@@ -704,6 +702,17 @@ dialog.ancho {
   border-bottom-color: #ecd9a0;
 }
 
+.alerta-item {
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.alerta-item:hover,
+.alerta-item:focus-visible {
+  background: #ffe9a8;
+  outline: none;
+}
+
 .chip.estado-OK      { background: #d7f5dd; border-color: #86c995; color: #14532d; }
 .chip.estado-BAJO    { background: #fff3cd; border-color: #e6c870; color: #5c4400; }
 .chip.estado-AGOTADO { background: var(--contenedor-error); border-color: #e8a29b; color: var(--sobre-contenedor-error); }
@@ -733,3 +742,14 @@ dialog.ancho {
 
 .movimiento-ENTRADA { color: #1b6e2f; font-weight: 500; }
 .movimiento-SALIDA  { color: var(--error); font-weight: 500; }
+
+/* El buscador ya tiene su propio botón de limpiar: se oculta la X del navegador */
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .dos-columnas {
+    grid-template-columns: 1fr; /* en el celular, mínimo y costo uno debajo del otro */
+  }
+}

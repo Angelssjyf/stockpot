@@ -45,34 +45,57 @@ async function cargarResumen() {
     );
 
     $('alertas').hidden = alertas.length === 0;
-    $('lista-alertas').replaceChildren(...alertas.map((a) => crear('li', {}, [
-      crear('span', { texto: `${a.nombre} · ${textoStock(a)} (mínimo ${formato.cantidad(a.stock_minimo)})` }),
-      crear('span', { className: `chip estado-${a.estado_stock}`,
-                      texto: a.estado_stock === 'AGOTADO' ? 'Agotado' : `Faltan ${formato.cantidad(a.faltante)}` }),
-    ])));
+    $('lista-alertas').replaceChildren(...alertas.map(filaDeAlerta));
   } catch (error) {
     $('resumen').replaceChildren(crear('p', { className: 'nota', texto: error.message }));
   }
 }
 
+/** Una alerta: al tocarla abre la ficha del insumo para reponerlo ahí mismo. */
+function filaDeAlerta(alerta) {
+  const fila = crear('li', { className: 'alerta-item', tabindex: '0', role: 'button' }, [
+    crear('span', { texto: `${alerta.nombre} · ${textoStock(alerta)} (mínimo ${formato.cantidad(alerta.stock_minimo)})` }),
+    crear('span', { className: `chip estado-${alerta.estado_stock}`,
+                    texto: alerta.estado_stock === 'AGOTADO' ? 'Agotado' : `Faltan ${formato.cantidad(alerta.faltante)}` }),
+  ]);
+  fila.addEventListener('click', () => abrirFormulario(alerta));
+  fila.addEventListener('keydown', (evento) => {
+    if (evento.key === 'Enter') abrirFormulario(alerta); // también con teclado
+  });
+  return fila;
+}
+
 // =====================================================================
-//  RF-03.2 Consultar insumos: lista con buscador
+//  RF-03.2 Consultar insumos: lista con búsqueda mientras se escribe
 // =====================================================================
+
+let insumos = []; // todos los insumos, ya ordenados por nombre desde la API
 
 async function cargar() {
   mostrarEstado('Cargando…');
   $('lista').replaceChildren();
   try {
-    const texto = encodeURIComponent($('buscar').value.trim());
-    const insumos = await api('GET', `/insumos?q=${texto}`);
-    if (insumos.length === 0) {
-      mostrarEstado('No se encontraron insumos');
-    } else {
-      $('estado').hidden = true;
-      $('lista').replaceChildren(...insumos.map(filaDeInsumo));
-    }
+    insumos = await api('GET', '/insumos');
+    pintarLista();
   } catch (error) {
     mostrarEstado(error.message, true);
+  }
+}
+
+/** Quita tildes y mayúsculas: así "limon" encuentra "Limón". */
+function normalizar(texto) {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+/** Muestra solo los insumos cuyo código o nombre contiene lo escrito en el buscador. */
+function pintarLista() {
+  const texto = normalizar($('buscar').value.trim());
+  const visibles = insumos.filter((i) => normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
+  if (visibles.length === 0) {
+    mostrarEstado(insumos.length ? 'No se encontraron insumos' : 'Todavía no hay insumos');
+  } else {
+    $('estado').hidden = true;
+    $('lista').replaceChildren(...visibles.map(filaDeInsumo));
   }
 }
 
@@ -107,13 +130,12 @@ function filaDeInsumo(insumo) {
   return fila;
 }
 
-$('form-buscar').addEventListener('submit', (evento) => {
-  evento.preventDefault();
-  cargar();
-});
+$('buscar').addEventListener('input', pintarLista); // filtra con cada letra
+$('form-buscar').addEventListener('submit', (evento) => evento.preventDefault());
 $('limpiar').addEventListener('click', () => {
   $('buscar').value = '';
-  cargar();
+  pintarLista();
+  $('buscar').focus();
 });
 $('reintentar').addEventListener('click', cargar);
 
