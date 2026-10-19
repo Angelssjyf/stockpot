@@ -271,16 +271,17 @@ function pintarCostos() {
 
 $('f-precio').addEventListener('input', pintarCostos);
 
-$('agregar-insumo').addEventListener('click', () => {
+/** Pasa a la receta el insumo elegido en la lista. Devuelve false si falta algo. */
+function agregarInsumo() {
   const insumo = insumosDisponibles.find((i) => i.id === Number($('nuevo-insumo').value));
   const cantidad = Number($('nueva-cantidad').value);
   if (!insumo) {
     marcarCampo('receta', 'Elige un insumo');
-    return;
+    return false;
   }
   if (!(cantidad > 0)) {
     marcarCampo('receta', 'Escribe la cantidad que lleva una porción');
-    return;
+    return false;
   }
   marcarCampo('receta', '');
   receta.push({
@@ -292,7 +293,10 @@ $('agregar-insumo').addEventListener('click', () => {
   });
   $('nueva-cantidad').value = '';
   pintarReceta();
-});
+  return true;
+}
+
+$('agregar-insumo').addEventListener('click', agregarInsumo);
 
 // ---------------------------------------------------- Validar y guardar
 
@@ -317,6 +321,8 @@ function validar() {
 $('form-producto').addEventListener('submit', async (evento) => {
   evento.preventDefault();
   $('error-formulario').hidden = true;
+  // Si quedó un insumo elegido sin tocar el botón ⊕, se agrega solo
+  if ($('nuevo-insumo').value && !agregarInsumo()) return;
   if (!validar()) return;
 
   const datos = {
