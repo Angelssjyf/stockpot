@@ -28,3 +28,10 @@ El resto de la estructura técnica está en la raíz del repositorio:
 |---|---|---|
 | **Entregado (70 %)** | RF-01, RF-02, RF-03, RF-04, RF-08, RF-09, RF-10, RF-11 | 233 de 330 (70,6 %) |
 | **Pendiente (30 %)** | RF-05 Pedidos en mesa, RF-06 Cocina, RF-07 Reservas | 97 de 330 (29,4 %) |
+
+## Video de demostración
+
+`05_Demostracion/StockPot_Demostracion_70.mp4` (4 min): recorrido por los 8 módulos entregados, en orden
+de uso real: inicio de sesión → usuarios y roles → proveedores y orden de compra (al recibirla sube el
+inventario) → inventario (alertas y entradas) → menú con recetas → domicilio de principio a fin → cobro
+en dos pagos con comprobante y venta de mostrador → ventas y consumo automático → reportes y estadísticas.
