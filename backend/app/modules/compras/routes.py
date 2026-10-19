@@ -8,6 +8,7 @@ from flask import Blueprint, jsonify, request
 
 from ...extensions import db
 from ...models import DetalleOrdenCompra, Insumo, OrdenCompra, Proveedor
+from ...services.inventario import registrar_movimiento
 from ...utils.auth import permiso_requerido, usuario_actual
 
 bp = Blueprint("compras", __name__)
@@ -133,8 +134,8 @@ def crear_orden():
 def actualizar_estado(orden_id):
     """RF-02.7 Actualizar el estado de la orden: PENDIENTE -> ENVIADA -> RECIBIDA (o CANCELADA).
 
-    RF-02.8 Relacionar compras con inventario: al pasar a RECIBIDA, el stock de cada insumo
-    aumenta con la cantidad comprada.
+    RF-02.8 Relacionar compras con inventario: al pasar a RECIBIDA, cada insumo recibe una
+    ENTRADA por COMPRA (RF-03.4) y su costo unitario se actualiza con el precio de compra.
     """
     orden = db.session.get(OrdenCompra, orden_id)
     if orden is None:
@@ -145,8 +146,13 @@ def actualizar_estado(orden_id):
         return jsonify(error=f"No se puede pasar de {orden.estado} a {nuevo or '(vacío)'}"), 409
 
     if nuevo == "RECIBIDA":
+        usuario = usuario_actual()
         for detalle in orden.detalles:
-            detalle.insumo.stock_actual += detalle.cantidad  # RF-02.8
+            registrar_movimiento(  # RF-02.8 + RF-03.4: queda el registro de la entrada
+                detalle.insumo, "ENTRADA", "COMPRA", detalle.cantidad, usuario.id,
+                orden_compra_id=orden.id, observacion=f"Recepción de la orden {orden.codigo}",
+            )
+            detalle.insumo.costo_unitario = detalle.precio_unitario  # último costo de compra
         orden.fecha_recepcion = datetime.now()
 
     orden.estado = nuevo
