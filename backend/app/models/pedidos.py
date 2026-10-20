@@ -1,4 +1,4 @@
-"""Modelos de ILF17 Mesas e ILF18 Pedidos en mesa (Iteración 3, RF-05.1 a RF-05.9)."""
+"""Modelos de ILF08 Mesas y de los pedidos en mesa, que completan ILF09 Pedidos (Iteración 3, RF-05.1 a RF-05.9)."""
 
 from sqlalchemy.orm import backref
 
@@ -10,7 +10,7 @@ def _fecha(valor):
 
 
 class Mesa(db.Model):
-    """ILF17 Mesa del restaurante (RF-05.2). Que esté ocupada no se guarda: se calcula a
+    """ILF08 Mesa del restaurante (RF-05.2). Que esté ocupada no se guarda: se calcula a
     partir de sus pedidos abiertos, así nunca queda desactualizado."""
 
     __tablename__ = "mesas"
@@ -47,7 +47,7 @@ class Mesa(db.Model):
 
 
 class PedidoMesa(db.Model):
-    """ILF18 Pedido tomado en una mesa. Las líneas y el total viven en su orden (tipo MESA);
+    """ILF09 (complemento) Pedido tomado en una mesa. Las líneas y el total viven en su orden (tipo MESA);
     aquí queda la mesa, los comensales y el recorrido del pedido.
 
     REGISTRADO -> CONFIRMADO -> EN_COCINA -> (cocina) EN_PREPARACION -> LISTO -> ENTREGADO

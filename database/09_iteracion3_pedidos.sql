@@ -7,7 +7,7 @@
 USE stockpot;
 
 -- ---------------------------------------------------------------------
--- ILF17 Mesas del restaurante (RF-05.2; también las usarán las reservas, RF-07).
+-- ILF08 Mesas del restaurante (RF-05.2; también las usarán las reservas, RF-07).
 -- Que una mesa esté ocupada no se guarda: se calcula con sus pedidos abiertos.
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS mesas (
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS mesas (
 );
 
 -- ---------------------------------------------------------------------
--- ILF18 Pedidos en mesa (RF-05.1 a RF-05.9). Las líneas y el total viven en
+-- ILF09 Pedidos (complemento de ordenes para los pedidos en mesa, RF-05.1 a RF-05.9). Las líneas y el total viven en
 -- su orden (ordenes, tipo MESA); aquí van la mesa, los comensales y el recorrido:
 -- REGISTRADO -> CONFIRMADO -> EN_COCINA -> EN_PREPARACION -> LISTO -> ENTREGADO
 -- (o CANCELADO antes de ir a cocina). Se cobra en la caja como cualquier orden.
