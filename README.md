@@ -23,11 +23,14 @@ frontend/                                              backend/                 
 |---|---|---|---|
 | 1 | Andrés Mateo Puentes | Usuarios y roles (RF-01) · Proveedores y compras (RF-02) | ✅ Terminado |
 | 2 | Jhorman Caballero | Inventario (RF-03) · Productos y menú (RF-04) | ✅ Terminado |
-| 3 | Yovany Peñaranda | Pedidos (RF-05) · Cocina (RF-06) · Reservas (RF-07) | ⏳ Pendiente (30 %) |
+| 3 | Yovany Peñaranda | Pedidos en mesa (RF-05) ✅ · Cocina (RF-06) · Reservas (RF-07) | ⏳ En curso: falta cocina y reservas |
 | 4 | Ángel David Rodríguez Vega (líder) | Domicilios (RF-08) · Pagos (RF-09) · Ventas y consumo (RF-10) · Reportes (RF-11) | ✅ Terminado |
 
 **Entrega del 2.º corte (20/10/2026): 70 % del software** = Iteraciones 1, 2 y 4 → 233 de 330 puntos
 de función (376 de 515 PFSA). 267 pruebas automáticas aprobadas (41 de ellas unitarias), 95 % de cobertura del backend.
+
+**Después del corte (Iteración 3, en curso):** módulo de pedidos en mesa (RF-05) terminado, con mesas,
+confirmación, envío a cocina y cobro en caja. Total actual: 304 pruebas automáticas aprobadas.
 
 ## Gestión del proyecto
 
@@ -57,11 +60,11 @@ Hitos: **20/10/2026** entrega parcial del 70 % (2.º corte) · **21/10 – 13/11
 ```
 stockpot/
 ├── database/            Scripts SQL
-│   ├── 01_schema.sql    Crea la base y sus 19 tablas (instalación desde cero)
+│   ├── 01_schema.sql    Crea la base y sus 21 tablas (instalación desde cero)
 │   ├── 02_seed.sql      Roles y permisos iniciales
 │   ├── 03_usuario_app.sql   Usuario de MySQL para la aplicación
 │   ├── 04_datos_ejemplo.sql Datos de demostración (insumos, proveedores, carta, clientes)
-│   └── 05 a 08_*.sql    Actualizan una base existente sin borrar datos
+│   └── 05 a 09_*.sql    Actualizan una base existente sin borrar datos
 ├── backend/             API Flask
 │   ├── app/
 │   │   ├── models/      Tablas como clases de Python
@@ -101,13 +104,14 @@ En MySQL Workbench, conectado como `root`, ejecuta en este orden (rayo ⚡):
 3. `database/03_usuario_app.sql`: **antes de ejecutarlo**, cambia `CAMBIA_ESTA_CLAVE` por una
    contraseña tuya, solo en el editor de Workbench. No guardes el archivo con la clave.
 4. *(Opcional)* `database/04_datos_ejemplo.sql`: insumos, proveedores, 8 platos con sus recetas y
-   3 clientes de ejemplo. Se puede ejecutar más de una vez sin duplicar datos.
+   3 clientes y 8 mesas de ejemplo. Se puede ejecutar más de una vez sin duplicar datos.
 
-Verifica con `SHOW TABLES FROM stockpot;`: deben salir 19 tablas.
+Verifica con `SHOW TABLES FROM stockpot;`: deben salir 21 tablas.
 
 **¿Ya tenías la base creada de antes?** No vuelvas a ejecutar el `01` (borra todo). Ejecuta solo
 los scripts de actualización que te falten, en orden: `05_iteracion2_inventario.sql`,
-`06_iteracion2_productos.sql`, `07_iteracion4_domicilios.sql` y `08_iteracion4_pagos_ventas.sql`.
+`06_iteracion2_productos.sql`, `07_iteracion4_domicilios.sql`, `08_iteracion4_pagos_ventas.sql` y
+`09_iteracion3_pedidos.sql`.
 Solo agregan columnas y tablas; tus datos se conservan.
 
 ### 4. Configurar el backend
@@ -211,6 +215,10 @@ Todas las rutas, excepto `login` y `health`, requieren el encabezado
 | GET/POST/PUT | `/api/insumos` · `/api/insumos/<id>/movimientos` | RF-03.1 a RF-03.5, RF-03.7 | `inventario.*` |
 | GET | `/api/inventario/existencias` · `/api/inventario/alertas` | RF-03.6 y RF-03.8 | `inventario.ver` |
 | GET/POST/PUT/PATCH | `/api/productos` · `/<id>/disponibilidad` | RF-04.1 a RF-04.6 | `productos.*` |
+| GET/POST/PUT | `/api/mesas` · `/api/mesas/<id>` | RF-05.2 Mesas del salón (libres u ocupadas) | `pedidos.*` |
+| GET/POST/PUT | `/api/pedidos` · `/<id>` · `/<id>/productos` | RF-05.1 a RF-05.5 Registrar, agregar productos, modificar y consultar | `pedidos.*` |
+| POST | `/api/pedidos/disponibilidad` | RF-05.6 Validar disponibilidad de insumos (sin guardar) | `pedidos.ver` |
+| PATCH/GET | `/api/pedidos/<id>/confirmar` · `/enviar-cocina` · `/comanda` · `/estado` · `/cancelar` | RF-05.7 a RF-05.9 | `pedidos.*` |
 | GET/POST/PUT | `/api/clientes` · `/api/domicilios` (+ `asignar`, `estado`, `entrega`, `historial`) | RF-08.1 a RF-08.8 | `domicilios.*` |
 | GET/POST/PATCH | `/api/ordenes/por-cobrar` · `/<id>/cuenta` · `/<id>/pagos` · `/<id>/comprobante` · `/api/pagos` | RF-09.1 a RF-09.7 | `pagos.*` |
 | GET/POST | `/api/ventas` · `/mas-vendidos` · `/consumo` | RF-10.1 a RF-10.6 | `ventas.ver` / `pagos.gestionar` |

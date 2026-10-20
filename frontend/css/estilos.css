@@ -1096,3 +1096,129 @@ input[type="search"]::-webkit-search-cancel-button {
   min-width: 0;
   width: 100%;
 }
+
+/* ------------------------------------------------------------ Pedidos en mesa (RF-05) */
+.barra-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Mapa del salón: una tarjeta por mesa, verde si está libre y naranja si está ocupada */
+.mesas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 12px 0 96px;
+}
+
+.mesa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: var(--radio);
+  border: 2px solid #86c995;
+  background: #f1fbf3;
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--sombra);
+}
+
+.mesa:hover,
+.mesa:focus-visible {
+  outline: 3px solid var(--contenedor-primario);
+}
+
+.mesa.ocupada {
+  border-color: #f0a878;
+  background: #fff4ec;
+}
+
+.mesa .numero-mesa {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.mesa .detalle-mesa {
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.mesa .estado-mesa {
+  font-size: 13px;
+  font-weight: 600;
+  color: #14532d;
+}
+
+.mesa.ocupada .estado-mesa {
+  color: #6b2e00;
+}
+
+.chip.estado-REGISTRADO { background: #fff3cd; border-color: #e6c870; color: #5c4400; }
+.chip.estado-CONFIRMADO { background: #d7e8ff; border-color: #8fb4e8; color: #0b3a75; }
+.chip.estado-EN_COCINA  { background: #ffe0cc; border-color: #f0a878; color: #6b2e00; }
+
+/* RF-05.9 Recorrido del pedido */
+.linea-tiempo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.linea-tiempo li::before {
+  content: "●";
+  color: var(--primario);
+  margin-right: 6px;
+}
+
+/* RF-05.6 Resultado de revisar el inventario mientras se arma el pedido */
+.disponibilidad {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.disponibilidad.ok {
+  background: #d7f5dd;
+  color: #14532d;
+}
+
+.disponibilidad.falta {
+  background: var(--contenedor-error);
+  color: var(--sobre-contenedor-error);
+}
+
+.campo-buscar {
+  margin-bottom: 8px;
+}
+
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.mini-lista .mesa-inactiva {
+  color: var(--texto-suave);
+  text-decoration: line-through;
+}
+
+/* Comanda para la cocina (RF-05.8) */
+.comanda .producto-comanda {
+  font-size: 18px;
+  font-weight: 600;
+}

@@ -68,6 +68,9 @@ def registrar_pago(orden, metodo, monto, usuario, recibido=None, referencia=None
     """
     if orden.estado != "ABIERTA":
         raise PagoRechazado(f"La orden {orden.codigo} está {orden.estado}", 409)
+    pedido_mesa = getattr(orden, "pedido_mesa", None)
+    if pedido_mesa is not None and pedido_mesa.estado == "REGISTRADO":
+        raise PagoRechazado(f"Confirma el pedido {orden.codigo} antes de cobrarlo", 409)
     if metodo not in Pago.METODOS:
         raise PagoRechazado(f"Método de pago inválido. Opciones: {', '.join(Pago.METODOS)}")
 
