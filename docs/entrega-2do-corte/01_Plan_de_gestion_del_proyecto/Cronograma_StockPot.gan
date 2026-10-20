@@ -776,7 +776,7 @@ Las fechas son la línea base del plan. La Iteración 3 va atrasada respecto a e
 </task>
 </tasks>
 <resources>
-<resource id="0" name="Andrés Mateo" function="1" contacts="" phone=""/>
+<resource id="0" name="Andrés Mateo Puentes" function="1" contacts="" phone=""/>
 <resource id="1" name="Jhorman Caballero" function="2" contacts="" phone=""/>
 <resource id="2" name="Yovany Peñaranda" function="3" contacts="" phone=""/>
 <resource id="3" name="Ángel David Rodríguez Vega" function="4" contacts="" phone=""/>
