@@ -57,7 +57,7 @@ Hitos: **20/10/2026** entrega parcial del 70 % (2.º corte) · **21/10 – 13/11
 ```
 stockpot/
 ├── database/            Scripts SQL
-│   ├── 01_schema.sql    Crea la base y sus 17 tablas (instalación desde cero)
+│   ├── 01_schema.sql    Crea la base y sus 19 tablas (instalación desde cero)
 │   ├── 02_seed.sql      Roles y permisos iniciales
 │   ├── 03_usuario_app.sql   Usuario de MySQL para la aplicación
 │   ├── 04_datos_ejemplo.sql Datos de demostración (insumos, proveedores, carta, clientes)
@@ -103,7 +103,7 @@ En MySQL Workbench, conectado como `root`, ejecuta en este orden (rayo ⚡):
 4. *(Opcional)* `database/04_datos_ejemplo.sql`: insumos, proveedores, 8 platos con sus recetas y
    3 clientes de ejemplo. Se puede ejecutar más de una vez sin duplicar datos.
 
-Verifica con `SHOW TABLES FROM stockpot;`: deben salir 17 tablas.
+Verifica con `SHOW TABLES FROM stockpot;`: deben salir 19 tablas.
 
 **¿Ya tenías la base creada de antes?** No vuelvas a ejecutar el `01` (borra todo). Ejecuta solo
 los scripts de actualización que te falten, en orden: `05_iteracion2_inventario.sql`,
