@@ -772,7 +772,7 @@ Las fechas son la línea base del plan. La Iteración 3 va atrasada respecto a e
   </task>
 </task>
 <task id="186" name="Entrega parcial del 70 % (2.º corte)" color="#d0021b" meeting="true" start="2026-10-20" duration="0" complete="100" expand="true">
-  <notes><![CDATA[Iteraciones 1, 2 y 4: 233 de 330 PF transaccionales (376 de 515 PFSA). 226 pruebas automáticas aprobadas.]]></notes>
+  <notes><![CDATA[Iteraciones 1, 2 y 4: 233 de 330 PF transaccionales (376 de 515 PFSA). 267 pruebas automáticas aprobadas.]]></notes>
 </task>
 </tasks>
 <resources>

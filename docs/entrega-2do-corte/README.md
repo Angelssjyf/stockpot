@@ -20,7 +20,7 @@ El resto de la estructura técnica está en la raíz del repositorio:
 | 6.3 Plan de infraestructura | `README.md` → *Instalación* · `iniciar.bat` · `backend/requirements.txt` |
 | 7.1 Gestión de la configuración | Repositorio GitHub (ramas `main`, `develop`, `feature/RF-XX-…`) |
 | 7.3 Documentación del software | `docs/modelo-datos.md` · docstrings `RF-XX.X` en el código |
-| Producto | `database/` (scripts SQL) · `backend/` (API Flask y 226 pruebas) · `frontend/` (interfaz web) |
+| Producto | `database/` (scripts SQL) · `backend/` (API Flask y 267 pruebas: funcionales, de integración y unitarias) · `frontend/` (interfaz web) |
 
 ## Resumen del 70 %
 
