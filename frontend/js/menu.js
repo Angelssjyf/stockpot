@@ -12,7 +12,7 @@ const MODULOS = [
   { titulo: 'Proveedores', icono: 'local_shipping', permiso: 'proveedores.ver', pagina: 'proveedores.html' },
   { titulo: 'Inventario', icono: 'inventory_2', permiso: 'inventario.ver', pagina: 'insumos.html' },
   { titulo: 'Menú', icono: 'restaurant_menu', permiso: 'productos.ver', pagina: 'productos.html' },
-  { titulo: 'Pedidos', icono: 'receipt_long', permiso: 'pedidos.ver', pagina: null },
+  { titulo: 'Pedidos', icono: 'receipt_long', permiso: 'pedidos.ver', pagina: 'pedidos.html' },
   { titulo: 'Cocina', icono: 'soup_kitchen', permiso: 'cocina.ver', pagina: null },
   { titulo: 'Reservas', icono: 'event_seat', permiso: 'reservas.ver', pagina: null },
   { titulo: 'Domicilios', icono: 'delivery_dining', permiso: 'domicilios.ver', pagina: 'domicilios.html' },

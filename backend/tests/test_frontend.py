@@ -66,7 +66,8 @@ def client_real():
 
 @pytest.mark.parametrize(
     "pagina",
-    ["/", "/menu.html", "/usuarios.html", "/insumos.html", "/proveedores.html", "/compras.html"],
+    ["/", "/menu.html", "/usuarios.html", "/insumos.html", "/proveedores.html", "/compras.html",
+     "/pedidos.html", "/comanda.html"],
 )
 def test_cp_web_6_paginas_existen(client_real, pagina):
     """CP-WEB-6 | Interfaz web | Las páginas de la interfaz existen y se entregan."""
@@ -79,7 +80,7 @@ def test_cp_web_6_paginas_existen(client_real, pagina):
 @pytest.mark.parametrize(
     "archivo",
     ["/js/api.js", "/js/ui.js", "/js/login.js", "/js/menu.js", "/js/usuarios.js",
-     "/js/insumos.js", "/js/proveedores.js", "/js/compras.js"],
+     "/js/insumos.js", "/js/proveedores.js", "/js/compras.js", "/js/pedidos.js", "/js/comanda.js"],
 )
 def test_cp_web_7_javascript_con_tipo_correcto(client_real, archivo):
     """CP-WEB-7 | Interfaz web | Los .js se entregan como JavaScript (si no, el navegador no los ejecuta)."""

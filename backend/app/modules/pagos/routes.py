@@ -50,8 +50,10 @@ def leer_pago(data):
 @bp.get("/ordenes/por-cobrar")
 @permiso_requerido("pagos.ver")
 def ordenes_por_cobrar():
-    """RF-09.4 Órdenes abiertas con su saldo pendiente, de la más antigua a la más reciente."""
+    """RF-09.4 Órdenes abiertas con su saldo pendiente, de la más antigua a la más reciente.
+    Los pedidos en mesa aparecen cuando ya están confirmados (RF-05.7)."""
     ordenes = Orden.query.filter_by(estado="ABIERTA").order_by(Orden.created_at, Orden.id).all()
+    ordenes = [o for o in ordenes if not (o.pedido_mesa and o.pedido_mesa.estado == "REGISTRADO")]
     return jsonify([{
         "orden_id": o.id,
         "codigo": o.codigo,
@@ -59,6 +61,8 @@ def ordenes_por_cobrar():
         "fecha": o.created_at.isoformat() if o.created_at else None,
         "cliente": o.cliente.nombre if o.cliente else None,
         "estado_domicilio": o.domicilio.estado if o.domicilio else None,
+        "mesa": o.pedido_mesa.mesa.numero if o.pedido_mesa else None,
+        "estado_pedido": o.pedido_mesa.estado if o.pedido_mesa else None,
         "total": float(o.total),
         "pagado": float(pagado(o)),
         "saldo": float(o.total - pagado(o)),

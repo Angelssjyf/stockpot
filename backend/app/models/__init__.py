@@ -2,6 +2,7 @@
 
 from .inventario import Insumo, MovimientoInventario
 from .ordenes import Cliente, DetalleOrden, Domicilio, Orden
+from .pedidos import Mesa, PedidoMesa
 from .productos import Producto, Receta
 from .proveedores import DetalleOrdenCompra, OrdenCompra, Proveedor, ProveedorInsumo
 from .usuarios import Permiso, Rol, Usuario, rol_permisos
@@ -14,10 +15,12 @@ __all__ = [
     "DetalleOrdenCompra",
     "Domicilio",
     "Insumo",
+    "Mesa",
     "MovimientoInventario",
     "Orden",
     "OrdenCompra",
     "Pago",
+    "PedidoMesa",
     "Permiso",
     "Producto",
     "Proveedor",

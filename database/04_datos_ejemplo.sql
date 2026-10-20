@@ -130,3 +130,11 @@ INSERT IGNORE INTO clientes (nombre, telefono, direccion, barrio, referencia) VA
  ('María Gómez',     '3001234567', 'Calle 45 # 27-30',     'Cabecera',     'Edificio Torres del Parque, apto 502'),
  ('Carlos Pérez',    '3109876543', 'Carrera 33 # 52-14',   'La Aurora',    'Casa esquinera de portón negro'),
  ('Laura Martínez',  '3157654321', 'Avenida Quebradaseca # 18-40', 'San Francisco', NULL);
+
+-- ---------------------------------------------------------------------
+-- Mesas del salón para los pedidos en mesa (RF-05.2).
+-- Requiere la tabla mesas (01_schema.sql actual o script 09).
+-- ---------------------------------------------------------------------
+INSERT IGNORE INTO mesas (numero, capacidad, ubicacion) VALUES
+ (1, 4, 'Salón'), (2, 4, 'Salón'), (3, 2, 'Salón'), (4, 6, 'Salón'),
+ (5, 4, 'Terraza'), (6, 2, 'Terraza'), (7, 8, 'Terraza'), (8, 2, 'Barra');
