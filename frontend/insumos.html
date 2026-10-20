@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Inventario</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Inventario</h1>
+  </header>
+
+  <main class="contenido">
+    <!-- RF-03.6 Consultar existencias: resumen del inventario -->
+    <section class="resumen" id="resumen" aria-label="Resumen del inventario"></section>
+
+    <!-- RF-03.8 Alertas de stock -->
+    <section class="alertas" id="alertas" hidden>
+      <h3><span class="icono" aria-hidden="true">warning</span> Insumos por reponer</h3>
+      <ul class="mini-lista" id="lista-alertas"></ul>
+    </section>
+
+    <!-- RF-03.2 Consultar insumos -->
+    <form class="campo buscador" id="form-buscar" role="search">
+      <span class="icono" aria-hidden="true">search</span>
+      <input id="buscar" type="search" placeholder="Buscar por código o nombre"
+             aria-label="Buscar insumos">
+      <button type="button" class="boton-icono" id="limpiar" title="Limpiar">
+        <span class="icono" aria-hidden="true">close</span>
+      </button>
+    </form>
+
+    <div class="estado" id="estado" hidden>
+      <p id="estado-texto"></p>
+      <button type="button" class="boton-texto" id="reintentar" hidden>Reintentar</button>
+    </div>
+    <ul class="lista" id="lista"></ul>
+  </main>
+
+  <button type="button" class="boton-principal boton-flotante" id="boton-nuevo" hidden>
+    <span class="icono" aria-hidden="true">add</span> Nuevo
+  </button>
+
+  <!-- RF-03.1 Registrar insumos / RF-03.3 Modificar insumos / RF-03.7 Niveles mínimos -->
+  <dialog id="dialogo-insumo" class="ancho">
+    <form id="form-insumo" novalidate>
+      <h2 id="titulo-formulario">Nuevo insumo</h2>
+
+      <label class="etiqueta" for="f-codigo">Código *</label>
+      <div class="campo" id="campo-codigo"><input id="f-codigo" placeholder="INS-013" autocomplete="off"></div>
+      <small class="error-campo" id="error-codigo"></small>
+
+      <label class="etiqueta" for="f-nombre">Nombre *</label>
+      <div class="campo" id="campo-nombre"><input id="f-nombre" autocomplete="off"></div>
+      <small class="error-campo" id="error-nombre"></small>
+
+      <label class="etiqueta" for="f-unidad">Unidad de medida *</label>
+      <div class="campo" id="campo-unidad">
+        <select id="f-unidad">
+          <option value="">Elige una unidad</option>
+          <option value="KG">Kilogramos (KG)</option>
+          <option value="G">Gramos (G)</option>
+          <option value="L">Litros (L)</option>
+          <option value="ML">Mililitros (ML)</option>
+          <option value="UNIDAD">Unidades</option>
+        </select>
+      </div>
+      <small class="error-campo" id="error-unidad"></small>
+
+      <div class="dos-columnas">
+        <div>
+          <label class="etiqueta" for="f-minimo">Stock mínimo</label>
+          <div class="campo" id="campo-minimo"><input id="f-minimo" type="number" min="0" step="any" placeholder="0"></div>
+          <small class="error-campo" id="error-minimo"></small>
+        </div>
+        <div>
+          <label class="etiqueta" for="f-costo">Costo unitario ($)</label>
+          <div class="campo" id="campo-costo"><input id="f-costo" type="number" min="0" step="any" placeholder="0"></div>
+          <small class="error-campo" id="error-costo"></small>
+        </div>
+      </div>
+      <small class="ayuda-campo">Cuando el stock llegue al mínimo, el insumo aparece en "Insumos por reponer".</small>
+
+      <!-- Al editar: el stock se muestra pero no se edita -->
+      <div id="bloque-edicion">
+        <div class="dato-rol">
+          <div>
+            <div>Stock actual</div>
+            <div class="valor" id="stock-actual"></div>
+          </div>
+        </div>
+        <label class="interruptor">
+          <span>Insumo activo<small>Un insumo inactivo no se puede comprar ni mover</small></span>
+          <input type="checkbox" id="f-activo">
+        </label>
+
+        <!-- RF-03.4 / RF-03.5 Movimientos de inventario -->
+        <section class="seccion">
+          <h3>Movimientos</h3>
+          <div class="botones-movimiento" id="botones-movimiento">
+            <button type="button" class="boton-texto" id="boton-entrada">
+              <span class="icono" aria-hidden="true">add_circle</span> Registrar entrada
+            </button>
+            <button type="button" class="boton-texto" id="boton-salida">
+              <span class="icono" aria-hidden="true">remove_circle</span> Registrar salida
+            </button>
+          </div>
+          <ul class="mini-lista" id="historial"></ul>
+        </section>
+      </div>
+
+      <div class="alerta-error" id="error-formulario" role="alert" hidden></div>
+
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="cancelar">Cerrar</button>
+        <button type="submit" class="boton-principal" id="guardar">
+          <span class="icono" aria-hidden="true">save</span> Guardar
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- RF-03.4 Registrar entradas / RF-03.5 Registrar salidas -->
+  <dialog id="dialogo-movimiento">
+    <form id="form-movimiento" novalidate>
+      <h2 id="titulo-movimiento">Registrar entrada</h2>
+      <p class="nota" id="insumo-movimiento"></p>
+
+      <label class="etiqueta" for="m-motivo">Motivo *</label>
+      <div class="campo"><select id="m-motivo"></select></div>
+
+      <label class="etiqueta" for="m-cantidad">Cantidad *</label>
+      <div class="campo" id="campo-cantidad">
+        <input id="m-cantidad" type="number" min="0" step="any">
+        <span class="unidad" id="m-unidad"></span>
+      </div>
+      <small class="error-campo" id="error-cantidad"></small>
+
+      <label class="etiqueta" for="m-observacion">Observación</label>
+      <div class="campo"><input id="m-observacion" autocomplete="off" maxlength="255"></div>
+
+      <div class="alerta-error" id="error-movimiento" role="alert" hidden></div>
+
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="cancelar-movimiento">Cancelar</button>
+        <button type="submit" class="boton-principal" id="guardar-movimiento">
+          <span class="icono" aria-hidden="true">check</span> Registrar
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/insumos.js"></script>
+</body>
+</html>

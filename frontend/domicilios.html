@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Domicilios</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Domicilios</h1>
+  </header>
+
+  <main class="contenido">
+    <div class="pestanas" role="tablist">
+      <button type="button" role="tab" id="tab-curso" aria-selected="true">En curso</button>
+      <button type="button" role="tab" id="tab-historial" aria-selected="false">Historial</button>
+    </div>
+
+    <!-- RF-08.4 Consultar pedidos a domicilio -->
+    <section id="vista-curso">
+      <div class="categorias" id="filtro-estados" role="group" aria-label="Filtrar por estado"></div>
+      <div class="estado" id="estado" hidden>
+        <p id="estado-texto"></p>
+        <button type="button" class="boton-texto" id="reintentar" hidden>Reintentar</button>
+      </div>
+      <ul class="lista" id="lista"></ul>
+    </section>
+
+    <!-- RF-08.8 Consultar historial de domicilios -->
+    <section id="vista-historial" hidden>
+      <form class="filtros" id="form-historial">
+        <div class="campo"><input type="date" id="h-desde" aria-label="Desde"></div>
+        <div class="campo"><input type="date" id="h-hasta" aria-label="Hasta"></div>
+        <button type="submit" class="boton-icono" title="Consultar">
+          <span class="icono" aria-hidden="true">search</span>
+        </button>
+      </form>
+      <section class="resumen" id="resumen-historial"></section>
+      <p class="nota" id="estado-historial" hidden></p>
+      <ul class="lista" id="lista-historial"></ul>
+    </section>
+  </main>
+
+  <button type="button" class="boton-principal boton-flotante" id="boton-nuevo" hidden>
+    <span class="icono" aria-hidden="true">add</span> Nuevo domicilio
+  </button>
+
+  <!-- RF-08.1 Registrar pedido, RF-08.2 Cliente y RF-08.3 Dirección de entrega -->
+  <dialog id="dialogo-nuevo" class="ancho">
+    <form id="form-nuevo" novalidate>
+      <h2>Nuevo domicilio</h2>
+
+      <!-- RF-08.2 Cliente: se busca por teléfono; si no existe, se registra aquí mismo -->
+      <label class="etiqueta" for="c-buscar">Cliente *</label>
+      <div class="campo" id="campo-cliente">
+        <span class="icono" aria-hidden="true">phone</span>
+        <input id="c-buscar" type="search" placeholder="Teléfono o nombre" autocomplete="off">
+      </div>
+      <small class="error-campo" id="error-cliente"></small>
+      <ul class="mini-lista sugerencias" id="sugerencias"></ul>
+      <div class="cliente-elegido" id="cliente-elegido" hidden></div>
+
+      <div id="bloque-cliente-nuevo" hidden>
+        <p class="nota">Cliente nuevo: completa sus datos.</p>
+        <div class="dos-columnas">
+          <div>
+            <label class="etiqueta" for="c-nombre">Nombre *</label>
+            <div class="campo" id="campo-c-nombre"><input id="c-nombre" autocomplete="off"></div>
+            <small class="error-campo" id="error-c-nombre"></small>
+          </div>
+          <div>
+            <label class="etiqueta" for="c-telefono">Teléfono *</label>
+            <div class="campo" id="campo-c-telefono"><input id="c-telefono" inputmode="tel" autocomplete="off"></div>
+            <small class="error-campo" id="error-c-telefono"></small>
+          </div>
+        </div>
+      </div>
+
+      <!-- RF-08.3 Dirección de entrega -->
+      <section class="seccion">
+        <h3>Dirección de entrega</h3>
+        <label class="etiqueta" for="d-direccion">Dirección *</label>
+        <div class="campo" id="campo-direccion"><input id="d-direccion" autocomplete="off"></div>
+        <small class="error-campo" id="error-direccion"></small>
+        <div class="dos-columnas">
+          <div>
+            <label class="etiqueta" for="d-barrio">Barrio</label>
+            <div class="campo"><input id="d-barrio" autocomplete="off"></div>
+          </div>
+          <div>
+            <label class="etiqueta" for="d-referencia">Referencia</label>
+            <div class="campo"><input id="d-referencia" autocomplete="off"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RF-08.1 Productos del pedido -->
+      <section class="seccion">
+        <h3>Productos</h3>
+        <div class="lineas" id="lineas-pedido"></div>
+        <div class="linea">
+          <div class="campo"><select id="p-producto" aria-label="Producto a agregar"></select></div>
+          <div class="campo"><input id="p-cantidad" type="number" min="1" step="1" value="1" aria-label="Cantidad"></div>
+          <button type="button" class="boton-icono" id="agregar-producto" title="Agregar producto">
+            <span class="icono" aria-hidden="true">add_circle</span>
+          </button>
+        </div>
+        <small class="error-campo" id="error-productos"></small>
+
+        <div class="dos-columnas">
+          <div>
+            <label class="etiqueta" for="d-envio">Costo de envío ($)</label>
+            <div class="campo"><input id="d-envio" type="number" min="0" step="any" value="0"></div>
+          </div>
+          <div>
+            <label class="etiqueta" for="d-observaciones">Observaciones</label>
+            <div class="campo"><input id="d-observaciones" autocomplete="off" maxlength="255"></div>
+          </div>
+        </div>
+        <p class="total" id="total-nuevo">Total: $ 0</p>
+      </section>
+
+      <div class="alerta-error" id="error-nuevo" role="alert" hidden></div>
+
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="cancelar-nuevo">Cancelar</button>
+        <button type="submit" class="boton-principal" id="guardar-nuevo">
+          <span class="icono" aria-hidden="true">delivery_dining</span> Registrar domicilio
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- RF-08.4 Detalle, RF-08.5 Asignar, RF-08.6 Estado y RF-08.7 Entrega -->
+  <dialog id="dialogo-detalle" class="ancho">
+    <h2 id="detalle-titulo"></h2>
+    <dl class="datos-orden" id="detalle-datos"></dl>
+    <section class="seccion">
+      <h3>Productos</h3>
+      <ul class="mini-lista" id="detalle-lineas"></ul>
+      <p class="total" id="detalle-total"></p>
+    </section>
+
+    <section class="seccion" id="bloque-asignar" hidden>
+      <h3>Domiciliario</h3>
+      <div class="filtros">
+        <div class="campo"><select id="a-domiciliario" aria-label="Domiciliario"></select></div>
+        <button type="button" class="boton-texto" id="boton-asignar">Asignar</button>
+      </div>
+    </section>
+
+    <section class="seccion" id="bloque-entrega" hidden>
+      <h3>Registrar entrega</h3>
+      <label class="etiqueta" for="e-recibido">Quién recibió *</label>
+      <div class="campo" id="campo-recibido"><input id="e-recibido" autocomplete="off"></div>
+      <small class="error-campo" id="error-recibido"></small>
+      <label class="etiqueta" for="e-observacion">Observación</label>
+      <div class="campo"><input id="e-observacion" autocomplete="off" maxlength="255"></div>
+    </section>
+
+    <div class="alerta-error" id="error-detalle" role="alert" hidden></div>
+    <div class="acciones" id="detalle-acciones"></div>
+  </dialog>
+
+  <script type="module" src="js/domicilios.js"></script>
+</body>
+</html>

@@ -90,7 +90,7 @@ CREATE TABLE proveedores (
 );
 
 -- ---------------------------------------------------------------------
--- ILF04 Insumos (versión básica; se completa en la Iteración 2)
+-- ILF04 Insumos
 -- Materias primas que se compran y se gastan al preparar los platos.
 -- Se crea ahora porque las órdenes de compra necesitan saber qué se compra.
 -- ---------------------------------------------------------------------
@@ -100,6 +100,8 @@ CREATE TABLE insumos (
     nombre          VARCHAR(120)   NOT NULL,
     unidad_medida   ENUM('KG','G','L','ML','UNIDAD') NOT NULL,
     stock_actual    DECIMAL(12,3)  NOT NULL DEFAULT 0,
+    stock_minimo    DECIMAL(12,3)  NOT NULL DEFAULT 0,  -- RF-03.7 nivel de alerta
+    costo_unitario  DECIMAL(12,2)  NOT NULL DEFAULT 0,  -- último costo de compra
     activo          BOOLEAN        NOT NULL DEFAULT TRUE,
     created_at      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_insumo_stock CHECK (stock_actual >= 0)  -- nunca stock negativo
@@ -152,4 +154,214 @@ CREATE TABLE detalle_orden_compra (
     CONSTRAINT fk_doc_orden  FOREIGN KEY (orden_compra_id) REFERENCES ordenes_compra(id) ON DELETE CASCADE,
     CONSTRAINT fk_doc_insumo FOREIGN KEY (insumo_id)       REFERENCES insumos(id),
     CONSTRAINT chk_doc_cantidad CHECK (cantidad > 0)
+);
+
+
+-- =====================================================================
+--  ITERACIÓN 2 - Inventario completo
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- ILF05 Movimientos de inventario (RF-03.4 entradas, RF-03.5 salidas)
+-- Cada cambio de stock deja un registro: qué, cuánto, por qué, quién y cuándo.
+-- ---------------------------------------------------------------------
+CREATE TABLE movimientos_inventario (
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    insumo_id         INT           NOT NULL,
+    tipo              ENUM('ENTRADA','SALIDA') NOT NULL,
+    motivo            ENUM('COMPRA','AJUSTE','DEVOLUCION','CONSUMO','MERMA') NOT NULL,
+    cantidad          DECIMAL(12,3) NOT NULL,
+    stock_resultante  DECIMAL(12,3) NOT NULL,       -- stock después del movimiento
+    orden_compra_id   INT,                          -- si viene de una compra recibida
+    usuario_id        INT           NOT NULL,       -- quién lo registró
+    observacion       VARCHAR(255),
+    created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mov_insumo  FOREIGN KEY (insumo_id)       REFERENCES insumos(id),
+    CONSTRAINT fk_mov_oc      FOREIGN KEY (orden_compra_id) REFERENCES ordenes_compra(id),
+    CONSTRAINT fk_mov_usuario FOREIGN KEY (usuario_id)      REFERENCES usuarios(id),
+    CONSTRAINT chk_mov_cantidad CHECK (cantidad > 0),
+    INDEX idx_mov_fecha (created_at)
+);
+
+
+-- =====================================================================
+--  ITERACIÓN 2 - Productos y menú
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- ILF06 Productos y platos (RF-04.1 a RF-04.3, RF-04.5 precio, RF-04.6 disponibilidad)
+-- Lo que el restaurante vende: platos, bebidas, postres...
+-- ---------------------------------------------------------------------
+CREATE TABLE productos (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    codigo        VARCHAR(30)   NOT NULL UNIQUE,     -- ej: PRD-001
+    nombre        VARCHAR(120)  NOT NULL,
+    descripcion   VARCHAR(255),
+    categoria     ENUM('ENTRADA','PLATO_FUERTE','BEBIDA','POSTRE','ADICIONAL') NOT NULL,
+    precio_venta  DECIMAL(12,2) NOT NULL,            -- RF-04.5
+    disponible    BOOLEAN       NOT NULL DEFAULT TRUE,  -- RF-04.6 se puede pedir hoy
+    activo        BOOLEAN       NOT NULL DEFAULT TRUE,  -- sigue en la carta
+    created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_producto_precio CHECK (precio_venta > 0)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF07 Recetas / composición (RF-04.4 Asociar insumos a productos)
+-- Cuánto de cada insumo lleva UNA porción del producto. Con esto se
+-- calcula el costo del plato y, al vender, el consumo de inventario.
+-- ---------------------------------------------------------------------
+CREATE TABLE recetas (
+    producto_id  INT           NOT NULL,
+    insumo_id    INT           NOT NULL,
+    cantidad     DECIMAL(12,3) NOT NULL,             -- en la unidad del insumo
+    PRIMARY KEY (producto_id, insumo_id),            -- un insumo no se repite en la receta
+    CONSTRAINT fk_receta_producto FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_receta_insumo   FOREIGN KEY (insumo_id)   REFERENCES insumos(id),
+    CONSTRAINT chk_receta_cantidad CHECK (cantidad > 0)
+);
+
+
+-- =====================================================================
+--  ITERACIÓN 4 - Domicilios (con las órdenes que reutiliza la Iteración 3)
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- ILF12 Clientes (RF-08.2 Registrar información del cliente)
+-- El teléfono identifica al cliente: al llamar, se busca por su número.
+-- ---------------------------------------------------------------------
+CREATE TABLE clientes (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    nombre      VARCHAR(120) NOT NULL,
+    telefono    VARCHAR(20)  NOT NULL UNIQUE,
+    email       VARCHAR(120),
+    direccion   VARCHAR(200),                    -- dirección habitual (se propone al pedir)
+    barrio      VARCHAR(80),
+    referencia  VARCHAR(200),                    -- ej: "casa esquinera, portón negro"
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ---------------------------------------------------------------------
+-- ILF09 Órdenes: un pedido de productos. Sirve para domicilios (Iteración 4)
+-- y para los pedidos en mesa de la Iteración 3 (tipo MESA).
+-- ---------------------------------------------------------------------
+CREATE TABLE ordenes (
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    codigo         VARCHAR(20)   NOT NULL UNIQUE,      -- PED-000001
+    tipo           ENUM('MESA','DOMICILIO','LLEVAR') NOT NULL,
+    estado         ENUM('ABIERTA','CERRADA','CANCELADA') NOT NULL DEFAULT 'ABIERTA',
+    cliente_id     INT,
+    usuario_id     INT           NOT NULL,             -- quién la registró
+    subtotal       DECIMAL(14,2) NOT NULL DEFAULT 0,   -- suma de las líneas
+    observaciones  VARCHAR(255),
+    created_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_orden_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    CONSTRAINT fk_orden_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    INDEX idx_orden_fecha (created_at)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF10 Detalle de órdenes: cada producto pedido, cuántos y a qué precio.
+-- El precio se copia del menú al pedir: si luego cambia, el pedido no.
+-- ---------------------------------------------------------------------
+CREATE TABLE detalle_ordenes (
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    orden_id         INT           NOT NULL,
+    producto_id      INT           NOT NULL,
+    cantidad         INT           NOT NULL,
+    precio_unitario  DECIMAL(12,2) NOT NULL,
+    subtotal         DECIMAL(14,2) NOT NULL,           -- cantidad x precio_unitario
+    observacion      VARCHAR(150),                     -- ej: "sin cebolla"
+    CONSTRAINT fk_detalle_orden    FOREIGN KEY (orden_id)    REFERENCES ordenes(id) ON DELETE CASCADE,
+    CONSTRAINT fk_detalle_producto FOREIGN KEY (producto_id) REFERENCES productos(id),
+    CONSTRAINT chk_detalle_cantidad CHECK (cantidad > 0)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF13 Domicilios (RF-08.1 a RF-08.8): la entrega de una orden.
+-- RECIBIDO -> EN_PREPARACION -> LISTO -> EN_CAMINO -> ENTREGADO (o CANCELADO)
+-- ---------------------------------------------------------------------
+CREATE TABLE domicilios (
+    id                   INT AUTO_INCREMENT PRIMARY KEY,
+    orden_id             INT           NOT NULL UNIQUE,
+    cliente_id           INT           NOT NULL,
+    direccion            VARCHAR(200)  NOT NULL,       -- RF-08.3 dirección de entrega
+    barrio               VARCHAR(80),
+    referencia           VARCHAR(200),
+    telefono_contacto    VARCHAR(20)   NOT NULL,
+    costo_envio          DECIMAL(12,2) NOT NULL DEFAULT 0,
+    estado               ENUM('RECIBIDO','EN_PREPARACION','LISTO','EN_CAMINO','ENTREGADO','CANCELADO')
+                         NOT NULL DEFAULT 'RECIBIDO',
+    domiciliario_id      INT,                          -- RF-08.5 quién lo lleva
+    fecha_asignacion     DATETIME,
+    fecha_salida         DATETIME,
+    fecha_entrega        DATETIME,                     -- RF-08.7
+    recibido_por         VARCHAR(120),
+    observacion_entrega  VARCHAR(255),
+    created_at           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_domicilio_orden        FOREIGN KEY (orden_id)        REFERENCES ordenes(id),
+    CONSTRAINT fk_domicilio_cliente      FOREIGN KEY (cliente_id)      REFERENCES clientes(id),
+    CONSTRAINT fk_domicilio_domiciliario FOREIGN KEY (domiciliario_id) REFERENCES usuarios(id),
+    CONSTRAINT chk_domicilio_envio CHECK (costo_envio >= 0),
+    INDEX idx_domicilio_estado (estado)
+);
+
+
+-- =====================================================================
+--  ITERACIÓN 4 - Pagos, ventas y consumo
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- ILF14 Pagos (RF-09.1 a RF-09.7). Una orden se puede pagar en partes y
+-- con varios métodos; cuando lo pagado completa el total, se registra la venta.
+-- ---------------------------------------------------------------------
+CREATE TABLE pagos (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    orden_id    INT           NOT NULL,                -- RF-09.5 pago asociado al pedido
+    metodo      ENUM('EFECTIVO','TARJETA','TRANSFERENCIA') NOT NULL,   -- RF-09.2
+    monto       DECIMAL(14,2) NOT NULL,                -- lo que abona a la cuenta
+    recibido    DECIMAL(14,2),                         -- efectivo entregado por el cliente
+    cambio      DECIMAL(14,2) NOT NULL DEFAULT 0,      -- recibido - monto
+    referencia  VARCHAR(60),                           -- n.º de aprobación o de transferencia
+    estado      ENUM('APROBADO','ANULADO') NOT NULL DEFAULT 'APROBADO',
+    usuario_id  INT           NOT NULL,                -- quién cobró
+    created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_pago_orden   FOREIGN KEY (orden_id)   REFERENCES ordenes(id),
+    CONSTRAINT fk_pago_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    CONSTRAINT chk_pago_monto CHECK (monto > 0),
+    INDEX idx_pago_fecha (created_at)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF15 Ventas (RF-10.1, RF-10.2, RF-10.4): una orden pagada por completo.
+-- Los productos vendidos son las líneas de la orden (detalle_ordenes).
+-- ---------------------------------------------------------------------
+CREATE TABLE ventas (
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    codigo         VARCHAR(20)   NOT NULL UNIQUE,      -- VTA-000001 (n.º del comprobante)
+    orden_id       INT           NOT NULL UNIQUE,
+    subtotal       DECIMAL(14,2) NOT NULL,             -- productos
+    costo_envio    DECIMAL(12,2) NOT NULL DEFAULT 0,
+    total          DECIMAL(14,2) NOT NULL,
+    costo_insumos  DECIMAL(14,2) NOT NULL DEFAULT 0,   -- lo que costaron los insumos gastados
+    usuario_id     INT           NOT NULL,
+    created_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_venta_orden   FOREIGN KEY (orden_id)   REFERENCES ordenes(id),
+    CONSTRAINT fk_venta_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    INDEX idx_venta_fecha (created_at)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF16 Consumo (RF-10.3): insumos gastados en cada venta según las recetas.
+-- Cada línea tiene su SALIDA por CONSUMO en movimientos_inventario.
+-- ---------------------------------------------------------------------
+CREATE TABLE consumos (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    venta_id        INT           NOT NULL,
+    insumo_id       INT           NOT NULL,
+    cantidad        DECIMAL(12,3) NOT NULL,
+    costo_unitario  DECIMAL(12,2) NOT NULL,            -- costo del insumo al momento de vender
+    movimiento_id   INT           NOT NULL,
+    CONSTRAINT fk_consumo_venta      FOREIGN KEY (venta_id)      REFERENCES ventas(id),
+    CONSTRAINT fk_consumo_insumo     FOREIGN KEY (insumo_id)     REFERENCES insumos(id),
+    CONSTRAINT fk_consumo_movimiento FOREIGN KEY (movimiento_id) REFERENCES movimientos_inventario(id)
 );

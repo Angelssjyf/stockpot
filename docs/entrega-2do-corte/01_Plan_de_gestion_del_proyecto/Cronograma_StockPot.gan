@@ -1,0 +1,983 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="StockPot – Cronograma (2.º corte, avance 70 %)" company="Universidad Simón Bolívar – Cúcuta" webLink="" view-date="2026-08-03" view-index="0" gantt-divider-location="520" resource-divider-location="300" version="3.2.3247" locale="es">
+<description><![CDATA[Cronograma StockPot – 4 iteraciones (10/08/2026 – 13/11/2026). Lunes a sábado laborables; domingos y festivos de Colombia no laborables (festivos en rojo).
+Avance al 19/10/2026 tomado del tablero de Jira (Listo = 100 %, En curso = 50 %, Por hacer = 0 %): Iteraciones 1, 2 y 4 completas (70 % del alcance); Iteración 3 con análisis y diseño en curso y codificación y pruebas pendientes (30 %).
+Las fechas son la línea base del plan. La Iteración 3 va atrasada respecto a esa línea base y se replanificó del 21/10 al 13/11/2026 (ver el acta de constitución), sin mover la fecha de fin.]]></description>
+<view zooming-state="default:2" id="gantt-chart">
+<field id="tpd3" name="Nombre" width="320" order="0"/>
+<field id="tpd4" name="Fecha de inicio" width="90" order="1"/>
+<field id="tpd5" name="Fecha de fin" width="90" order="2"/>
+<field id="tpd6" name="Duración" width="60" order="3"/>
+</view>
+<view id="resource-table">
+<field id="0" name="Nombre" width="200" order="0"/>
+<field id="1" name="Función por defecto" width="100" order="1"/>
+</view>
+<tasks empty-milestones="true">
+<taskproperties>
+<taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+<taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+<taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+<taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+<taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+<taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+<taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+<taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+<taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+<taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+</taskproperties>
+<task id="0" name="Iteración 1 – Usuarios y roles + Proveedores (Mateo)" color="#555555" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+  <task id="1" name="Análisis – Iteración 1" color="#777777" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+    <task id="2" name="Reunión de inicio de la iteración" color="#4a90d9" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 3 | Predecesoras: — | Responsable: Mateo | Horas PERT: 4]]></notes>
+      <depend id="3" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="3" name="Revisar los requerimientos de usuarios y proveedores" color="#4a90d9" meeting="false" start="2026-08-10" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 4 | Predecesoras: 3 | Responsable: Mateo | Horas PERT: 12]]></notes>
+      <depend id="4" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="4" name="Validar el alcance de la iteración" color="#4a90d9" meeting="false" start="2026-08-12" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 5 | Predecesoras: 4 | Responsable: Mateo | Horas PERT: 6]]></notes>
+      <depend id="5" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="6" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="5" name="Analizar gestión de proveedores y compras" color="#4a90d9" meeting="false" start="2026-08-12" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 7 | Predecesoras: 5 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="7" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="6" name="Analizar gestión de usuarios y roles" color="#4a90d9" meeting="false" start="2026-08-15" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 6 | Predecesoras: 5 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="7" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="7" name="Definir requerimientos funcionales y no funcionales de la iteración" color="#4a90d9" meeting="false" start="2026-08-19" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 8 | Predecesoras: 6, 7 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="8" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="8" name="Validar y ajustar los requerimientos" color="#4a90d9" meeting="false" start="2026-08-21" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 9 | Predecesoras: 8 | Responsable: Mateo | Horas PERT: 12]]></notes>
+      <depend id="9" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="9" name="Elaborar documento de análisis de la iteración" color="#4a90d9" meeting="false" start="2026-08-22" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 10 | Predecesoras: 9 | Responsable: Mateo | Horas PERT: 12]]></notes>
+      <depend id="10" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="10" name="Entrega del documento de análisis" color="#4a90d9" meeting="false" start="2026-08-25" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 11 | Predecesoras: 10 | Responsable: Mateo | Horas PERT: 4]]></notes>
+      <depend id="12" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="11" name="Diseño – Iteración 1" color="#777777" meeting="false" start="2026-09-19" duration="1" complete="100" expand="true">
+    <task id="12" name="Definir arquitectura de la solución" color="#8e6bbf" meeting="false" start="2026-09-19" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 13 | Predecesoras: 11 | Responsable: Mateo | Horas PERT: 12]]></notes>
+      <depend id="13" type="2" difference="0" hardness="Rubber"/>
+      <depend id="14" type="2" difference="0" hardness="Rubber"/>
+      <depend id="15" type="2" difference="0" hardness="Rubber"/>
+      <depend id="16" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="13" name="Diseñar interfaces del módulo de usuarios" color="#8e6bbf" meeting="false" start="2026-09-22" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 16 | Predecesoras: 13 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="17" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="14" name="Diseñar interfaces del módulo de proveedores" color="#8e6bbf" meeting="false" start="2026-09-23" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 17 | Predecesoras: 13 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="17" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="15" name="Diseñar la base de datos de proveedores y compras" color="#8e6bbf" meeting="false" start="2026-09-25" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 15 | Predecesoras: 13 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="17" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="16" name="Diseñar la base de datos de usuarios y roles" color="#8e6bbf" meeting="false" start="2026-09-26" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 14 | Predecesoras: 13 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="17" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="17" name="Validar el diseño de la iteración" color="#8e6bbf" meeting="false" start="2026-09-29" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 18 | Predecesoras: 14, 15, 16, 17 | Responsable: Mateo | Horas PERT: 8]]></notes>
+      <depend id="18" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="18" name="Elaborar documento de diseño" color="#8e6bbf" meeting="false" start="2026-10-08" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 19 | Predecesoras: 18 | Responsable: Mateo | Horas PERT: 12]]></notes>
+      <depend id="19" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="19" name="Entrega del documento de diseño" color="#8e6bbf" meeting="false" start="2026-10-09" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 20 | Predecesoras: 19 | Responsable: Mateo | Horas PERT: 4]]></notes>
+      <depend id="21" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="22" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="20" name="Codificación – Iteración 1" color="#777777" meeting="false" start="2026-10-09" duration="1" complete="100" expand="true">
+    <task id="21" name="Codificar registro y consulta de proveedores" color="#3aa76d" meeting="false" start="2026-10-09" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 25 | Predecesoras: 20 | Responsable: Mateo | Horas PERT: 28]]></notes>
+      <depend id="23" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="22" name="Codificar registro de usuarios" color="#3aa76d" meeting="false" start="2026-10-14" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 22 | Predecesoras: 20 | Responsable: Mateo | Horas PERT: 28]]></notes>
+      <depend id="24" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="23" name="Codificar productos suministrados" color="#3aa76d" meeting="false" start="2026-10-17" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 26 | Predecesoras: 25 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="25" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="24" name="Codificar consulta y modificación de usuarios" color="#3aa76d" meeting="false" start="2026-10-20" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 23 | Predecesoras: 22 | Responsable: Mateo | Horas PERT: 28]]></notes>
+      <depend id="27" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="25" name="Codificar órdenes de compra" color="#3aa76d" meeting="false" start="2026-10-23" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 27 | Predecesoras: 26 | Responsable: Mateo | Horas PERT: 32]]></notes>
+      <depend id="26" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="26" name="Codificar actualización de órdenes de compra" color="#3aa76d" meeting="false" start="2026-10-27" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 28 | Predecesoras: 27 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="28" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="27" name="Codificar inicio de sesión, roles y permisos" color="#3aa76d" meeting="false" start="2026-10-29" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 24 | Predecesoras: 23 | Responsable: Mateo | Horas PERT: 28]]></notes>
+      <depend id="29" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="28" name="Relacionar compras con inventario" color="#3aa76d" meeting="false" start="2026-11-03" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 29 | Predecesoras: 28 | Responsable: Mateo | Horas PERT: 24]]></notes>
+      <depend id="29" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="29" name="Integrar módulos de usuarios y proveedores" color="#3aa76d" meeting="false" start="2026-11-05" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 30 | Predecesoras: 24, 29 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="30" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="30" name="Entrega del código fuente de la iteración" color="#3aa76d" meeting="false" start="2026-11-06" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 31 | Predecesoras: 30 | Responsable: Mateo | Horas PERT: 0]]></notes>
+      <depend id="32" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="31" name="Pruebas – Iteración 1" color="#777777" meeting="false" start="2026-11-07" duration="1" complete="100" expand="true">
+    <task id="32" name="Diseñar casos de prueba de la iteración" color="#e08a2e" meeting="false" start="2026-11-07" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 33 | Predecesoras: 31 | Responsable: Mateo | Horas PERT: 12]]></notes>
+      <depend id="33" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="34" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="33" name="Ejecutar pruebas funcionales de proveedores" color="#e08a2e" meeting="false" start="2026-11-09" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 35 | Predecesoras: 33 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="35" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="34" name="Ejecutar pruebas funcionales de usuarios y roles" color="#e08a2e" meeting="false" start="2026-11-11" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 34 | Predecesoras: 33 | Responsable: Mateo | Horas PERT: 12]]></notes>
+      <depend id="35" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="35" name="Realizar correcciones y pruebas de regresión" color="#e08a2e" meeting="false" start="2026-11-12" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 36 | Predecesoras: 34, 35 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="36" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="36" name="Entrega de resultados de las pruebas" color="#e08a2e" meeting="false" start="2026-11-13" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 37 | Predecesoras: 36 | Responsable: Mateo | Horas PERT: 0]]></notes>
+    </task>
+  </task>
+</task>
+<task id="37" name="Iteración 2 – Inventario + Productos/Menú (Jhorman)" color="#555555" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+  <task id="38" name="Análisis – Iteración 2" color="#777777" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+    <task id="39" name="Reunión de inicio de la iteración" color="#4a90d9" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 3 | Predecesoras: — | Responsable: Jhorman | Horas PERT: 4]]></notes>
+      <depend id="40" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="40" name="Revisar los requerimientos de inventario y productos" color="#4a90d9" meeting="false" start="2026-08-10" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 4 | Predecesoras: 3 | Responsable: Jhorman | Horas PERT: 12]]></notes>
+      <depend id="41" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="41" name="Validar el alcance de la iteración" color="#4a90d9" meeting="false" start="2026-08-12" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 5 | Predecesoras: 4 | Responsable: Jhorman | Horas PERT: 8]]></notes>
+      <depend id="42" type="2" difference="0" hardness="Rubber"/>
+      <depend id="43" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="42" name="Analizar gestión de productos y menú" color="#4a90d9" meeting="false" start="2026-08-13" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 7 | Predecesoras: 5 | Responsable: Jhorman | Horas PERT: 16]]></notes>
+      <depend id="44" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="43" name="Analizar gestión de inventario" color="#4a90d9" meeting="false" start="2026-08-15" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 6 | Predecesoras: 5 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="44" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="44" name="Analizar integración entre inventario y productos" color="#4a90d9" meeting="false" start="2026-08-19" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 8 | Predecesoras: 6, 7 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="45" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="45" name="Definir requerimientos funcionales y no funcionales" color="#4a90d9" meeting="false" start="2026-08-22" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 9 | Predecesoras: 8 | Responsable: Jhorman | Horas PERT: 16]]></notes>
+      <depend id="46" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="46" name="Validar y ajustar los requerimientos" color="#4a90d9" meeting="false" start="2026-08-25" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 10 | Predecesoras: 9 | Responsable: Jhorman | Horas PERT: 16]]></notes>
+      <depend id="47" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="47" name="Elaborar documento de análisis de la iteración" color="#4a90d9" meeting="false" start="2026-08-27" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 11 | Predecesoras: 10 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="48" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="48" name="Entrega del documento de análisis" color="#4a90d9" meeting="false" start="2026-08-29" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 12 | Predecesoras: 11 | Responsable: Jhorman | Horas PERT: 14]]></notes>
+      <depend id="50" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="49" name="Diseño – Iteración 2" color="#777777" meeting="false" start="2026-09-10" duration="1" complete="100" expand="true">
+    <task id="50" name="Definir arquitectura de la solución" color="#8e6bbf" meeting="false" start="2026-09-10" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 14 | Predecesoras: 12 | Responsable: Jhorman | Horas PERT: 12]]></notes>
+      <depend id="51" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="52" type="2" difference="0" hardness="Rubber"/>
+      <depend id="53" type="2" difference="0" hardness="Rubber"/>
+      <depend id="54" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="51" name="Diseñar la base de datos de inventario" color="#8e6bbf" meeting="false" start="2026-09-11" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 15 | Predecesoras: 14 | Responsable: Jhorman | Horas PERT: 16.7]]></notes>
+      <depend id="55" type="2" difference="0" hardness="Rubber"/>
+      <depend id="56" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="52" name="Diseñar interfaces del módulo de inventario" color="#8e6bbf" meeting="false" start="2026-09-12" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 17 | Predecesoras: 14 | Responsable: Jhorman | Horas PERT: 16.7]]></notes>
+      <depend id="55" type="2" difference="0" hardness="Rubber"/>
+      <depend id="56" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="53" name="Diseñar la base de datos de productos y menú" color="#8e6bbf" meeting="false" start="2026-09-15" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 16 | Predecesoras: 14 | Responsable: Jhorman | Horas PERT: 16.7]]></notes>
+      <depend id="55" type="2" difference="0" hardness="Rubber"/>
+      <depend id="56" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="54" name="Diseñar interfaces del módulo de productos y menú" color="#8e6bbf" meeting="false" start="2026-09-17" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 18 | Predecesoras: 14 | Responsable: Jhorman | Horas PERT: 16.7]]></notes>
+      <depend id="55" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="56" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="55" name="Diseñar integración entre inventario y productos" color="#8e6bbf" meeting="false" start="2026-09-18" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 19 | Predecesoras: 15, 16, 17, 18 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="56" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="56" name="Validar el diseño de la iteración" color="#8e6bbf" meeting="false" start="2026-09-21" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 20 | Predecesoras: 15, 16, 17, 18, 19 | Responsable: Jhorman | Horas PERT: 12]]></notes>
+      <depend id="57" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="57" name="Elaborar documento de diseño" color="#8e6bbf" meeting="false" start="2026-09-23" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 21 | Predecesoras: 20 | Responsable: Jhorman | Horas PERT: 12]]></notes>
+      <depend id="58" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="58" name="Entrega del documento de diseño" color="#8e6bbf" meeting="false" start="2026-09-24" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 22 | Predecesoras: 21 | Responsable: Jhorman | Horas PERT: 14]]></notes>
+      <depend id="60" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="59" name="Codificación – Iteración 2" color="#777777" meeting="false" start="2026-09-25" duration="1" complete="100" expand="true">
+    <task id="60" name="Codificar registro y consulta de insumos" color="#3aa76d" meeting="false" start="2026-09-25" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 24 | Predecesoras: 22 | Responsable: Jhorman | Horas PERT: 24]]></notes>
+      <depend id="61" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="61" name="Codificar modificación de insumos" color="#3aa76d" meeting="false" start="2026-09-29" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 25 | Predecesoras: 24 | Responsable: Jhorman | Horas PERT: 16]]></notes>
+      <depend id="62" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="62" name="Codificar entradas de inventario" color="#3aa76d" meeting="false" start="2026-09-30" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 26 | Predecesoras: 25 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="63" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="63" name="Codificar salidas de inventario" color="#3aa76d" meeting="false" start="2026-10-02" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 27 | Predecesoras: 26 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="64" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="64" name="Codificar consulta de existencias y niveles mínimos" color="#3aa76d" meeting="false" start="2026-10-05" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 28 | Predecesoras: 27 | Responsable: Jhorman | Horas PERT: 16]]></notes>
+      <depend id="65" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="65" name="Codificar alertas de stock" color="#3aa76d" meeting="false" start="2026-10-07" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 29 | Predecesoras: 28 | Responsable: Jhorman | Horas PERT: 16]]></notes>
+      <depend id="66" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="66" name="Codificar actualización automática del inventario" color="#3aa76d" meeting="false" start="2026-10-08" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 30 | Predecesoras: 29 | Responsable: Jhorman | Horas PERT: 28]]></notes>
+      <depend id="67" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="71" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="67" name="Codificar registro de productos y platos" color="#3aa76d" meeting="false" start="2026-10-13" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 31 | Predecesoras: 30 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="68" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="68" name="Codificar consulta y modificación de productos" color="#3aa76d" meeting="false" start="2026-10-23" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 32 | Predecesoras: 31 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="69" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="69" name="Codificar asociación de insumos a productos o platos" color="#3aa76d" meeting="false" start="2026-10-26" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 33 | Predecesoras: 32 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="70" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="70" name="Codificar precios y disponibilidad de productos" color="#3aa76d" meeting="false" start="2026-10-28" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 34 | Predecesoras: 33 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="71" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="71" name="Integrar módulos de inventario y productos" color="#3aa76d" meeting="false" start="2026-11-05" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 35 | Predecesoras: 30, 34 | Responsable: Jhorman | Horas PERT: 12.7]]></notes>
+      <depend id="72" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="72" name="Entrega del código fuente de la iteración" color="#3aa76d" meeting="false" start="2026-11-06" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 36 | Predecesoras: 35 | Responsable: Jhorman | Horas PERT: 4]]></notes>
+      <depend id="74" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="73" name="Pruebas – Iteración 2" color="#777777" meeting="false" start="2026-11-06" duration="1" complete="100" expand="true">
+    <task id="74" name="Diseñar casos de prueba de la iteración" color="#e08a2e" meeting="false" start="2026-11-06" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 38 | Predecesoras: 36 | Responsable: Jhorman | Horas PERT: 12]]></notes>
+      <depend id="75" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="76" type="2" difference="0" hardness="Rubber"/>
+      <depend id="77" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="75" name="Ejecutar pruebas funcionales de inventario" color="#e08a2e" meeting="false" start="2026-11-07" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 39 | Predecesoras: 38 | Responsable: Jhorman | Horas PERT: 16.7]]></notes>
+      <depend id="78" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="76" name="Ejecutar pruebas de integración inventario-productos" color="#e08a2e" meeting="false" start="2026-11-10" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 41 | Predecesoras: 38 | Responsable: Jhorman | Horas PERT: 12.7]]></notes>
+      <depend id="78" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="77" name="Ejecutar pruebas funcionales de productos y menú" color="#e08a2e" meeting="false" start="2026-11-11" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 40 | Predecesoras: 38 | Responsable: Jhorman | Horas PERT: 12.7]]></notes>
+      <depend id="78" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="78" name="Realizar correcciones y pruebas de regresión" color="#e08a2e" meeting="false" start="2026-11-13" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 42 | Predecesoras: 39, 40, 41 | Responsable: Jhorman | Horas PERT: 6]]></notes>
+      <depend id="79" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="79" name="Entrega de resultados de las pruebas" color="#e08a2e" meeting="false" start="2026-11-13" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 43 | Predecesoras: 42 | Responsable: Jhorman | Horas PERT: 2]]></notes>
+    </task>
+  </task>
+</task>
+<task id="80" name="Iteración 3 – Pedidos + Cocina + Reservas (Yovany)" color="#555555" meeting="false" start="2026-08-10" duration="1" complete="28" expand="true">
+  <task id="81" name="Análisis – Iteración 3" color="#777777" meeting="false" start="2026-08-10" duration="1" complete="58" expand="true">
+    <task id="82" name="Reunión de inicio de la iteración" color="#4a90d9" meeting="false" start="2026-08-10" duration="1" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 3 | Predecesoras: — | Responsable: Yovany | Horas PERT: 4]]></notes>
+      <depend id="83" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="83" name="Revisar los requerimientos de pedidos, cocina y reservas" color="#4a90d9" meeting="false" start="2026-08-10" duration="2" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 4 | Predecesoras: 3 | Responsable: Yovany | Horas PERT: 12]]></notes>
+      <depend id="84" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="84" name="Validar el alcance de la iteración" color="#4a90d9" meeting="false" start="2026-08-12" duration="1" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 5 | Predecesoras: 4 | Responsable: Yovany | Horas PERT: 8]]></notes>
+      <depend id="85" type="2" difference="0" hardness="Rubber"/>
+      <depend id="86" type="2" difference="0" hardness="Rubber"/>
+      <depend id="87" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="85" name="Analizar gestión de pedidos" color="#4a90d9" meeting="false" start="2026-08-13" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 6 | Predecesoras: 5 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="89" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="86" name="Analizar gestión de cocina" color="#4a90d9" meeting="false" start="2026-08-15" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 7 | Predecesoras: 5 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="89" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="87" name="Analizar gestión de reservas" color="#4a90d9" meeting="false" start="2026-08-19" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 8 | Predecesoras: 5 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="88" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="88" name="Analizar integración entre reservas y mesas" color="#4a90d9" meeting="false" start="2026-08-22" duration="2" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 10 | Predecesoras: 8 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="90" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="89" name="Analizar integración entre pedidos y cocina" color="#4a90d9" meeting="false" start="2026-08-25" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 9 | Predecesoras: 6, 7 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="90" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="90" name="Definir requerimientos funcionales y no funcionales" color="#4a90d9" meeting="false" start="2026-08-27" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 11 | Predecesoras: 9, 10 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="91" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="91" name="Validar y ajustar los requerimientos" color="#4a90d9" meeting="false" start="2026-08-29" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 12 | Predecesoras: 11 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="92" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="92" name="Elaborar documento de análisis de la iteración" color="#4a90d9" meeting="false" start="2026-09-01" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 13 | Predecesoras: 12 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="93" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="93" name="Entrega del documento de análisis" color="#4a90d9" meeting="false" start="2026-09-04" duration="1" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 14 | Predecesoras: 13 | Responsable: Yovany | Horas PERT: 6]]></notes>
+      <depend id="95" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="94" name="Diseño – Iteración 3" color="#777777" meeting="false" start="2026-09-10" duration="1" complete="54" expand="true">
+    <task id="95" name="Definir arquitectura de la solución" color="#8e6bbf" meeting="false" start="2026-09-10" duration="2" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 16 | Predecesoras: 14 | Responsable: Yovany | Horas PERT: 12]]></notes>
+      <depend id="96" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="97" type="2" difference="0" hardness="Rubber"/>
+      <depend id="98" type="2" difference="0" hardness="Rubber"/>
+      <depend id="99" type="2" difference="0" hardness="Rubber"/>
+      <depend id="100" type="2" difference="0" hardness="Rubber"/>
+      <depend id="102" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="96" name="Diseñar la base de datos de reservas" color="#8e6bbf" meeting="false" start="2026-09-11" duration="2" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 19 | Predecesoras: 16 | Responsable: Yovany | Horas PERT: 16.7]]></notes>
+      <depend id="101" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="97" name="Diseñar interfaces del módulo de reservas" color="#8e6bbf" meeting="false" start="2026-09-12" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 22 | Predecesoras: 16 | Responsable: Yovany | Horas PERT: 16.7]]></notes>
+      <depend id="101" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="98" name="Diseñar interfaces del módulo de cocina" color="#8e6bbf" meeting="false" start="2026-09-15" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 21 | Predecesoras: 16 | Responsable: Yovany | Horas PERT: 16.7]]></notes>
+      <depend id="103" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="99" name="Diseñar la base de datos de pedidos" color="#8e6bbf" meeting="false" start="2026-09-17" duration="2" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 17 | Predecesoras: 16 | Responsable: Yovany | Horas PERT: 16.7]]></notes>
+      <depend id="103" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="100" name="Diseñar la base de datos de cocina" color="#8e6bbf" meeting="false" start="2026-09-18" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 18 | Predecesoras: 16 | Responsable: Yovany | Horas PERT: 16.7]]></notes>
+      <depend id="103" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="101" name="Diseñar integración entre reservas y mesas" color="#8e6bbf" meeting="false" start="2026-09-18" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 24 | Predecesoras: 19, 22 | Responsable: Mateo | Horas PERT: 16]]></notes>
+      <depend id="104" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="102" name="Diseñar interfaces del módulo de pedidos" color="#8e6bbf" meeting="false" start="2026-09-21" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 20 | Predecesoras: 16 | Responsable: Yovany | Horas PERT: 16.7]]></notes>
+      <depend id="103" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="103" name="Diseñar integración entre pedidos y cocina" color="#8e6bbf" meeting="false" start="2026-09-23" duration="3" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 23 | Predecesoras: 17, 18, 20, 21 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="104" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="104" name="Validar el diseño de la iteración" color="#8e6bbf" meeting="false" start="2026-09-25" duration="2" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 25 | Predecesoras: 23, 24 | Responsable: Yovany | Horas PERT: 12]]></notes>
+      <depend id="105" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="105" name="Elaborar documento de diseño" color="#8e6bbf" meeting="false" start="2026-09-26" duration="2" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 26 | Predecesoras: 25 | Responsable: Yovany | Horas PERT: 12]]></notes>
+      <depend id="106" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="106" name="Entrega del documento de diseño" color="#8e6bbf" meeting="false" start="2026-09-28" duration="1" complete="50" expand="true">
+      <notes><![CDATA[ID PERT 27 | Predecesoras: 26 | Responsable: Yovany | Horas PERT: 4]]></notes>
+      <depend id="108" type="2" difference="0" hardness="Rubber"/>
+      <depend id="112" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="107" name="Codificación – Iteración 3" color="#777777" meeting="false" start="2026-09-29" duration="1" complete="0" expand="true">
+    <task id="108" name="Codificar registro y modificación de pedidos" color="#3aa76d" meeting="false" start="2026-09-29" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 29 | Predecesoras: 27 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="109" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="109" name="Codificar asociación de pedidos a mesas" color="#3aa76d" meeting="false" start="2026-10-01" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 30 | Predecesoras: 29 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="110" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="110" name="Codificar productos y confirmación del pedido" color="#3aa76d" meeting="false" start="2026-10-02" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 31 | Predecesoras: 30 | Responsable: Yovany | Horas PERT: 24]]></notes>
+      <depend id="111" type="2" difference="0" hardness="Rubber"/>
+      <depend id="113" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="111" name="Codificar consulta y estado de pedidos" color="#3aa76d" meeting="false" start="2026-10-06" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 32 | Predecesoras: 31 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="114" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="112" name="Codificar registro y consulta de reservas" color="#3aa76d" meeting="false" start="2026-10-06" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 38 | Predecesoras: 27 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="116" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="113" name="Codificar validación de disponibilidad de insumos" color="#3aa76d" meeting="false" start="2026-10-08" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 33 | Predecesoras: 31 | Responsable: Yovany | Horas PERT: 24]]></notes>
+      <depend id="114" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="114" name="Codificar envío de pedidos a cocina" color="#3aa76d" meeting="false" start="2026-10-10" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 34 | Predecesoras: 32, 33 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="115" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="115" name="Codificar recepción y visualización de órdenes en cocina" color="#3aa76d" meeting="false" start="2026-10-14" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 35 | Predecesoras: 34 | Responsable: Yovany | Horas PERT: 24]]></notes>
+      <depend id="118" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="116" name="Codificar modificación y cancelación de reservas" color="#3aa76d" meeting="false" start="2026-10-16" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 39 | Predecesoras: 38 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="117" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="117" name="Codificar fecha, hora y asociación con mesas" color="#3aa76d" meeting="false" start="2026-10-19" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 40 | Predecesoras: 39 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="119" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="118" name="Codificar organización y actualización de órdenes" color="#3aa76d" meeting="false" start="2026-10-21" duration="4" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 36 | Predecesoras: 35 | Responsable: Yovany | Horas PERT: 24]]></notes>
+      <depend id="120" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="119" name="Codificar disponibilidad y estados de reservas" color="#3aa76d" meeting="false" start="2026-10-24" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 41 | Predecesoras: 40 | Responsable: Yovany | Horas PERT: 24]]></notes>
+      <depend id="121" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="120" name="Codificar estados de pedidos y notificaciones" color="#3aa76d" meeting="false" start="2026-10-27" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 37 | Predecesoras: 36 | Responsable: Yovany | Horas PERT: 24]]></notes>
+      <depend id="121" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="121" name="Integrar módulos de pedidos, cocina y reservas" color="#3aa76d" meeting="false" start="2026-10-30" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 42 | Predecesoras: 37, 41 | Responsable: Yovany | Horas PERT: 20]]></notes>
+      <depend id="122" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="122" name="Entrega del código fuente de la iteración" color="#3aa76d" meeting="false" start="2026-11-03" duration="1" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 43 | Predecesoras: 42 | Responsable: Yovany | Horas PERT: 4]]></notes>
+      <depend id="124" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="123" name="Pruebas – Iteración 3" color="#777777" meeting="false" start="2026-11-03" duration="1" complete="0" expand="true">
+    <task id="124" name="Diseñar casos de prueba de la iteración" color="#e08a2e" meeting="false" start="2026-11-03" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 45 | Predecesoras: 43 | Responsable: Yovany | Horas PERT: 12]]></notes>
+      <depend id="125" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="126" type="2" difference="0" hardness="Rubber"/>
+      <depend id="127" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="125" name="Ejecutar pruebas funcionales de cocina" color="#e08a2e" meeting="false" start="2026-11-04" duration="3" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 47 | Predecesoras: 45 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="128" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="126" name="Ejecutar pruebas funcionales de reservas" color="#e08a2e" meeting="false" start="2026-11-06" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 48 | Predecesoras: 45 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="128" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="127" name="Ejecutar pruebas funcionales de pedidos" color="#e08a2e" meeting="false" start="2026-11-07" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 46 | Predecesoras: 45 | Responsable: Yovany | Horas PERT: 12]]></notes>
+      <depend id="128" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="128" name="Ejecutar pruebas de integración" color="#e08a2e" meeting="false" start="2026-11-10" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 49 | Predecesoras: 46, 47, 48 | Responsable: Yovany | Horas PERT: 12]]></notes>
+      <depend id="129" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="129" name="Realizar correcciones y pruebas de regresión" color="#e08a2e" meeting="false" start="2026-11-11" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 50 | Predecesoras: 49 | Responsable: Yovany | Horas PERT: 16]]></notes>
+      <depend id="130" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="130" name="Entrega de resultados de las pruebas" color="#e08a2e" meeting="false" start="2026-11-12" duration="2" complete="0" expand="true">
+      <notes><![CDATA[ID PERT 51 | Predecesoras: 50 | Responsable: Yovany | Horas PERT: 4]]></notes>
+    </task>
+  </task>
+</task>
+<task id="131" name="Iteración 4 – Domicilios + Pagos + Ventas/Consumo + Reportes (Ángel)" color="#555555" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+  <task id="132" name="Análisis – Iteración 4" color="#777777" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+    <task id="133" name="Reunión de inicio de la iteración" color="#4a90d9" meeting="false" start="2026-08-10" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 3 | Predecesoras: — | Responsable: Ángel | Horas PERT: 8]]></notes>
+      <depend id="134" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="134" name="Revisar los requerimientos de domicilios, pagos, ventas y reportes" color="#4a90d9" meeting="false" start="2026-08-11" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 4 | Predecesoras: 3 | Responsable: Ángel | Horas PERT: 12]]></notes>
+      <depend id="135" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="135" name="Validar el alcance de la iteración" color="#4a90d9" meeting="false" start="2026-08-12" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 5 | Predecesoras: 4 | Responsable: Ángel | Horas PERT: 8]]></notes>
+      <depend id="136" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="137" type="2" difference="0" hardness="Rubber"/>
+      <depend id="138" type="2" difference="0" hardness="Rubber"/>
+      <depend id="140" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="136" name="Analizar gestión de ventas y consumo" color="#4a90d9" meeting="false" start="2026-08-13" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 8 | Predecesoras: 5 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="139" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="137" name="Analizar gestión de domicilios" color="#4a90d9" meeting="false" start="2026-08-18" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 6 | Predecesoras: 5 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="141" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="138" name="Analizar gestión de reportes y estadísticas" color="#4a90d9" meeting="false" start="2026-08-20" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 9 | Predecesoras: 5 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="139" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="139" name="Analizar integración entre ventas, consumo y reportes" color="#4a90d9" meeting="false" start="2026-08-24" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 11 | Predecesoras: 8, 9 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="142" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="140" name="Analizar gestión de pagos" color="#4a90d9" meeting="false" start="2026-08-26" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 7 | Predecesoras: 5 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="141" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="141" name="Analizar integración entre domicilios y pagos" color="#4a90d9" meeting="false" start="2026-08-29" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 10 | Predecesoras: 6, 7 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="142" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="142" name="Definir requerimientos funcionales y no funcionales" color="#4a90d9" meeting="false" start="2026-09-01" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 12 | Predecesoras: 10, 11 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="143" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="143" name="Validar y ajustar los requerimientos" color="#4a90d9" meeting="false" start="2026-09-04" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 13 | Predecesoras: 12 | Responsable: Ángel | Horas PERT: 12]]></notes>
+      <depend id="144" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="144" name="Elaborar documento de análisis de la iteración" color="#4a90d9" meeting="false" start="2026-09-05" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 14 | Predecesoras: 13 | Responsable: Ángel | Horas PERT: 12]]></notes>
+      <depend id="145" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="145" name="Entrega del documento de análisis" color="#4a90d9" meeting="false" start="2026-09-08" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 15 | Predecesoras: 14 | Responsable: Ángel | Horas PERT: 8]]></notes>
+      <depend id="147" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="146" name="Diseño – Iteración 4" color="#777777" meeting="false" start="2026-09-10" duration="1" complete="100" expand="true">
+    <task id="147" name="Definir arquitectura de la solución" color="#8e6bbf" meeting="false" start="2026-09-10" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 17 | Predecesoras: 15 | Responsable: Ángel | Horas PERT: 12]]></notes>
+      <depend id="148" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="149" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="150" type="2" difference="0" hardness="Rubber"/>
+      <depend id="151" type="2" difference="0" hardness="Rubber"/>
+      <depend id="152" type="2" difference="0" hardness="Rubber"/>
+      <depend id="153" type="2" difference="0" hardness="Rubber"/>
+      <depend id="154" type="2" difference="0" hardness="Rubber"/>
+      <depend id="155" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="148" name="Diseñar la base de datos de domicilios" color="#8e6bbf" meeting="false" start="2026-09-11" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 18 | Predecesoras: 17 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="149" name="Diseñar la base de datos de ventas y consumo" color="#8e6bbf" meeting="false" start="2026-09-11" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 20 | Predecesoras: 17 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="150" name="Diseñar la estructura de reportes y estadísticas" color="#8e6bbf" meeting="false" start="2026-09-14" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 21 | Predecesoras: 17 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="151" name="Diseñar interfaces de ventas y consumo" color="#8e6bbf" meeting="false" start="2026-09-14" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 24 | Predecesoras: 17 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="152" name="Diseñar interfaces del módulo de domicilios" color="#8e6bbf" meeting="false" start="2026-09-16" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 22 | Predecesoras: 17 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="153" name="Diseñar interfaces de reportes y estadísticas" color="#8e6bbf" meeting="false" start="2026-09-16" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 25 | Predecesoras: 17 | Responsable: Mateo | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="154" name="Diseñar la base de datos de pagos" color="#8e6bbf" meeting="false" start="2026-09-18" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 19 | Predecesoras: 17 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="155" name="Diseñar interfaces del módulo de pagos" color="#8e6bbf" meeting="false" start="2026-09-21" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 23 | Predecesoras: 17 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="156" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="156" name="Diseñar integración entre los módulos" color="#8e6bbf" meeting="false" start="2026-09-23" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 26 | Predecesoras: 18, 19, 20, 21, 22, 23, 24, 25 | Responsable: Ángel | Horas PERT: 28]]></notes>
+      <depend id="157" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="157" name="Validar el diseño de la iteración" color="#8e6bbf" meeting="false" start="2026-09-26" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 27 | Predecesoras: 26 | Responsable: Ángel | Horas PERT: 12]]></notes>
+      <depend id="158" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="158" name="Elaborar documento de diseño" color="#8e6bbf" meeting="false" start="2026-09-28" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 28 | Predecesoras: 27 | Responsable: Ángel | Horas PERT: 12]]></notes>
+      <depend id="159" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="159" name="Entrega del documento de diseño" color="#8e6bbf" meeting="false" start="2026-09-29" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 29 | Predecesoras: 28 | Responsable: Ángel | Horas PERT: 8]]></notes>
+      <depend id="161" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="162" type="2" difference="-1" hardness="Rubber"/>
+      <depend id="163" type="2" difference="0" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="160" name="Codificación – Iteración 4" color="#777777" meeting="false" start="2026-09-30" duration="1" complete="100" expand="true">
+    <task id="161" name="Codificar registro y método de pago" color="#3aa76d" meeting="false" start="2026-09-30" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 36 | Predecesoras: 29 | Responsable: Mateo | Horas PERT: 24]]></notes>
+      <depend id="164" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="162" name="Codificar registro y consulta de ventas" color="#3aa76d" meeting="false" start="2026-09-30" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 40 | Predecesoras: 29 | Responsable: Ángel | Horas PERT: 24]]></notes>
+      <depend id="167" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="163" name="Codificar registro de pedidos a domicilio" color="#3aa76d" meeting="false" start="2026-10-02" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 31 | Predecesoras: 29 | Responsable: Ángel | Horas PERT: 32]]></notes>
+      <depend id="165" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="164" name="Codificar cálculo y consulta del estado del pago" color="#3aa76d" meeting="false" start="2026-10-02" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 37 | Predecesoras: 36 | Responsable: Mateo | Horas PERT: 24]]></notes>
+      <depend id="170" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="165" name="Codificar información del cliente y dirección" color="#3aa76d" meeting="false" start="2026-10-06" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 32 | Predecesoras: 31 | Responsable: Ángel | Horas PERT: 24]]></notes>
+      <depend id="166" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="166" name="Codificar consulta y asignación de domicilios" color="#3aa76d" meeting="false" start="2026-10-09" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 33 | Predecesoras: 32 | Responsable: Ángel | Horas PERT: 24]]></notes>
+      <depend id="168" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="167" name="Codificar consumo y relación con productos" color="#3aa76d" meeting="false" start="2026-10-13" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 41 | Predecesoras: 40 | Responsable: Ángel | Horas PERT: 24]]></notes>
+      <depend id="169" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="168" name="Codificar actualización y registro de entrega" color="#3aa76d" meeting="false" start="2026-10-15" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 34 | Predecesoras: 33 | Responsable: Jhorman | Horas PERT: 24]]></notes>
+      <depend id="173" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="169" name="Codificar consultas de productos más vendidos e historial" color="#3aa76d" meeting="false" start="2026-10-16" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 42 | Predecesoras: 41 | Responsable: Ángel | Horas PERT: 24]]></notes>
+      <depend id="171" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="170" name="Codificar asociación y comprobante de pago" color="#3aa76d" meeting="false" start="2026-10-19" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 38 | Predecesoras: 37 | Responsable: Jhorman | Horas PERT: 28]]></notes>
+      <depend id="172" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="171" name="Codificar reportes de inventario, ventas y consumo" color="#3aa76d" meeting="false" start="2026-10-19" duration="4" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 43 | Predecesoras: 42 | Responsable: Ángel | Horas PERT: 28]]></notes>
+      <depend id="174" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="172" name="Codificar historial de pagos" color="#3aa76d" meeting="false" start="2026-10-21" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 39 | Predecesoras: 38 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="175" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="173" name="Codificar historial de domicilios" color="#3aa76d" meeting="false" start="2026-10-22" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 35 | Predecesoras: 34 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="175" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="174" name="Codificar consultas y estadísticas" color="#3aa76d" meeting="false" start="2026-10-24" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 44 | Predecesoras: 43 | Responsable: Ángel | Horas PERT: 28]]></notes>
+      <depend id="175" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="175" name="Integrar módulos de domicilios, pagos, ventas y reportes" color="#3aa76d" meeting="false" start="2026-10-28" duration="3" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 45 | Predecesoras: 35, 39, 44 | Responsable: Ángel | Horas PERT: 28]]></notes>
+      <depend id="176" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="176" name="Entrega del código fuente de la iteración" color="#3aa76d" meeting="false" start="2026-10-30" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 46 | Predecesoras: 45 | Responsable: Ángel | Horas PERT: 0]]></notes>
+      <depend id="178" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+  </task>
+  <task id="177" name="Pruebas – Iteración 4" color="#777777" meeting="false" start="2026-10-30" duration="1" complete="100" expand="true">
+    <task id="178" name="Diseñar casos de prueba de la iteración" color="#e08a2e" meeting="false" start="2026-10-30" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 48 | Predecesoras: 46 | Responsable: Ángel | Horas PERT: 12]]></notes>
+      <depend id="179" type="2" difference="0" hardness="Rubber"/>
+      <depend id="180" type="2" difference="0" hardness="Rubber"/>
+      <depend id="181" type="2" difference="0" hardness="Rubber"/>
+      <depend id="182" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="179" name="Ejecutar pruebas funcionales de domicilios" color="#e08a2e" meeting="false" start="2026-11-03" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 49 | Predecesoras: 48 | Responsable: Jhorman | Horas PERT: 20]]></notes>
+      <depend id="183" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="180" name="Ejecutar pruebas funcionales de ventas y consumo" color="#e08a2e" meeting="false" start="2026-11-03" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 51 | Predecesoras: 48 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="183" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="181" name="Ejecutar pruebas funcionales de pagos" color="#e08a2e" meeting="false" start="2026-11-05" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 50 | Predecesoras: 48 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="183" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="182" name="Ejecutar pruebas funcionales de reportes y estadísticas" color="#e08a2e" meeting="false" start="2026-11-07" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 52 | Predecesoras: 48 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="183" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="183" name="Ejecutar pruebas de integración" color="#e08a2e" meeting="false" start="2026-11-10" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 53 | Predecesoras: 49, 50, 51, 52 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="184" type="2" difference="0" hardness="Rubber"/>
+    </task>
+    <task id="184" name="Realizar correcciones y pruebas de regresión" color="#e08a2e" meeting="false" start="2026-11-12" duration="2" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 54 | Predecesoras: 53 | Responsable: Ángel | Horas PERT: 20]]></notes>
+      <depend id="185" type="2" difference="-1" hardness="Rubber"/>
+    </task>
+    <task id="185" name="Entrega de resultados de las pruebas" color="#e08a2e" meeting="false" start="2026-11-13" duration="1" complete="100" expand="true">
+      <notes><![CDATA[ID PERT 55 | Predecesoras: 54 | Responsable: Ángel | Horas PERT: 0]]></notes>
+    </task>
+  </task>
+</task>
+<task id="186" name="Entrega parcial del 70 % (2.º corte)" color="#d0021b" meeting="true" start="2026-10-20" duration="0" complete="100" expand="true">
+  <notes><![CDATA[Iteraciones 1, 2 y 4: 233 de 330 PF transaccionales (376 de 515 PFSA). 226 pruebas automáticas aprobadas.]]></notes>
+</task>
+</tasks>
+<resources>
+<resource id="0" name="Mateo" function="Default:1" contacts="" phone=""/>
+<resource id="1" name="Jhorman" function="Default:1" contacts="" phone=""/>
+<resource id="2" name="Yovany" function="Default:1" contacts="" phone=""/>
+<resource id="3" name="Ángel" function="Default:1" contacts="" phone=""/>
+</resources>
+<allocations>
+<allocation task-id="2" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="3" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="4" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="5" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="6" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="7" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="8" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="9" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="10" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="12" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="13" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="14" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="15" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="16" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="17" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="18" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="19" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="21" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="22" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="23" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="24" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="25" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="26" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="27" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="28" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="29" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="30" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="32" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="33" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="34" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="35" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="36" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="39" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="40" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="41" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="42" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="43" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="44" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="45" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="46" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="47" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="48" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="50" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="51" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="52" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="53" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="54" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="55" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="56" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="57" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="58" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="60" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="61" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="62" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="63" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="64" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="65" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="66" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="67" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="68" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="69" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="70" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="71" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="72" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="74" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="75" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="76" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="77" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="78" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="79" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="82" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="83" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="84" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="85" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="86" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="87" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="88" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="89" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="90" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="91" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="92" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="93" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="95" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="96" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="97" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="98" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="99" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="100" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="101" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="102" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="103" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="104" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="105" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="106" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="108" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="109" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="110" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="111" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="112" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="113" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="114" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="115" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="116" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="117" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="118" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="119" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="120" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="121" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="122" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="124" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="125" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="126" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="127" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="128" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="129" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="130" resource-id="2" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="133" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="134" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="135" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="136" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="137" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="138" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="139" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="140" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="141" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="142" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="143" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="144" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="145" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="147" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="148" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="149" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="150" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="151" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="152" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="153" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="154" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="155" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="156" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="157" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="158" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="159" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="161" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="162" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="163" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="164" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="165" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="166" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="167" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="168" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="169" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="170" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="171" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="172" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="173" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="174" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="175" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="176" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="178" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="179" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="180" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="181" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="182" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="183" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="184" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+<allocation task-id="185" resource-id="3" function="Default:1" responsible="true" load="100.0"/>
+</allocations>
+<vacations/>
+<previousTasks/>
+<roles roleset-name="Default"/>
+<calendars>
+<day-types>
+<day-type id="0"/>
+<day-type id="1"/>
+<default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="0"/>
+<only-show-weekends value="false"/>
+<overriden-day-types/>
+<days/>
+</day-types>
+<date year="2026" month="1" date="1" type="HOLIDAY" color="#FF0000">Año Nuevo</date>
+<date year="2026" month="1" date="12" type="HOLIDAY" color="#FF0000">Reyes Magos</date>
+<date year="2026" month="3" date="23" type="HOLIDAY" color="#FF0000">San José</date>
+<date year="2026" month="4" date="2" type="HOLIDAY" color="#FF0000">Jueves Santo</date>
+<date year="2026" month="4" date="3" type="HOLIDAY" color="#FF0000">Viernes Santo</date>
+<date year="2026" month="5" date="1" type="HOLIDAY" color="#FF0000">Día del Trabajo</date>
+<date year="2026" month="5" date="18" type="HOLIDAY" color="#FF0000">Ascensión del Señor</date>
+<date year="2026" month="6" date="8" type="HOLIDAY" color="#FF0000">Corpus Christi</date>
+<date year="2026" month="6" date="15" type="HOLIDAY" color="#FF0000">Sagrado Corazón</date>
+<date year="2026" month="6" date="29" type="HOLIDAY" color="#FF0000">San Pedro y San Pablo</date>
+<date year="2026" month="7" date="20" type="HOLIDAY" color="#FF0000">Día de la Independencia</date>
+<date year="2026" month="8" date="7" type="HOLIDAY" color="#FF0000">Batalla de Boyacá</date>
+<date year="2026" month="8" date="17" type="HOLIDAY" color="#FF0000">Asunción de la Virgen</date>
+<date year="2026" month="10" date="12" type="HOLIDAY" color="#FF0000">Día de la Raza</date>
+<date year="2026" month="11" date="2" type="HOLIDAY" color="#FF0000">Todos los Santos</date>
+<date year="2026" month="11" date="16" type="HOLIDAY" color="#FF0000">Independencia de Cartagena</date>
+<date year="2026" month="12" date="8" type="HOLIDAY" color="#FF0000">Inmaculada Concepción</date>
+<date year="2026" month="12" date="25" type="HOLIDAY" color="#FF0000">Navidad</date>
+<date year="2027" month="1" date="1" type="HOLIDAY" color="#FF0000">Año Nuevo</date>
+<date year="2027" month="1" date="11" type="HOLIDAY" color="#FF0000">Reyes Magos</date>
+</calendars>
+</project>
