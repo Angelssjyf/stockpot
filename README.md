@@ -21,10 +21,10 @@ frontend/                                              backend/                 
 
 | Iteración | Responsable | Módulos | Estado |
 |---|---|---|---|
-| 1 | Mateo | Usuarios y roles (RF-01) · Proveedores y compras (RF-02) | ✅ Terminado |
-| 2 | Jhorman | Inventario (RF-03) · Productos y menú (RF-04) | ✅ Terminado |
-| 3 | Yovany | Pedidos (RF-05) · Cocina (RF-06) · Reservas (RF-07) | ⏳ Pendiente (30 %) |
-| 4 | Ángel | Domicilios (RF-08) · Pagos (RF-09) · Ventas y consumo (RF-10) · Reportes (RF-11) | ✅ Terminado |
+| 1 | Andrés Mateo Puentes | Usuarios y roles (RF-01) · Proveedores y compras (RF-02) | ✅ Terminado |
+| 2 | Jhorman Caballero | Inventario (RF-03) · Productos y menú (RF-04) | ✅ Terminado |
+| 3 | Yovany Peñaranda | Pedidos (RF-05) · Cocina (RF-06) · Reservas (RF-07) | ⏳ Pendiente (30 %) |
+| 4 | Ángel David Rodríguez Vega (líder) | Domicilios (RF-08) · Pagos (RF-09) · Ventas y consumo (RF-10) · Reportes (RF-11) | ✅ Terminado |
 
 **Entrega del 2.º corte (20/10/2026): 70 % del software** = Iteraciones 1, 2 y 4 → 233 de 330 puntos
 de función (376 de 515 PFSA). 267 pruebas automáticas aprobadas (41 de ellas unitarias), 95 % de cobertura del backend.
@@ -33,6 +33,7 @@ de función (376 de 515 PFSA). 267 pruebas automáticas aprobadas (41 de ellas u
 
 | Qué | Dónde |
 |---|---|
+| Cliente | Restaurante Sexto Sentido Café & Brunch |
 | Tablero de tareas | [Jira – proyecto STOC](https://mateopuentes1227.atlassian.net/jira/software/projects/STOC/boards/34) |
 | Cronograma | [Cronograma_StockPot.gan](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Cronograma_StockPot.gan) (GanttProject) · [imagen](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Cronograma_StockPot.png) |
 | Duración | 10/08/2026 – 13/11/2026 · lunes a sábado, sin domingos ni festivos de Colombia |
