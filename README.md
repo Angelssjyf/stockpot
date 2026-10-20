@@ -22,12 +22,34 @@ frontend/                                              backend/                 
 | Iteración | Responsable | Módulos | Estado |
 |---|---|---|---|
 | 1 | Mateo | Usuarios y roles (RF-01) · Proveedores y compras (RF-02) | ✅ Terminado |
-| 2 | Jorman | Inventario (RF-03) · Productos y menú (RF-04) | ✅ Terminado |
+| 2 | Jhorman | Inventario (RF-03) · Productos y menú (RF-04) | ✅ Terminado |
 | 3 | Yovany | Pedidos (RF-05) · Cocina (RF-06) · Reservas (RF-07) | ⏳ Pendiente (30 %) |
 | 4 | Ángel | Domicilios (RF-08) · Pagos (RF-09) · Ventas y consumo (RF-10) · Reportes (RF-11) | ✅ Terminado |
 
 **Entrega del 2.º corte (20/10/2026): 70 % del software** = Iteraciones 1, 2 y 4 → 233 de 330 puntos
 de función (376 de 515 PFSA). 226 pruebas automáticas aprobadas, 95 % de cobertura del backend.
+
+## Gestión del proyecto
+
+| Qué | Dónde |
+|---|---|
+| Tablero de tareas | [Jira – proyecto STOC](https://mateopuentes1227.atlassian.net/jira/software/projects/STOC/boards/34) |
+| Cronograma | [Cronograma_StockPot.gan](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Cronograma_StockPot.gan) (GanttProject) · [imagen](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Cronograma_StockPot.png) |
+| Duración | 10/08/2026 – 13/11/2026 · lunes a sábado, sin domingos ni festivos de Colombia |
+| Estimación | Puntos de función y PERT ([Excel](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Puntos_de_Funcion_y_PERT_StockPot.xlsx)) |
+
+Estado del tablero de Jira al 19/10/2026 (166 tareas, una por cada fila del plan PERT):
+
+| Iteración | Listo | En curso | Por hacer | Avance en el cronograma |
+|---|---|---|---|---|
+| 1 – Mateo | 32 | 0 | 0 | 100 % |
+| 2 – Jhorman | 38 | 0 | 0 | 100 % |
+| 3 – Yovany | 3 | 21 | 22 | 28 % (análisis y diseño en curso; codificación y pruebas pendientes) |
+| 4 – Ángel | 50 | 0 | 0 | 100 % |
+| **Total** | **123** | **21** | **22** | |
+
+Hitos: **20/10/2026** entrega parcial del 70 % (2.º corte) · **21/10 – 13/11/2026** Iteración 3
+(30 % restante), pruebas de aceptación y entrega final.
 
 ## Estructura del proyecto
 
@@ -232,4 +254,12 @@ Después abre un **Pull Request hacia `develop`** en GitHub para que otro integr
 ## Documentación del 2.º corte
 
 En [docs/entrega-2do-corte](docs/entrega-2do-corte) están los entregables, organizados según la
-sección de procesos técnicos y de soporte de IEEE 1058 (ver su README).
+sección de procesos técnicos y de soporte de IEEE 1058 (ver su README):
+
+| Carpeta | Contenido |
+|---|---|
+| `01_Plan_de_gestion_del_proyecto` | Acta de constitución (70 % entregado / 30 % pendiente) · cronograma de GanttProject con el avance de Jira · Excel de puntos de función y PERT · enlace de Jira |
+| `02_Metodos_herramientas_y_tecnicas` | Prompts e inteligencia artificial utilizada |
+| `03_Verificacion_y_validacion` | Plan de pruebas (casos CRUD) · matriz de criterios de aceptación v1 · informe de pruebas realizadas |
+| `04_Aceptacion_del_producto` | Acta de aceptación del cliente (UAT, Formato 2) |
+| `05_Demostracion` | Video del recorrido por los módulos del 70 % |
