@@ -232,7 +232,7 @@ document.querySelectorAll('dialog').forEach(prepararVentana);
 //  Efecto de onda al tocar botones, tarjetas, mesas y filas
 // =====================================================================
 
-const CON_ONDA = '.boton-principal, .boton-texto, .tarjeta-modulo, .mesa, .fila.editable, .chip.filtro';
+const CON_ONDA = '.boton-principal, .boton-texto, .tarjeta-modulo, .mesa, .fila.editable, .chip.filtro, .plato, .tarjeta-hoy';
 
 document.addEventListener('pointerdown', (evento) => {
   const elemento = evento.target.closest(CON_ONDA);
