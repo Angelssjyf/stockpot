@@ -1,6 +1,6 @@
 // Módulo de reportes y estadísticas (RF-11.1 a RF-11.6).
 import { api, exigirSesion } from './api.js';
-import { crear, formato } from './ui.js';
+import { crear, empezarCarga, formato, pintarSuave } from './ui.js';
 
 await exigirSesion('reportes.ver'); // solo el ADMINISTRADOR
 
@@ -310,12 +310,14 @@ async function generar() {
   $('periodo').textContent = reporte.sinFechas ? ''
     : `Del ${formato.fecha($('desde').value)} al ${formato.fecha($('hasta').value)}`;
   $('error').hidden = true;
-  $('contenido-reporte').replaceChildren(crear('p', { className: 'nota', texto: 'Generando…' }));
+  if (empezarCarga($('contenido-reporte'))) {
+    pintarSuave($('contenido-reporte'), crear('p', { className: 'nota', texto: 'Generando…' }));
+  }
   tablaActual = { nombre: reporteActual, columnas: [], filas: [] };
   try {
-    $('contenido-reporte').replaceChildren(...await reporte.pintar(parametros));
+    pintarSuave($('contenido-reporte'), ...await reporte.pintar(parametros));
   } catch (error) {
-    $('contenido-reporte').replaceChildren();
+    pintarSuave($('contenido-reporte'));
     $('error').textContent = error.message;
     $('error').hidden = false;
   }

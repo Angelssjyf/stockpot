@@ -1,6 +1,6 @@
 // Módulo de domicilios (RF-08.1 a RF-08.8): pedidos, clientes, asignación, estados y entregas.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('domicilios.ver'); // sin el permiso vuelve al menú
 // CAJERO y ADMINISTRADOR gestionan; el DOMICILIARIO solo ve y entrega lo suyo
@@ -35,7 +35,7 @@ function chipEstado(estado) {
 function filaDeDomicilio(domicilio, conEspera) {
   const detalle = [domicilio.direccion, domicilio.domiciliario && `🛵 ${domicilio.domiciliario}`]
     .filter(Boolean).join(' · ');
-  const fila = crear('li', { className: 'fila editable' }, [
+  const fila = crear('li', { className: 'fila editable', 'data-clave': domicilio.id, 'data-version': `${domicilio.estado}|${domicilio.total}|${domicilio.domiciliario ?? ''}` }, [
     crear('div', { className: 'avatar' }, [
       crear('span', { className: 'icono', texto: 'delivery_dining', 'aria-hidden': 'true' }),
     ]),
@@ -107,10 +107,10 @@ function pintarLista() {
   const visibles = domicilios.filter((d) => !estadoElegido || d.estado === estadoElegido);
   if (visibles.length === 0) {
     mostrarEstado(puedeGestionar ? 'No hay domicilios en curso' : 'No tienes domicilios asignados');
-    $('lista').replaceChildren();
+    pintarSuave($('lista'));
   } else {
     $('estado').hidden = true;
-    $('lista').replaceChildren(...visibles.map((d) => filaDeDomicilio(d, true)));
+    pintarSuave($('lista'), ...visibles.map((d) => filaDeDomicilio(d, true)));
   }
 }
 
@@ -139,19 +139,21 @@ $('h-desde').value = iso(haceUnaSemana);
 $('h-hasta').value = iso(hoy);
 
 async function cargarHistorial() {
-  $('estado-historial').hidden = false;
-  $('estado-historial').textContent = 'Cargando…';
+  if (empezarCarga($('lista-historial'))) {
+    $('estado-historial').hidden = false;
+    $('estado-historial').textContent = 'Cargando…';
+  }
   try {
     const parametros = new URLSearchParams({ desde: $('h-desde').value, hasta: $('h-hasta').value });
     const { resumen, domicilios: lista } = await api('GET', `/domicilios/historial?${parametros}`);
-    $('resumen-historial').replaceChildren(
+    pintarSuave($('resumen-historial'),
       tarjetaResumen('task_alt', 'Entregados', String(resumen.entregados)),
       tarjetaResumen('cancel', 'Cancelados', String(resumen.cancelados)),
       tarjetaResumen('payments', 'Total entregado', formato.dinero(resumen.total_entregado)),
     );
     $('estado-historial').hidden = lista.length > 0;
     $('estado-historial').textContent = 'No hay domicilios en esas fechas';
-    $('lista-historial').replaceChildren(...lista.map((d) => filaDeDomicilio(d, false)));
+    pintarSuave($('lista-historial'), ...lista.map((d) => filaDeDomicilio(d, false)));
   } catch (error) {
     $('estado-historial').textContent = error.message;
   }
@@ -302,7 +304,7 @@ function pintarLineas() {
     ]);
   });
   if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Agrega los productos que pidió el cliente.' }));
-  $('lineas-pedido').replaceChildren(...filas);
+  pintarSuave($('lineas-pedido'), ...filas);
   pintarTotal();
 }
 
@@ -454,11 +456,11 @@ function pintarDetalle(domicilio) {
     ['Entregado', domicilio.fecha_entrega && `${fechaHora(domicilio.fecha_entrega)} · recibió ${domicilio.recibido_por}`],
     ['Observaciones', [orden.observaciones, domicilio.observacion_entrega].filter(Boolean).join(' · ')],
   ].filter(([, valor]) => valor);
-  $('detalle-datos').replaceChildren(...datos.flatMap(([titulo, valor]) => [
+  pintarSuave($('detalle-datos'), ...datos.flatMap(([titulo, valor]) => [
     crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
   ]));
 
-  $('detalle-lineas').replaceChildren(
+  pintarSuave($('detalle-lineas'),
     ...orden.detalles.map((d) => crear('li', {}, [
       crear('span', { texto: `${d.cantidad} × ${d.producto}${d.observacion ? ` (${d.observacion})` : ''}` }),
       crear('span', { texto: formato.dinero(d.subtotal) }),

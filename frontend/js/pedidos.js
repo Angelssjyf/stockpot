@@ -1,6 +1,6 @@
 // Módulo de pedidos en mesa (RF-05.1 a RF-05.9): mesas, pedidos, cocina y estado.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso, normalizar, pintarSuave } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, normalizar, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('pedidos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('pedidos.gestionar'); // MESERO, CAJERO, ADMINISTRADOR
@@ -109,7 +109,7 @@ async function cargarMesas() {
 function pintarMesas() {
   const ocupadas = mesas.filter((m) => m.ocupada);
   const porCobrar = ocupadas.reduce((total, m) => total + m.pedido.total, 0);
-  $('resumen-mesas').replaceChildren(
+  pintarSuave($('resumen-mesas'),
     tarjetaResumen('event_available', 'Mesas libres', String(mesas.length - ocupadas.length)),
     tarjetaResumen('groups', 'Mesas ocupadas', String(ocupadas.length)),
     tarjetaResumen('payments', 'En mesas sin cobrar', formato.dinero(porCobrar)),
@@ -117,7 +117,7 @@ function pintarMesas() {
   $('estado-mesas').hidden = mesas.length > 0;
   $('estado-mesas').textContent = puedeGestionar
     ? 'Todavía no hay mesas. Créalas con «Administrar mesas».' : 'Todavía no hay mesas registradas.';
-  $('mesas').replaceChildren(...mesas.map(tarjetaMesa));
+  pintarSuave($('mesas'), ...mesas.map(tarjetaMesa));
 }
 
 function tarjetaMesa(mesa) {
@@ -138,6 +138,9 @@ function tarjetaMesa(mesa) {
   const tarjeta = crear('button', {
     type: 'button', className: `mesa${mesa.ocupada ? ' ocupada' : ''}`,
     'aria-label': `Mesa ${mesa.numero}, ${mesa.ocupada ? 'ocupada' : 'libre'}`,
+    // Clave y versión: al refrescar solo se ilumina la mesa que cambió (no por el "hace N min")
+    'data-clave': mesa.id,
+    'data-version': mesa.ocupada ? [mesa.pedido.codigo, mesa.pedido.estado, mesa.pedido.total, mesa.pedido.productos].join('|') : 'libre',
   }, partes);
   tarjeta.addEventListener('click', () => {
     if (mesa.ocupada) abrirDetalle(mesa.pedido.id);
@@ -155,7 +158,7 @@ let activos = [];
 let estadoElegido = '';
 
 function filaDePedido(pedido, conEspera) {
-  const fila = crear('li', { className: 'fila editable' }, [
+  const fila = crear('li', { className: 'fila editable', 'data-clave': pedido.id, 'data-version': `${pedido.estado}|${pedido.total}` }, [
     crear('div', { className: 'avatar' }, [
       crear('span', { className: 'icono', texto: 'table_restaurant', 'aria-hidden': 'true' }),
     ]),
@@ -203,7 +206,7 @@ function pintarActivos() {
   const visibles = activos.filter((p) => !estadoElegido || p.estado === estadoElegido);
   $('estado-activos').hidden = visibles.length > 0;
   $('estado-activos').textContent = 'No hay pedidos activos';
-  $('lista-activos').replaceChildren(...visibles.map((p) => filaDePedido(p, true)));
+  pintarSuave($('lista-activos'), ...visibles.map((p) => filaDePedido(p, true)));
 }
 
 const iso = (fecha) => fecha.toLocaleDateString('en-CA'); // AAAA-MM-DD en hora local
@@ -211,15 +214,17 @@ $('h-desde').value = iso(new Date(Date.now() - 7 * 24 * 3600 * 1000));
 $('h-hasta').value = iso(new Date());
 
 async function cargarHistorial() {
-  $('estado-historial').hidden = false;
-  $('estado-historial').textContent = 'Cargando…';
+  if (empezarCarga($('lista-historial'))) {
+    $('estado-historial').hidden = false;
+    $('estado-historial').textContent = 'Cargando…';
+  }
   try {
     const parametros = new URLSearchParams({ vista: 'historial', desde: $('h-desde').value, hasta: $('h-hasta').value });
     if ($('h-codigo').value.trim()) parametros.set('q', $('h-codigo').value.trim());
     const lista = await api('GET', `/pedidos?${parametros}`);
     $('estado-historial').hidden = lista.length > 0;
     $('estado-historial').textContent = 'No hay pedidos en esas fechas';
-    $('lista-historial').replaceChildren(...lista.map((p) => filaDePedido(p, false)));
+    pintarSuave($('lista-historial'), ...lista.map((p) => filaDePedido(p, false)));
   } catch (error) {
     $('estado-historial').textContent = error.message;
   }
@@ -523,13 +528,13 @@ function pintarDetalle(pedido) {
     ['Cuenta', cobro],
     ['Observaciones', pedido.observaciones],
   ].filter(([, valor]) => valor);
-  $('detalle-datos').replaceChildren(...datos.flatMap(([titulo, valor]) => [crear('dt', { texto: titulo }), crear('dd', { texto: valor })]));
+  pintarSuave($('detalle-datos'), ...datos.flatMap(([titulo, valor]) => [crear('dt', { texto: titulo }), crear('dd', { texto: valor })]));
 
   // RF-05.9 Recorrido: cada paso con su hora
-  $('detalle-tiempo').replaceChildren(...pedido.linea_de_tiempo.map((paso) =>
+  pintarSuave($('detalle-tiempo'), ...pedido.linea_de_tiempo.map((paso) =>
     crear('li', { texto: `${NOMBRES_ESTADO[paso.estado]} ${hora(paso.fecha)}` })));
 
-  $('detalle-lineas').replaceChildren(...pedido.detalles.map((d) => crear('li', {}, [
+  pintarSuave($('detalle-lineas'), ...pedido.detalles.map((d) => crear('li', {}, [
     crear('span', { texto: `${d.cantidad} × ${d.producto}${d.observacion ? ` (${d.observacion})` : ''}` }),
     crear('span', { texto: formato.dinero(d.subtotal) }),
   ])));
@@ -629,7 +634,7 @@ async function abrirAdminMesas() {
 async function pintarAdminMesas() {
   try {
     const todas = await api('GET', '/mesas?todas=true');
-    $('lista-admin-mesas').replaceChildren(...todas.map((m) => {
+    pintarSuave($('lista-admin-mesas'), ...todas.map((m) => {
       const li = crear('li', {}, [
         crear('span', {
           className: m.activa ? '' : 'mesa-inactiva',

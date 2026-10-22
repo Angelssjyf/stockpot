@@ -62,24 +62,41 @@ export function normalizar(texto) {
 }
 
 /**
- * Cambia las filas de una lista sin saltos. Cada fila trae data-clave (quién es) y, si quiere,
- * data-version (cómo está): las que ya estaban y no cambiaron se quedan quietas, las nuevas
- * aparecen con un fundido corto y las que cambiaron (por ejemplo su stock) se iluminan un momento.
+ * Cambia el contenido de una lista sin saltos (se usa igual que replaceChildren).
+ * Cada fila se reconoce por su data-clave o, si no la trae, por su texto: las que ya estaban
+ * y no cambiaron se quedan quietas, las nuevas aparecen con un fundido corto y las que traen
+ * la misma clave con otra data-version (por ejemplo otro stock) se iluminan un momento.
  */
-export function pintarSuave(contenedor, filas) {
-  const antes = new Map([...contenedor.children].map((el) => [el.dataset.clave, el.dataset.version]));
+export function pintarSuave(contenedor, ...filas) {
+  filas = filas.flat();
+  const clave = (el) => el.dataset?.clave ?? el.textContent;
+  const antes = new Map([...contenedor.children].map((el) => [clave(el), el.dataset.version]));
   let nuevas = 0;
   for (const fila of filas) {
-    const clave = fila.dataset.clave;
+    if (!(fila instanceof HTMLElement)) continue;
     let clase = null;
-    if (clave === undefined || !antes.has(clave)) clase = 'nueva';
-    else if (antes.get(clave) !== fila.dataset.version) clase = 'cambiada';
+    if (!antes.has(clave(fila))) clase = 'nueva';
+    else if (antes.get(clave(fila)) !== fila.dataset.version) clase = 'cambiada';
     if (!clase) continue;
     if (clase === 'nueva') fila.style.setProperty('--i', Math.min(nuevas++, 8)); // cascada corta
     fila.classList.add(clase);
     fila.addEventListener('animationend', () => fila.classList.remove(clase), { once: true });
   }
+  contenedor.classList.remove('actualizando');
   contenedor.replaceChildren(...filas);
+}
+
+/**
+ * Al recargar una lista: si ya tiene filas se atenúan mientras llegan los datos (sin vaciarla)
+ * y devuelve false; si está vacía devuelve true para que la pantalla muestre "Cargando…".
+ */
+export function empezarCarga(contenedor) {
+  if (contenedor.children.length) {
+    contenedor.classList.add('actualizando');
+    setTimeout(() => contenedor.classList.remove('actualizando'), 8000); // si la carga falló, no queda atenuada
+    return false;
+  }
+  return true;
 }
 
 /** Lleva un número de su valor anterior al nuevo en un instante, como un contador. */
@@ -230,3 +247,33 @@ document.addEventListener('pointerdown', (evento) => {
   elemento.appendChild(onda);
   onda.addEventListener('animationend', () => onda.remove(), { once: true });
 });
+
+// =====================================================================
+//  Pestañas: la línea de la pestaña elegida se desliza hasta la nueva en vez de saltar
+// =====================================================================
+
+function prepararPestanas(barra) {
+  const indicador = crear('span', { className: 'indicador-pestana', 'aria-hidden': 'true' });
+  barra.appendChild(indicador);
+  let primera = true;
+  const mover = () => {
+    if (!barra.contains(indicador)) barra.appendChild(indicador); // la pantalla volvió a pintar las pestañas
+    const elegida = barra.querySelector('[aria-selected="true"]');
+    if (!elegida) return;
+    if (primera) indicador.style.transition = 'none'; // la primera vez aparece en su sitio
+    indicador.style.width = `${elegida.offsetWidth}px`;
+    indicador.style.transform = `translateX(${elegida.offsetLeft}px)`;
+    if (primera) {
+      void indicador.offsetWidth;
+      indicador.style.transition = '';
+      primera = false;
+    }
+    if (barra.scrollWidth > barra.clientWidth) elegida.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  };
+  new MutationObserver(mover).observe(barra, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-selected'] });
+  addEventListener('resize', mover);
+  document.fonts?.ready.then(mover);
+  mover();
+}
+
+document.querySelectorAll('.pestanas').forEach(prepararPestanas);

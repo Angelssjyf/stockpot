@@ -1,6 +1,6 @@
 // Módulo de productos y menú (RF-04.1 a RF-04.6): carta, recetas, precios y disponibilidad.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('productos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('productos.gestionar');
@@ -43,8 +43,7 @@ function pintarCategorias() {
 }
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
   try {
     productos = await api('GET', '/productos');
     pintarLista();
@@ -60,9 +59,10 @@ function pintarLista() {
     && normalizar(`${p.codigo} ${p.nombre}`).includes(texto));
   if (visibles.length === 0) {
     mostrarEstado(productos.length ? 'No se encontraron productos' : 'Todavía no hay productos');
+    pintarSuave($('lista'));
   } else {
     $('estado').hidden = true;
-    $('lista').replaceChildren(...visibles.map(filaDeProducto));
+    pintarSuave($('lista'), ...visibles.map(filaDeProducto));
   }
 }
 
@@ -238,7 +238,7 @@ function pintarReceta() {
     ]);
   });
   if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Todavía no tiene insumos.' }));
-  $('lineas-receta').replaceChildren(...filas);
+  pintarSuave($('lineas-receta'), ...filas);
 
   // En el selector solo aparecen los insumos que todavía no están en la receta
   const yaEstan = new Set(receta.map((linea) => linea.insumo_id));
@@ -254,7 +254,7 @@ function pintarReceta() {
 /** Costo de la porción y ganancia, recalculados mientras se edita. */
 function pintarCostos() {
   if (!puedeGestionar) {
-    $('costos').replaceChildren(); // el costo y la ganancia son información del administrador
+    pintarSuave($('costos')); // el costo y la ganancia son información del administrador
     return;
   }
   const costo = receta.reduce((total, linea) => total + (linea.cantidad || 0) * linea.costo_unitario, 0);
@@ -264,7 +264,7 @@ function pintarCostos() {
     const margen = precio - costo;
     filas.push(['Ganancia por porción', `${formato.dinero(margen)} (${Math.round((margen / precio) * 100)} %)`]);
   }
-  $('costos').replaceChildren(...filas.flatMap(([titulo, valor]) => [
+  pintarSuave($('costos'), ...filas.flatMap(([titulo, valor]) => [
     crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
   ]));
 }

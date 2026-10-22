@@ -1,7 +1,7 @@
 // Módulo de proveedores: RF-02.1 Registrar, RF-02.2 Consultar, RF-02.3 Modificar,
 // RF-02.4 Productos suministrados y RF-02.5 Historial de compras.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('proveedores.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('proveedores.gestionar');
@@ -16,16 +16,16 @@ const $ = (id) => document.getElementById(id);
 // =====================================================================
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
   try {
     const texto = encodeURIComponent($('buscar').value.trim());
     const proveedores = await api('GET', `/proveedores?q=${texto}`);
     if (proveedores.length === 0) {
       mostrarEstado('No se encontraron proveedores');
+      pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
-      $('lista').replaceChildren(...proveedores.map(filaDeProveedor));
+      pintarSuave($('lista'), ...proveedores.map(filaDeProveedor));
     }
   } catch (error) {
     mostrarEstado(error.message, true);
@@ -142,7 +142,7 @@ function pintarInsumos() {
     ]);
   });
   if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Todavía no tiene insumos.' }));
-  $('lineas-insumos').replaceChildren(...filas);
+  pintarSuave($('lineas-insumos'), ...filas);
 
   // En el selector solo aparecen los insumos que todavía no vende
   const yaVende = new Set(insumosDelProveedor.map((item) => item.insumo_id));
@@ -172,10 +172,10 @@ $('agregar-insumo').addEventListener('click', () => {
 
 function pintarHistorial(compras) {
   if (compras.length === 0) {
-    $('historial').replaceChildren(crear('li', { texto: 'Sin compras registradas.' }));
+    pintarSuave($('historial'), crear('li', { texto: 'Sin compras registradas.' }));
     return;
   }
-  $('historial').replaceChildren(...compras.map((orden) => crear('li', {}, [
+  pintarSuave($('historial'), ...compras.map((orden) => crear('li', {}, [
     crear('span', { texto: `${orden.codigo} · ${formato.fecha(orden.fecha_orden)}` }),
     crear('span', { className: `chip estado-${orden.estado}`, texto: orden.estado }),
     crear('strong', { texto: formato.dinero(orden.total) }),

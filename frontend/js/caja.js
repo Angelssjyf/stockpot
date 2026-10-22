@@ -1,6 +1,6 @@
 // Módulo de caja y pagos (RF-09.1 a RF-09.7) y venta de mostrador (RF-10.1).
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('pagos.ver'); // sin el permiso vuelve al menú
 const puedeCobrar = yo.permisos.includes('pagos.gestionar');
@@ -132,7 +132,7 @@ async function cargarPorCobrar() {
     const ordenes = await api('GET', '/ordenes/por-cobrar');
     $('estado-cobrar').hidden = ordenes.length > 0;
     $('estado-cobrar').textContent = 'No hay órdenes pendientes de pago';
-    $('lista-cobrar').replaceChildren(...ordenes.map((orden) => {
+    pintarSuave($('lista-cobrar'), ...ordenes.map((orden) => {
       const chips = [crear('span', { className: 'chip', texto: `Saldo ${formato.dinero(orden.saldo)}` })];
       if (orden.pagado > 0) chips.unshift(crear('span', { className: 'chip estado-PARCIAL', texto: 'Pago parcial' }));
       const tipo = orden.mesa ? `Mesa ${orden.mesa}` : TIPOS[orden.tipo];
@@ -179,7 +179,7 @@ function pintarCuenta(cuenta) {
     crear('span', { className: `chip estado-${cuenta.estado_pago}`, texto: ESTADOS_PAGO[cuenta.estado_pago] }),
   );
   $('cuenta-cliente').textContent = [TIPOS[cuenta.tipo], cuenta.cliente?.nombre].filter(Boolean).join(' · ');
-  $('cuenta-lineas').replaceChildren(...cuenta.productos.map((d) => crear('li', {}, [
+  pintarSuave($('cuenta-lineas'), ...cuenta.productos.map((d) => crear('li', {}, [
     crear('span', { texto: `${d.cantidad} × ${d.producto}` }),
     crear('span', { texto: formato.dinero(d.subtotal) }),
   ])));
@@ -192,13 +192,13 @@ function pintarCuenta(cuenta) {
     ['Pagado', formato.dinero(cuenta.pagado)],
     ['Saldo', formato.dinero(cuenta.saldo)],
   );
-  $('cuenta-totales').replaceChildren(...filas.flatMap(([titulo, valor]) => [
+  pintarSuave($('cuenta-totales'), ...filas.flatMap(([titulo, valor]) => [
     crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
   ]));
 
   // Pagos ya hechos, con opción de anular mientras la orden siga abierta
   $('bloque-pagos-hechos').hidden = cuenta.pagos.length === 0;
-  $('cuenta-pagos').replaceChildren(...cuenta.pagos.map((pago) => {
+  pintarSuave($('cuenta-pagos'), ...cuenta.pagos.map((pago) => {
     const texto = `${METODOS[pago.metodo]} · ${formato.dinero(pago.monto)}`
       + (pago.cambio ? ` (cambio ${formato.dinero(pago.cambio)})` : '')
       + (pago.referencia ? ` · ref. ${pago.referencia}` : '');
@@ -311,7 +311,7 @@ function pintarLineas() {
     ]);
   });
   if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Agrega lo que lleva el cliente.' }));
-  $('m-lineas').replaceChildren(...filas);
+  pintarSuave($('m-lineas'), ...filas);
   $('m-total').textContent = `Total: ${formato.dinero(totalMostrador())}`;
   pagoMostrador?.actualizar();
 }
@@ -380,12 +380,14 @@ $('p-desde').value = hoy;
 $('p-hasta').value = hoy;
 
 async function cargarPagos() {
-  $('estado-pagos').hidden = false;
-  $('estado-pagos').textContent = 'Cargando…';
+  if (empezarCarga($('lista-pagos'))) {
+    $('estado-pagos').hidden = false;
+    $('estado-pagos').textContent = 'Cargando…';
+  }
   try {
     const parametros = new URLSearchParams({ desde: $('p-desde').value, hasta: $('p-hasta').value });
     const { resumen, pagos } = await api('GET', `/pagos?${parametros}`);
-    $('resumen-pagos').replaceChildren(
+    pintarSuave($('resumen-pagos'),
       tarjetaResumen('payments', 'Total recibido', formato.dinero(resumen.total)),
       tarjetaResumen('money', 'Efectivo', formato.dinero(resumen.por_metodo.EFECTIVO)),
       tarjetaResumen('credit_card', 'Tarjeta', formato.dinero(resumen.por_metodo.TARJETA)),
@@ -393,7 +395,7 @@ async function cargarPagos() {
     );
     $('estado-pagos').hidden = pagos.length > 0;
     $('estado-pagos').textContent = 'No hay pagos en esas fechas';
-    $('lista-pagos').replaceChildren(...pagos.map((pago) => {
+    pintarSuave($('lista-pagos'), ...pagos.map((pago) => {
       const chips = [crear('span', { className: 'chip', texto: formato.dinero(pago.monto) })];
       if (pago.estado === 'ANULADO') chips.unshift(crear('span', { className: 'chip estado-CANCELADO', texto: 'Anulado' }));
       const fila = crear('li', { className: 'fila editable' }, [

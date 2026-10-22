@@ -1656,3 +1656,71 @@ dialog.arrastrando {
 h2[tabindex="-1"]:focus {
   outline: none; /* recibe el foco al abrir la ventana solo para que no salte el teclado */
 }
+
+/* ------------------------------------------------------------ Transiciones en todo el sistema */
+/* Al pasar de una pantalla a otra (menú -> módulo) la página cambia con un fundido, no de golpe */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root) {
+    animation: desvanecer 0.16s ease-in both;
+  }
+
+  ::view-transition-new(root) {
+    animation: fundido 0.22s ease-out both;
+  }
+}
+
+/* Mientras una lista se recarga queda atenuada (sin vaciarse); si carga rápido ni se nota */
+.actualizando {
+  opacity: 0.55;
+  transition: opacity 0.2s ease 0.15s;
+}
+
+.lista,
+.mesas,
+.resumen,
+.mini-lista,
+#contenido-reporte {
+  transition: opacity 0.2s ease;
+}
+
+/* Las pestañas: el contenido nuevo entra con un fundido y la línea se desliza (ui.js) */
+[id^="vista-"]:not([hidden]),
+.seccion[id^="bloque-"]:not([hidden]) {
+  animation: aparecer-arriba 0.28s var(--curva-suave);
+}
+
+.pestanas {
+  position: relative;
+}
+
+.pestanas button {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.pestanas button[aria-selected="true"] {
+  border-bottom-color: transparent; /* la línea la dibuja el indicador que se desliza */
+}
+
+.indicador-pestana {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--primario);
+  pointer-events: none;
+  transition: transform 0.3s var(--curva-suave), width 0.3s var(--curva-suave);
+}
+
+/* Los campos y botones cambian de color suavemente (foco, error, deshabilitado) */
+.campo {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.error-campo {
+  transition: color 0.2s ease;
+}
