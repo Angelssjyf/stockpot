@@ -1724,3 +1724,612 @@ h2[tabindex="-1"]:focus {
 .error-campo {
   transition: color 0.2s ease;
 }
+
+/* ------------------------------------------------------------ Mesas como tarjetas con ícono (igual que el menú) */
+.mesa {
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  gap: 6px;
+  min-height: 196px;
+  padding: 14px 12px 16px;
+  border: 2px solid transparent;
+  background: var(--superficie);
+}
+
+.mesa .marco-mesa {
+  padding: 4px 14px;
+  border: 2px solid #86c995;
+  border-radius: 10px;
+  background: #f1fbf3;
+  color: #14532d;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.mesa .icono-mesa {
+  font-size: 52px;
+  color: var(--primario);
+  margin: 6px 0 2px;
+  transition: transform 0.25s var(--curva-rebote);
+}
+
+.mesa:hover .icono-mesa {
+  transform: scale(1.12);
+}
+
+.mesa .estado-mesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mesa:not(.ocupada) .estado-mesa::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2e9e4f;
+}
+
+.mesa .detalle-mesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mesa .detalle-mesa .icono {
+  font-size: 16px;
+}
+
+.mesa.ocupada {
+  border-color: #f0a878;
+  background: #fff4ec;
+}
+
+.mesa.ocupada .marco-mesa {
+  border-color: #f0a878;
+  background: #ffe0cc;
+  color: #6b2e00;
+}
+
+.mesa.ocupada .icono-mesa {
+  color: #c25a1c;
+}
+
+/* ------------------------------------------------------------ Ventana del pedido: carta + pedido */
+dialog.extra-ancho {
+  width: min(1040px, calc(100vw - 32px));
+}
+
+.pedido-columnas {
+  display: grid;
+  gap: 0 24px;
+}
+
+@media (min-width: 900px) {
+  .pedido-columnas {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .pedido-columnas .carta {
+    max-height: 46vh;
+  }
+}
+
+.carta {
+  list-style: none;
+  margin: 0;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 38vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.carta .sin-resultados {
+  text-align: center;
+  padding: 16px;
+}
+
+.plato {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.15s ease, border-color 0.2s ease, transform 0.12s var(--curva-suave);
+}
+
+.plato:hover {
+  background: var(--fondo);
+  border-color: var(--primario);
+}
+
+.plato:active {
+  transform: scale(0.985);
+}
+
+.plato.en-pedido {
+  border-color: var(--primario);
+  background: #fff6f2;
+}
+
+.plato .icono-categoria {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  font-size: 22px;
+}
+
+.plato .datos-plato {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.plato .nombre-producto {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plato small {
+  color: var(--texto-suave);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plato mark {
+  background: var(--contenedor-primario);
+  color: inherit;
+  border-radius: 3px;
+}
+
+.plato .precio-plato {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.plato .precio-plato .icono {
+  color: var(--primario);
+}
+
+.chip.contador-plato {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--sobre-primario);
+  font-weight: 600;
+}
+
+/* Líneas del pedido: el nombre se toca para cambiar cantidad u observaciones */
+.nombre-linea {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 4px 6px;
+  margin-left: -6px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.nombre-linea:hover {
+  background: var(--superficie-variante);
+}
+
+.observacion-linea {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8a4a00;
+  font-size: 12px;
+}
+
+.observacion-linea .icono {
+  font-size: 15px;
+}
+
+.observacion-linea.vacia {
+  color: var(--texto-suave);
+  opacity: 0.8;
+}
+
+/* ------------------------------------------------------------ Ventana del plato */
+.cabecera-plato {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cabecera-plato h2 {
+  margin: 0;
+}
+
+.cabecera-plato .nota {
+  margin: 2px 0 0;
+}
+
+.icono-plato {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  font-size: 30px;
+}
+
+.contador {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+}
+
+.contador output {
+  min-width: 40px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.contador .boton-icono:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#plato-sugerencias {
+  margin: 4px 0 8px;
+}
+
+.campo-texto textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: vertical;
+  min-height: 56px;
+  padding: 12px 0;
+  font: inherit;
+  font-size: 16px;
+  background: transparent;
+  color: var(--texto);
+}
+
+#plato-caracteres {
+  display: block;
+  text-align: right;
+}
+
+/* ------------------------------------------------------------ Menú principal: resumen de hoy */
+.saludo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 16px;
+}
+
+.saludo h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.saludo .nota {
+  margin: 2px 0 0;
+}
+
+.titulo-seccion {
+  margin: 24px 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.hoy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.tarjeta-hoy {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s var(--curva-suave), box-shadow 0.2s;
+}
+
+.tarjeta-hoy:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-elevada);
+}
+
+.tarjeta-hoy > .icono {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+}
+
+.tarjeta-hoy.alerta > .icono {
+  background: var(--contenedor-error);
+  color: var(--error);
+}
+
+.tarjeta-hoy .valor {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tarjeta-hoy small {
+  display: block;
+  color: var(--texto-suave);
+}
+
+.paneles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.panel {
+  padding: 16px;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  min-width: 0;
+}
+
+.panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.panel h3 .icono {
+  color: var(--primario);
+}
+
+.panel .nota {
+  margin: 0;
+}
+
+/* Barras de ventas de la semana */
+.barras {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: 6px;
+  height: 160px;
+}
+
+.barra-dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+  min-width: 0;
+}
+
+.barra-dia .relleno {
+  width: 100%;
+  max-width: 36px;
+  min-height: 3px;
+  height: var(--alto, 0%);
+  border-radius: 6px 6px 2px 2px;
+  background: var(--contenedor-primario);
+  transform-origin: bottom;
+  animation: crecer 0.6s var(--curva-suave) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+.barra-dia.hoy-dia .relleno {
+  background: var(--primario);
+}
+
+.barra-dia small {
+  font-size: 11px;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+.barra-dia .monto {
+  font-weight: 600;
+  color: var(--texto);
+}
+
+@keyframes crecer {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* Listas cortas del panel (más vendidos, por reponer) */
+.ranking {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ranking li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.ranking .puesto {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--superficie-variante);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ranking li:first-child .puesto {
+  background: var(--primario);
+  color: var(--sobre-primario);
+}
+
+.ranking .nombre-ranking {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranking .medidor {
+  grid-column: 2 / 4;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--superficie-variante);
+  overflow: hidden;
+}
+
+.ranking .medidor span {
+  display: block;
+  height: 100%;
+  width: var(--ancho, 0%);
+  background: var(--primario);
+  border-radius: 3px;
+  transform-origin: left;
+  animation: llenar 0.7s var(--curva-suave) both;
+}
+
+.ranking .medidor.peligro span {
+  background: var(--error);
+}
+
+@keyframes llenar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.entrando .hoy > *,
+.entrando .paneles > * {
+  animation: aparecer-escala 0.35s var(--curva-suave) both;
+}
+
+/* ------------------------------------------------------------ Ajustes en el celular (carta y menú) */
+@media (max-width: 600px) {
+  /* La ventana del pedido ocupa todo el ancho, como las demás hojas */
+  dialog.extra-ancho {
+    width: 100%;
+  }
+
+  /* Línea del pedido: el nombre y su observación arriba, la cantidad y el precio debajo */
+  .linea.con-cantidad:has(.nombre-linea) {
+    grid-template-columns: 80px minmax(0, 1fr) 36px;
+    row-gap: 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--superficie-variante);
+  }
+
+  .linea.con-cantidad .nombre-linea {
+    grid-column: 1 / -1;
+  }
+
+  .linea.con-cantidad:has(.nombre-linea) > .texto-linea {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  /* Tarjetas del día: ícono arriba y el texto debajo, así no se parte en muchas líneas */
+  .hoy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tarjeta-hoy {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .tarjeta-hoy > .icono {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  /* Módulos en tres columnas: el menú no queda tan largo */
+  .modulos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .tarjeta-modulo {
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .tarjeta-modulo .icono {
+    font-size: 34px;
+  }
+}
+
+.barras-vacias {
+  margin-top: 8px !important;
+  text-align: center;
+}

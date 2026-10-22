@@ -62,7 +62,7 @@
   </button>
 
   <!-- RF-05.1 Registrar, RF-05.2 Mesa, RF-05.3 Productos, RF-05.4 Modificar y RF-05.6 Disponibilidad -->
-  <dialog id="dialogo-pedido" class="ancho">
+  <dialog id="dialogo-pedido" class="ancho extra-ancho">
     <form id="form-pedido" novalidate>
       <h2 id="titulo-pedido">Nuevo pedido</h2>
 
@@ -79,27 +79,32 @@
         </div>
       </div>
 
-      <section class="seccion">
-        <h3>Productos</h3>
-        <div class="lineas" id="lineas-pedido"></div>
-        <!-- Buscador de la carta: se escribe, se toca el producto y queda agregado -->
-        <div class="buscador-carta">
-          <div class="campo" id="campo-productos">
+      <div class="pedido-columnas">
+        <!-- La carta: se busca o se filtra por categoría y se toca el plato -->
+        <section class="seccion">
+          <h3>Carta</h3>
+          <div class="campo" id="campo-carta">
             <span class="icono" aria-hidden="true">search</span>
-            <input id="p-buscar" type="search" placeholder="Buscar en la carta y tocar para agregar…" autocomplete="off"
-                   role="combobox" aria-expanded="false" aria-controls="p-resultados" aria-label="Buscar producto">
+            <input id="p-buscar" type="search" placeholder="Buscar plato o bebida…" autocomplete="off"
+                   aria-label="Buscar en la carta">
           </div>
-          <ul class="resultados-carta" id="p-resultados" role="listbox" hidden></ul>
-        </div>
-        <small class="error-campo" id="error-productos"></small>
-        <div class="campo"><input id="p-nota-linea" autocomplete="off" maxlength="150"
-          placeholder="Observación para el próximo producto (ej: sin cebolla)" aria-label="Observación del producto"></div>
+          <div class="categorias" id="p-categorias" role="group" aria-label="Filtrar por categoría"></div>
+          <ul class="carta" id="p-carta" aria-label="Platos de la carta"></ul>
+        </section>
 
-        <label class="etiqueta" for="p-observaciones">Observaciones del pedido</label>
-        <div class="campo"><input id="p-observaciones" autocomplete="off" maxlength="255"></div>
-        <p class="disponibilidad" id="disponibilidad" hidden></p>
-        <p class="total" id="total-pedido">Total: $ 0</p>
-      </section>
+        <!-- Lo que lleva el pedido -->
+        <section class="seccion">
+          <h3>Pedido de la mesa</h3>
+          <div class="lineas" id="lineas-pedido"></div>
+          <small class="error-campo" id="error-productos"></small>
+
+          <label class="etiqueta" for="p-observaciones">Observaciones generales del pedido</label>
+          <div class="campo"><input id="p-observaciones" autocomplete="off" maxlength="255"
+            placeholder="Ej: traer todo junto, cumpleaños"></div>
+          <p class="disponibilidad" id="disponibilidad" hidden></p>
+          <p class="total" id="total-pedido">Total: $ 0</p>
+        </section>
+      </div>
 
       <div class="alerta-error" id="error-pedido" role="alert" hidden></div>
 
@@ -135,12 +140,52 @@
           </div>
           <ul class="resultados-carta" id="a-resultados" role="listbox" hidden></ul>
         </div>
-        <div class="campo"><input id="a-cantidad" type="number" min="1" step="1" value="1" aria-label="Cantidad"></div>
       </div>
     </section>
 
     <div class="alerta-error" id="error-detalle" role="alert" hidden></div>
     <div class="acciones" id="detalle-acciones"></div>
+  </dialog>
+
+  <!-- Al elegir un plato: cantidad y observaciones del cliente (sin cebolla, término medio…) -->
+  <dialog id="dialogo-plato">
+    <form id="form-plato" novalidate>
+      <div class="cabecera-plato">
+        <span class="icono icono-plato" id="plato-icono" aria-hidden="true">restaurant</span>
+        <div>
+          <h2 id="plato-nombre"></h2>
+          <p class="nota" id="plato-detalle"></p>
+        </div>
+      </div>
+      <p class="nota" id="plato-descripcion"></p>
+
+      <label class="etiqueta" id="etiqueta-cantidad">Cantidad</label>
+      <div class="contador" role="group" aria-labelledby="etiqueta-cantidad">
+        <button type="button" class="boton-icono" id="plato-menos" aria-label="Uno menos">
+          <span class="icono" aria-hidden="true">remove</span>
+        </button>
+        <output id="plato-cantidad" aria-live="polite">1</output>
+        <button type="button" class="boton-icono" id="plato-mas" aria-label="Uno más">
+          <span class="icono" aria-hidden="true">add</span>
+        </button>
+      </div>
+
+      <label class="etiqueta" for="plato-observacion">Observaciones del cliente</label>
+      <div class="categorias" id="plato-sugerencias" role="group" aria-label="Observaciones frecuentes"></div>
+      <div class="campo campo-texto">
+        <textarea id="plato-observacion" rows="2" maxlength="150"
+                  placeholder="Ej: sin cebolla, término medio, salsa aparte"></textarea>
+      </div>
+      <small class="ayuda-campo" id="plato-caracteres">0 / 150</small>
+
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="plato-quitar" hidden>Quitar del pedido</button>
+        <button type="button" class="boton-texto" id="plato-cancelar">Cancelar</button>
+        <button type="submit" class="boton-principal" id="plato-guardar">
+          <span class="icono" aria-hidden="true">add_shopping_cart</span> <span id="plato-texto-guardar">Agregar</span>
+        </button>
+      </div>
+    </form>
   </dialog>
 
   <!-- Administrar mesas -->

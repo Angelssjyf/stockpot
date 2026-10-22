@@ -121,19 +121,26 @@ function pintarMesas() {
 }
 
 function tarjetaMesa(mesa) {
+  // Como las tarjetas del menú: arriba el número en un marquito, al centro el ícono y abajo su estado
   const partes = [
-    crear('span', { className: 'numero-mesa', texto: `Mesa ${mesa.numero}` }),
-    crear('span', { className: 'detalle-mesa', texto: [`${mesa.capacidad} personas`, mesa.ubicacion].filter(Boolean).join(' · ') }),
+    crear('span', { className: 'marco-mesa', texto: `Mesa ${mesa.numero}` }),
+    crear('span', { className: 'icono icono-mesa', texto: 'table_restaurant', 'aria-hidden': 'true' }),
   ];
   if (mesa.ocupada) {
     const p = mesa.pedido;
     partes.push(
-      crear('span', { className: 'estado-mesa', texto: `${p.codigo} · ${formato.dinero(p.total)}` }),
       chipEstado(p.estado),
+      crear('span', { className: 'estado-mesa', texto: `${p.codigo} · ${formato.dinero(p.total)}` }),
       crear('span', { className: 'detalle-mesa', texto: `${p.productos} producto${p.productos === 1 ? '' : 's'} · ${espera(p.fecha)}` }),
     );
   } else {
-    partes.push(crear('span', { className: 'estado-mesa', texto: 'Libre' }));
+    partes.push(
+      crear('span', { className: 'estado-mesa', texto: 'Libre' }),
+      crear('span', { className: 'detalle-mesa' }, [
+        crear('span', { className: 'icono', texto: 'group', 'aria-hidden': 'true' }),
+        document.createTextNode([`${mesa.capacidad}`, mesa.ubicacion].filter(Boolean).join(' · ')),
+      ]),
+    );
   }
   const tarjeta = crear('button', {
     type: 'button', className: `mesa${mesa.ocupada ? ' ocupada' : ''}`,
@@ -243,6 +250,22 @@ const dialogoPedido = $('dialogo-pedido');
 let carta = []; // productos disponibles hoy
 let lineas = []; // [{producto_id, nombre, precio, cantidad, observacion}]
 let pedidoEditado = null; // null = pedido nuevo
+let categoriaCarta = ''; // '' = toda la carta
+
+const CATEGORIAS = {
+  ENTRADA: 'Entradas', PLATO_FUERTE: 'Platos fuertes', BEBIDA: 'Bebidas', POSTRE: 'Postres', ADICIONAL: 'Adicionales',
+};
+const ICONOS_CATEGORIA = {
+  ENTRADA: 'tapas', PLATO_FUERTE: 'dinner_dining', BEBIDA: 'local_bar', POSTRE: 'cake', ADICIONAL: 'add_circle',
+};
+// Lo que más piden los clientes, según el tipo de producto (se tocan para agregarlas a la observación)
+const SUGERENCIAS = {
+  ENTRADA: ['Sin cebolla', 'Sin picante', 'Salsa aparte', 'Para compartir'],
+  PLATO_FUERTE: ['Sin cebolla', 'Término medio', 'Bien asado', 'Sin sal', 'Salsa aparte', 'Sin ensalada'],
+  BEBIDA: ['Sin hielo', 'Sin azúcar', 'Bien fría', 'Al clima'],
+  POSTRE: ['Sin azúcar', 'Con vela', 'Para llevar'],
+  ADICIONAL: ['Aparte', 'Para llevar'],
+};
 
 if (puedeGestionar) $('boton-nuevo').addEventListener('click', () => abrirFormulario(null));
 
@@ -260,6 +283,13 @@ function nombreResaltado(nombre, texto) {
     crear('mark', { texto: original.slice(posicion, posicion + texto.length) }),
     document.createTextNode(original.slice(posicion + texto.length)),
   ];
+}
+
+/** Los productos de la carta que coinciden por nombre, categoría o código; primero los que empiezan así. */
+function coincidencias(texto) {
+  return carta
+    .filter((p) => normalizar(`${p.nombre} ${CATEGORIAS[p.categoria] ?? ''} ${p.codigo}`).includes(texto))
+    .sort((a, b) => normalizar(b.nombre).startsWith(texto) - normalizar(a.nombre).startsWith(texto));
 }
 
 /**
@@ -282,12 +312,10 @@ function buscadorDeCarta(entrada, lista, alElegir) {
 
   function abrir() {
     const texto = normalizar(entrada.value.trim());
-    resultados = carta
-      .filter((p) => normalizar(`${p.nombre} ${p.categoria ?? ''} ${p.codigo}`).includes(texto))
-      .sort((a, b) => normalizar(b.nombre).startsWith(texto) - normalizar(a.nombre).startsWith(texto));
+    resultados = coincidencias(texto);
     lista.replaceChildren(...(resultados.length ? resultados.map((producto) => {
       const quedan = producto.porciones_posibles;
-      const detalle = [producto.categoria, quedan != null && quedan <= 10 ? `quedan ${quedan}` : null].filter(Boolean).join(' · ');
+      const detalle = [CATEGORIAS[producto.categoria], quedan != null && quedan <= 10 ? `quedan ${quedan}` : null].filter(Boolean).join(' · ');
       const opcion = crear('li', { role: 'option' }, [
         crear('div', {}, [
           crear('div', { className: 'nombre-producto' }, nombreResaltado(producto.nombre, texto)),
@@ -341,8 +369,102 @@ function buscadorDeCarta(entrada, lista, alElegir) {
   return { cerrar };
 }
 
-const buscadorPedido = buscadorDeCarta($('p-buscar'), $('p-resultados'), agregarProducto);
 const buscadorDetalle = buscadorDeCarta($('a-buscar'), $('a-resultados'), agregarAlPedidoAbierto);
+
+// ---------------------------------------------------------------- La carta dentro de la ventana del pedido
+
+function pintarCategoriasCarta() {
+  const presentes = Object.entries(CATEGORIAS).filter(([valor]) => carta.some((p) => p.categoria === valor));
+  $('p-categorias').replaceChildren(...[['', 'Todo'], ...presentes].map(([valor, texto]) => {
+    const boton = crear('button', {
+      type: 'button', className: 'chip filtro', texto, 'aria-pressed': String(valor === categoriaCarta),
+    });
+    boton.addEventListener('click', () => {
+      categoriaCarta = valor;
+      pintarCategoriasCarta();
+      pintarCarta();
+    });
+    return boton;
+  }));
+}
+
+/** Los platos que se ven: filtrados por lo escrito y la categoría; los que ya van en el pedido muestran "× 2". */
+function pintarCarta() {
+  const texto = normalizar($('p-buscar').value.trim());
+  const visibles = coincidencias(texto).filter((p) => !categoriaCarta || p.categoria === categoriaCarta);
+  pintarSuave($('p-carta'), visibles.length ? visibles.map((producto) => platoDeCarta(producto, texto))
+    : [crear('li', { className: 'nota sin-resultados', 'data-clave': 'vacio',
+      texto: carta.length ? 'No hay platos con ese nombre' : 'No hay productos disponibles hoy' })]);
+}
+
+function platoDeCarta(producto, texto) {
+  const enPedido = lineas.filter((l) => l.producto_id === producto.id).reduce((suma, l) => suma + (l.cantidad || 0), 0);
+  const quedan = producto.porciones_posibles;
+  const detalle = [producto.descripcion, quedan != null && quedan <= 10 ? `quedan ${quedan}` : null].filter(Boolean).join(' · ');
+  const boton = crear('button', {
+    type: 'button', className: `plato${enPedido ? ' en-pedido' : ''}`,
+    'aria-label': `${producto.nombre}, ${formato.dinero(producto.precio_venta)}${enPedido ? `, ${enPedido} en el pedido` : ''}`,
+  }, [
+    crear('span', { className: 'icono icono-categoria', texto: ICONOS_CATEGORIA[producto.categoria] ?? 'restaurant', 'aria-hidden': 'true' }),
+    crear('span', { className: 'datos-plato' }, [
+      crear('span', { className: 'nombre-producto' }, nombreResaltado(producto.nombre, texto)),
+      crear('small', { texto: detalle || CATEGORIAS[producto.categoria] || '' }),
+    ]),
+    crear('span', { className: 'precio-plato' }, [
+      crear('span', { className: 'precio', texto: formato.dinero(producto.precio_venta) }),
+      enPedido ? crear('span', { className: 'chip contador-plato', texto: `× ${enPedido}` })
+        : crear('span', { className: 'icono', texto: 'add_circle', 'aria-hidden': 'true' }),
+    ]),
+  ]);
+  boton.addEventListener('click', () => elegirPlato(producto));
+  return crear('li', { 'data-clave': producto.id, 'data-version': enPedido }, [boton]);
+}
+
+$('p-buscar').addEventListener('input', pintarCarta);
+$('p-buscar').addEventListener('keydown', (evento) => {
+  if (evento.key !== 'Enter') return;
+  evento.preventDefault(); // no envía el formulario: con un solo plato a la vista, lo abre
+  const visibles = coincidencias(normalizar($('p-buscar').value.trim())).filter((p) => !categoriaCarta || p.categoria === categoriaCarta);
+  if (visibles.length === 1) elegirPlato(visibles[0]);
+});
+
+/** Al tocar un plato de la carta se abre su ventana para la cantidad y las observaciones. */
+function elegirPlato(producto) {
+  abrirPlato(producto, {
+    alGuardar: ({ cantidad, observacion }) => {
+      marcarCampo('productos', '');
+      const existente = lineas.find((l) => l.producto_id === producto.id && l.observacion === observacion);
+      if (existente) existente.cantidad += cantidad; // el mismo plato con la misma observación: suma
+      else lineas.push({ producto_id: producto.id, nombre: producto.nombre, precio: producto.precio_venta, cantidad, observacion });
+      pintarLineas();
+      mostrarAviso(`${cantidad} × ${producto.nombre} agregado`);
+    },
+  });
+}
+
+/** Cambiar la cantidad o las observaciones de una línea ya agregada (o quitarla). */
+function editarLinea(posicion) {
+  const linea = lineas[posicion];
+  const producto = carta.find((p) => p.id === linea.producto_id)
+    ?? { id: linea.producto_id, nombre: linea.nombre, precio_venta: linea.precio };
+  abrirPlato(producto, {
+    cantidad: linea.cantidad, observacion: linea.observacion, textoGuardar: 'Guardar',
+    alGuardar: ({ cantidad, observacion }) => {
+      const igual = lineas.find((l, i) => i !== posicion && l.producto_id === linea.producto_id && l.observacion === observacion);
+      if (igual) { // quedó igual a otra línea: se juntan
+        igual.cantidad += cantidad;
+        lineas.splice(posicion, 1);
+      } else {
+        Object.assign(linea, { cantidad, observacion });
+      }
+      pintarLineas();
+    },
+    alQuitar: () => {
+      lineas.splice(posicion, 1);
+      pintarLineas();
+    },
+  });
+}
 
 /** pedido: el pedido a modificar, o null para uno nuevo. mesaId: mesa elegida al tocar una mesa libre. */
 async function abrirFormulario(pedido, mesaId = null) {
@@ -352,11 +474,12 @@ async function abrirFormulario(pedido, mesaId = null) {
   $('error-pedido').hidden = true;
   $('disponibilidad').hidden = true;
   $('titulo-pedido').textContent = pedido ? `Modificar ${pedido.codigo}` : 'Nuevo pedido';
-  $('texto-guardar').textContent = pedido ? 'Guardar cambios' : 'Registrar pedido';
+  categoriaCarta = '';
   lineas = pedido ? pedido.detalles.map((d) => ({
     producto_id: d.producto_id, nombre: d.producto, precio: d.precio_unitario, cantidad: d.cantidad, observacion: d.observacion,
   })) : [];
-  buscadorPedido.cerrar();
+  pintarLineas();
+  pintarSuave($('p-carta'), crear('li', { className: 'nota', texto: 'Cargando la carta…' }));
   dialogoPedido.showModal();
   try {
     const [listaMesas] = await Promise.all([api('GET', '/mesas'), cargarCarta()]);
@@ -369,11 +492,22 @@ async function abrirFormulario(pedido, mesaId = null) {
     $('p-mesa').value = pedido ? pedido.mesa.id : (mesaId ?? '');
     $('p-comensales').value = pedido ? pedido.comensales : 2;
     $('p-observaciones').value = pedido?.observaciones ?? '';
+    ponerTituloPedido();
+    pintarCategoriasCarta();
     pintarLineas();
   } catch (error) {
     mostrarErrorPedido(error.message);
   }
 }
+
+/** "Mesa 3 · Nuevo pedido" en cuanto se sabe la mesa. */
+function ponerTituloPedido() {
+  if (pedidoEditado) return;
+  const opcion = $('p-mesa').selectedOptions[0];
+  $('titulo-pedido').textContent = $('p-mesa').value ? `${opcion.textContent.split(' · ')[0]} · Nuevo pedido` : 'Nuevo pedido';
+}
+
+$('p-mesa').addEventListener('change', ponerTituloPedido);
 
 function pintarLineas() {
   const filas = lineas.map((linea, posicion) => {
@@ -384,6 +518,7 @@ function pintarLineas() {
       subtotal.textContent = formato.dinero(linea.precio * (linea.cantidad || 0));
       pintarTotal();
       revisarDisponibilidad();
+      pintarCarta();
     });
     const subtotal = crear('span', { className: 'texto-linea', texto: formato.dinero(linea.precio * linea.cantidad) });
     const quitar = crear('button', { type: 'button', className: 'boton-icono', title: 'Quitar' }, [
@@ -393,32 +528,29 @@ function pintarLineas() {
       lineas.splice(posicion, 1);
       pintarLineas();
     });
-    const nombre = linea.observacion ? `${linea.nombre} (${linea.observacion})` : linea.nombre;
-    return crear('div', { className: 'linea con-cantidad', 'data-clave': `${linea.producto_id}|${linea.observacion ?? ''}`, 'data-version': linea.cantidad }, [
-      crear('span', { className: 'texto-linea', texto: nombre }), crear('div', { className: 'campo' }, [cantidad]), subtotal, quitar,
+    const nombre = crear('button', { type: 'button', className: 'nombre-linea', title: 'Cambiar cantidad u observaciones' }, [
+      crear('span', { className: 'texto-linea', texto: linea.nombre }),
+      crear('small', { className: `observacion-linea${linea.observacion ? '' : ' vacia'}` }, [
+        crear('span', { className: 'icono', texto: 'edit_note', 'aria-hidden': 'true' }),
+        document.createTextNode(linea.observacion || 'Agregar observación'),
+      ]),
     ]);
+    nombre.addEventListener('click', () => editarLinea(posicion));
+    return crear('div', {
+      className: 'linea con-cantidad', 'data-clave': `${linea.producto_id}|${linea.observacion ?? ''}`, 'data-version': linea.cantidad,
+    }, [nombre, crear('div', { className: 'campo' }, [cantidad]), subtotal, quitar]);
   });
-  if (filas.length === 0) filas.push(crear('p', { className: 'nota', 'data-clave': 'vacio', texto: 'Busca en la carta lo que pidió la mesa.' }));
+  if (filas.length === 0) filas.push(crear('p', { className: 'nota', 'data-clave': 'vacio', texto: 'Toca los platos de la carta para agregarlos.' }));
   pintarSuave($('lineas-pedido'), filas);
   pintarTotal();
   revisarDisponibilidad();
+  pintarCarta();
 }
 
 function pintarTotal() {
   const total = lineas.reduce((suma, l) => suma + l.precio * (l.cantidad || 0), 0);
   $('total-pedido').textContent = `Total: ${formato.dinero(total)}`;
-}
-
-/** Pasa al pedido el producto tocado en el buscador, con la observación escrita (si hay). */
-function agregarProducto(producto) {
-  marcarCampo('productos', '');
-  const observacion = $('p-nota-linea').value.trim() || null;
-  const existente = lineas.find((l) => l.producto_id === producto.id && l.observacion === observacion);
-  if (existente) existente.cantidad += 1; // el mismo producto otra vez: suma uno
-  else lineas.push({ producto_id: producto.id, nombre: producto.nombre, precio: producto.precio_venta, cantidad: 1, observacion });
-  $('p-nota-linea').value = '';
-  pintarLineas();
-  mostrarAviso(`${producto.nombre} agregado`);
+  $('texto-guardar').textContent = `${pedidoEditado ? 'Guardar cambios' : 'Registrar pedido'}${total ? ` · ${formato.dinero(total)}` : ''}`;
 }
 
 // RF-05.6 Mientras se arma el pedido, se revisa si el inventario alcanza (sin guardar nada)
@@ -544,7 +676,6 @@ function pintarDetalle(pedido) {
   const sePuedeAgregar = puedeGestionar && pedido.editable;
   $('bloque-agregar').hidden = !sePuedeAgregar;
   $('a-buscar').value = '';
-  $('a-cantidad').value = '1';
   buscadorDetalle.cerrar();
   pintarAcciones(pedido);
 }
@@ -600,18 +731,84 @@ async function ejecutar(metodo, ruta, datos, aviso) {
   }
 }
 
-/** RF-05.3 Agrega al pedido abierto el producto tocado en el buscador, con la cantidad escrita al lado. */
+/** RF-05.3 Al elegir un producto en el detalle se abre su ventana (cantidad y observaciones) y se agrega. */
 function agregarAlPedidoAbierto(producto) {
-  const cantidad = Number($('a-cantidad').value);
-  if (!Number.isInteger(cantidad) || cantidad < 1) {
-    $('error-detalle').textContent = 'La cantidad debe ser un número entero mayor que cero';
-    $('error-detalle').hidden = false;
-    return false;
-  }
-  ejecutar('POST', `/pedidos/${pedidoAbierto.id}/productos`, { items: [{ producto_id: producto.id, cantidad }] },
-    `${cantidad} × ${producto.nombre} agregado al pedido`);
+  abrirPlato(producto, {
+    textoGuardar: 'Agregar al pedido',
+    alGuardar: ({ cantidad, observacion }) => {
+      ejecutar('POST', `/pedidos/${pedidoAbierto.id}/productos`, { items: [{ producto_id: producto.id, cantidad, observacion }] },
+        `${cantidad} × ${producto.nombre} agregado al pedido`);
+    },
+  });
   return true;
 }
+
+// =====================================================================
+//  Ventana del plato: cantidad y observaciones del cliente
+// =====================================================================
+
+const dialogoPlato = $('dialogo-plato');
+let platoAbierto = null; // { producto, alGuardar, alQuitar, textoGuardar, cantidad }
+
+/** Abre la ventana de un plato. alGuardar recibe { cantidad, observacion }; alQuitar (opcional) muestra "Quitar". */
+function abrirPlato(producto, { cantidad = 1, observacion = '', textoGuardar = 'Agregar', alGuardar, alQuitar = null }) {
+  platoAbierto = { producto, alGuardar, alQuitar, textoGuardar, cantidad: 1 };
+  $('plato-icono').textContent = ICONOS_CATEGORIA[producto.categoria] ?? 'restaurant';
+  $('plato-nombre').textContent = producto.nombre;
+  $('plato-detalle').textContent = [CATEGORIAS[producto.categoria], formato.dinero(producto.precio_venta)].filter(Boolean).join(' · ');
+  $('plato-descripcion').textContent = producto.descripcion ?? '';
+  $('plato-descripcion').hidden = !producto.descripcion;
+  $('plato-observacion').value = observacion ?? '';
+  $('plato-quitar').hidden = !alQuitar;
+  ponerCantidad(cantidad);
+  pintarSugerencias();
+  dialogoPlato.showModal();
+}
+
+function ponerCantidad(cantidad) {
+  platoAbierto.cantidad = Math.min(Math.max(cantidad, 1), 99);
+  $('plato-cantidad').textContent = platoAbierto.cantidad;
+  $('plato-menos').disabled = platoAbierto.cantidad === 1;
+  $('plato-texto-guardar').textContent =
+    `${platoAbierto.textoGuardar} · ${formato.dinero(platoAbierto.producto.precio_venta * platoAbierto.cantidad)}`;
+}
+
+/** Las observaciones escritas, separadas por comas. */
+function partesObservacion() {
+  return $('plato-observacion').value.split(',').map((parte) => parte.trim()).filter(Boolean);
+}
+
+/** Chips con lo que más se pide; se ven marcadas las que ya están en la observación. */
+function pintarSugerencias() {
+  const escritas = partesObservacion().map(normalizar);
+  const sugerencias = SUGERENCIAS[platoAbierto.producto.categoria] ?? ['Para llevar'];
+  $('plato-sugerencias').replaceChildren(...sugerencias.map((texto) => {
+    const marcada = escritas.includes(normalizar(texto));
+    const chip = crear('button', { type: 'button', className: 'chip filtro', texto, 'aria-pressed': String(marcada) });
+    chip.addEventListener('click', () => {
+      const partes = partesObservacion();
+      const resto = partes.filter((parte) => normalizar(parte) !== normalizar(texto));
+      $('plato-observacion').value = (marcada ? resto : [...partes, texto]).join(', ').slice(0, 150);
+      pintarSugerencias();
+    });
+    return chip;
+  }));
+  $('plato-caracteres').textContent = `${$('plato-observacion').value.length} / 150`;
+}
+
+$('plato-observacion').addEventListener('input', pintarSugerencias);
+$('plato-menos').addEventListener('click', () => ponerCantidad(platoAbierto.cantidad - 1));
+$('plato-mas').addEventListener('click', () => ponerCantidad(platoAbierto.cantidad + 1));
+$('plato-cancelar').addEventListener('click', () => dialogoPlato.close());
+$('plato-quitar').addEventListener('click', () => {
+  platoAbierto.alQuitar();
+  dialogoPlato.close();
+});
+$('form-plato').addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  platoAbierto.alGuardar({ cantidad: platoAbierto.cantidad, observacion: $('plato-observacion').value.trim() || null });
+  dialogoPlato.close();
+});
 
 // =====================================================================
 //  Administrar mesas
