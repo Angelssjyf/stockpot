@@ -1526,3 +1526,133 @@ dialog.arrastrando {
   pointer-events: none;
   animation: onda 0.55s ease-out forwards;
 }
+
+/* ------------------------------------------------------------ Listas que cambian sin saltos (ui.js pintarSuave) */
+@keyframes fila-nueva {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fila-cambiada {
+  from { background-color: var(--contenedor-primario); }
+}
+
+.nueva {
+  animation: fila-nueva 0.28s var(--curva-suave) both;
+  animation-delay: calc(var(--i, 0) * 25ms);
+}
+
+.cambiada {
+  animation: fila-cambiada 1.2s ease-out;
+}
+
+/* Lo que aparece o desaparece en la pantalla lo hace con un fundido, no de golpe */
+.estado:not([hidden]),
+.alertas:not([hidden]),
+.disponibilidad:not([hidden]),
+.alerta-error:not([hidden]) {
+  animation: aparecer-arriba 0.25s var(--curva-suave);
+}
+
+.chip,
+.tarjeta-resumen .icono {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ------------------------------------------------------------ Buscador de la carta (pedidos) */
+.buscador-carta {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.agregar-fila {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.agregar-fila > .campo {
+  width: 90px;
+  flex: none;
+}
+
+.resultados-carta {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 4px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra-elevada);
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: aparecer-escala 0.18s var(--curva-suave);
+}
+
+.resultados-carta li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.resultados-carta li.marcado,
+.resultados-carta li:hover {
+  background: var(--superficie-variante);
+}
+
+.resultados-carta .nombre-producto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resultados-carta small {
+  display: block;
+  color: var(--texto-suave);
+}
+
+.resultados-carta mark {
+  background: var(--contenedor-primario);
+  color: inherit;
+  border-radius: 3px;
+}
+
+.resultados-carta .precio {
+  font-weight: 500;
+}
+
+.resultados-carta .icono {
+  color: var(--primario);
+}
+
+.resultados-carta .sin-resultados {
+  display: block;
+  color: var(--texto-suave);
+  cursor: default;
+  text-align: center;
+}
+
+.resultados-carta .sin-resultados:hover {
+  background: none;
+}
+
+/* Al agregar un producto, el buscador da un pulso corto para confirmar */
+@keyframes agregado {
+  0%   { box-shadow: 0 0 0 0 rgba(143, 76, 44, 0.45); }
+  100% { box-shadow: 0 0 0 10px rgba(143, 76, 44, 0); }
+}
+
+.campo.agregado {
+  animation: agregado 0.5s ease-out;
+}
+
+h2[tabindex="-1"]:focus {
+  outline: none; /* recibe el foco al abrir la ventana solo para que no salte el teclado */
+}

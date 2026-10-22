@@ -1,6 +1,6 @@
 // Módulo de pedidos en mesa (RF-05.1 a RF-05.9): mesas, pedidos, cocina y estado.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, formato, mostrarAviso, normalizar, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('pedidos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('pedidos.gestionar'); // MESERO, CAJERO, ADMINISTRADOR
@@ -243,19 +243,101 @@ if (puedeGestionar) $('boton-nuevo').addEventListener('click', () => abrirFormul
 
 async function cargarCarta() {
   carta = await api('GET', '/productos?disponible=true');
-  pintarOpcionesCarta('');
 }
 
-/** Llena la lista de productos, filtrada por lo que se escribe en el buscador. */
-function pintarOpcionesCarta(texto) {
-  const buscar = texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const visibles = carta.filter((p) => p.nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(buscar));
-  const opciones = visibles.map((p) => crear('option', { value: p.id, texto: `${p.nombre} · ${formato.dinero(p.precio_venta)}` }));
-  $('p-producto').replaceChildren(crear('option', { value: '', texto: visibles.length ? 'Elige un producto…' : 'Sin resultados' }), ...opciones);
-  if (visibles.length === 1 && buscar) $('p-producto').value = visibles[0].id; // un solo resultado: queda elegido
+/** El nombre con la parte buscada resaltada (con nodos de texto, nunca HTML). */
+function nombreResaltado(nombre, texto) {
+  const original = nombre.normalize('NFC'); // así cada letra con tilde ocupa lo mismo que sin tilde
+  const posicion = texto ? normalizar(original).indexOf(texto) : -1;
+  if (posicion < 0) return [document.createTextNode(original)];
+  return [
+    document.createTextNode(original.slice(0, posicion)),
+    crear('mark', { texto: original.slice(posicion, posicion + texto.length) }),
+    document.createTextNode(original.slice(posicion + texto.length)),
+  ];
 }
 
-$('p-buscar').addEventListener('input', () => pintarOpcionesCarta($('p-buscar').value));
+/**
+ * Buscador de la carta: al escribir (o al tocar el campo) muestra los productos que coinciden por
+ * nombre, categoría o código; al tocar uno, o con Enter, llama a alElegir(producto).
+ * Con las flechas se recorre la lista y con Escape se cierra sin cerrar la ventana.
+ */
+function buscadorDeCarta(entrada, lista, alElegir) {
+  let resultados = [];
+  let marcado = -1;
+
+  function marcar(posicion) {
+    marcado = posicion;
+    [...lista.children].forEach((li, i) => {
+      li.classList.toggle('marcado', i === marcado);
+      li.setAttribute('aria-selected', String(i === marcado));
+    });
+    lista.children[marcado]?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function abrir() {
+    const texto = normalizar(entrada.value.trim());
+    resultados = carta
+      .filter((p) => normalizar(`${p.nombre} ${p.categoria ?? ''} ${p.codigo}`).includes(texto))
+      .sort((a, b) => normalizar(b.nombre).startsWith(texto) - normalizar(a.nombre).startsWith(texto));
+    lista.replaceChildren(...(resultados.length ? resultados.map((producto) => {
+      const quedan = producto.porciones_posibles;
+      const detalle = [producto.categoria, quedan != null && quedan <= 10 ? `quedan ${quedan}` : null].filter(Boolean).join(' · ');
+      const opcion = crear('li', { role: 'option' }, [
+        crear('div', {}, [
+          crear('div', { className: 'nombre-producto' }, nombreResaltado(producto.nombre, texto)),
+          ...(detalle ? [crear('small', { texto: detalle })] : []),
+        ]),
+        crear('span', { className: 'precio', texto: formato.dinero(producto.precio_venta) }),
+        crear('span', { className: 'icono', texto: 'add_circle', 'aria-hidden': 'true' }),
+      ]);
+      opcion.addEventListener('mousedown', (evento) => evento.preventDefault()); // el campo no pierde el foco
+      opcion.addEventListener('click', () => elegir(producto));
+      return opcion;
+    }) : [crear('li', { className: 'sin-resultados', texto: carta.length ? 'No hay productos con ese nombre' : 'No hay productos disponibles hoy' })]));
+    lista.hidden = false;
+    lista.scrollTop = 0;
+    entrada.setAttribute('aria-expanded', 'true');
+    marcar(texto && resultados.length ? 0 : -1); // con algo escrito, Enter agrega el primero
+  }
+
+  function cerrar() {
+    lista.hidden = true;
+    entrada.setAttribute('aria-expanded', 'false');
+  }
+
+  function elegir(producto) {
+    if (alElegir(producto) === false) return;
+    entrada.value = '';
+    cerrar();
+    const campo = entrada.closest('.campo');
+    campo.classList.remove('agregado');
+    void campo.offsetWidth; // reinicia la animación si se agregan dos seguidos
+    campo.classList.add('agregado');
+  }
+
+  entrada.addEventListener('input', abrir);
+  entrada.addEventListener('click', abrir); // al tocar el campo se ve toda la carta
+  entrada.addEventListener('blur', () => setTimeout(cerrar, 150)); // deja terminar el toque sobre un producto
+  entrada.addEventListener('keydown', (evento) => {
+    if (evento.key === 'ArrowDown' || evento.key === 'ArrowUp') {
+      evento.preventDefault();
+      if (lista.hidden) abrir();
+      const paso = evento.key === 'ArrowDown' ? 1 : -1;
+      if (resultados.length) marcar((marcado + paso + resultados.length) % resultados.length);
+    } else if (evento.key === 'Enter') {
+      evento.preventDefault(); // no envía el formulario
+      if (!lista.hidden && resultados[marcado]) elegir(resultados[marcado]);
+    } else if (evento.key === 'Escape' && !lista.hidden) {
+      evento.preventDefault(); // cierra la lista, no la ventana
+      cerrar();
+    }
+  });
+  return { cerrar };
+}
+
+const buscadorPedido = buscadorDeCarta($('p-buscar'), $('p-resultados'), agregarProducto);
+const buscadorDetalle = buscadorDeCarta($('a-buscar'), $('a-resultados'), agregarAlPedidoAbierto);
 
 /** pedido: el pedido a modificar, o null para uno nuevo. mesaId: mesa elegida al tocar una mesa libre. */
 async function abrirFormulario(pedido, mesaId = null) {
@@ -269,6 +351,7 @@ async function abrirFormulario(pedido, mesaId = null) {
   lineas = pedido ? pedido.detalles.map((d) => ({
     producto_id: d.producto_id, nombre: d.producto, precio: d.precio_unitario, cantidad: d.cantidad, observacion: d.observacion,
   })) : [];
+  buscadorPedido.cerrar();
   dialogoPedido.showModal();
   try {
     const [listaMesas] = await Promise.all([api('GET', '/mesas'), cargarCarta()]);
@@ -282,7 +365,6 @@ async function abrirFormulario(pedido, mesaId = null) {
     $('p-comensales').value = pedido ? pedido.comensales : 2;
     $('p-observaciones').value = pedido?.observaciones ?? '';
     pintarLineas();
-    $('p-buscar').focus();
   } catch (error) {
     mostrarErrorPedido(error.message);
   }
@@ -307,12 +389,12 @@ function pintarLineas() {
       pintarLineas();
     });
     const nombre = linea.observacion ? `${linea.nombre} (${linea.observacion})` : linea.nombre;
-    return crear('div', { className: 'linea con-cantidad' }, [
+    return crear('div', { className: 'linea con-cantidad', 'data-clave': `${linea.producto_id}|${linea.observacion ?? ''}`, 'data-version': linea.cantidad }, [
       crear('span', { className: 'texto-linea', texto: nombre }), crear('div', { className: 'campo' }, [cantidad]), subtotal, quitar,
     ]);
   });
-  if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Agrega lo que pidió la mesa.' }));
-  $('lineas-pedido').replaceChildren(...filas);
+  if (filas.length === 0) filas.push(crear('p', { className: 'nota', 'data-clave': 'vacio', texto: 'Busca en la carta lo que pidió la mesa.' }));
+  pintarSuave($('lineas-pedido'), filas);
   pintarTotal();
   revisarDisponibilidad();
 }
@@ -322,33 +404,17 @@ function pintarTotal() {
   $('total-pedido').textContent = `Total: ${formato.dinero(total)}`;
 }
 
-/** Pasa al pedido el producto elegido. Devuelve false si falta algo. */
-function agregarProducto() {
-  const producto = carta.find((p) => p.id === Number($('p-producto').value));
-  const cantidad = Number($('p-cantidad').value);
-  if (!producto) {
-    marcarCampo('productos', 'Elige un producto');
-    return false;
-  }
-  if (!Number.isInteger(cantidad) || cantidad < 1) {
-    marcarCampo('productos', 'La cantidad debe ser un número entero');
-    return false;
-  }
+/** Pasa al pedido el producto tocado en el buscador, con la observación escrita (si hay). */
+function agregarProducto(producto) {
   marcarCampo('productos', '');
   const observacion = $('p-nota-linea').value.trim() || null;
   const existente = lineas.find((l) => l.producto_id === producto.id && l.observacion === observacion);
-  if (existente) existente.cantidad += cantidad; // el mismo producto otra vez: suma
-  else lineas.push({ producto_id: producto.id, nombre: producto.nombre, precio: producto.precio_venta, cantidad, observacion });
-  $('p-producto').value = '';
-  $('p-cantidad').value = '1';
+  if (existente) existente.cantidad += 1; // el mismo producto otra vez: suma uno
+  else lineas.push({ producto_id: producto.id, nombre: producto.nombre, precio: producto.precio_venta, cantidad: 1, observacion });
   $('p-nota-linea').value = '';
-  $('p-buscar').value = '';
-  pintarOpcionesCarta('');
   pintarLineas();
-  return true;
+  mostrarAviso(`${producto.nombre} agregado`);
 }
-
-$('agregar-producto').addEventListener('click', agregarProducto);
 
 // RF-05.6 Mientras se arma el pedido, se revisa si el inventario alcanza (sin guardar nada)
 let temporizadorDisponibilidad;
@@ -400,7 +466,6 @@ function validarPedido() {
 $('form-pedido').addEventListener('submit', async (evento) => {
   evento.preventDefault();
   $('error-pedido').hidden = true;
-  if ($('p-producto').value && !agregarProducto()) return; // elegido sin tocar ⊕: se agrega solo
   if (!validarPedido()) return;
 
   const datos = {
@@ -473,11 +538,9 @@ function pintarDetalle(pedido) {
   // RF-05.3 Agregar productos: solo mientras no vaya para cocina
   const sePuedeAgregar = puedeGestionar && pedido.editable;
   $('bloque-agregar').hidden = !sePuedeAgregar;
-  if (sePuedeAgregar) {
-    $('a-producto').replaceChildren(crear('option', { value: '', texto: 'Elige un producto…' }),
-      ...carta.map((p) => crear('option', { value: p.id, texto: `${p.nombre} · ${formato.dinero(p.precio_venta)}` })));
-    $('a-cantidad').value = '1';
-  }
+  $('a-buscar').value = '';
+  $('a-cantidad').value = '1';
+  buscadorDetalle.cerrar();
   pintarAcciones(pedido);
 }
 
@@ -532,17 +595,18 @@ async function ejecutar(metodo, ruta, datos, aviso) {
   }
 }
 
-$('boton-agregar').addEventListener('click', () => {
-  const productoId = Number($('a-producto').value);
+/** RF-05.3 Agrega al pedido abierto el producto tocado en el buscador, con la cantidad escrita al lado. */
+function agregarAlPedidoAbierto(producto) {
   const cantidad = Number($('a-cantidad').value);
-  if (!productoId || !Number.isInteger(cantidad) || cantidad < 1) {
-    $('error-detalle').textContent = 'Elige un producto y una cantidad entera';
+  if (!Number.isInteger(cantidad) || cantidad < 1) {
+    $('error-detalle').textContent = 'La cantidad debe ser un número entero mayor que cero';
     $('error-detalle').hidden = false;
-    return;
+    return false;
   }
-  ejecutar('POST', `/pedidos/${pedidoAbierto.id}/productos`, { items: [{ producto_id: productoId, cantidad }] },
-    'Producto agregado al pedido');
-});
+  ejecutar('POST', `/pedidos/${pedidoAbierto.id}/productos`, { items: [{ producto_id: producto.id, cantidad }] },
+    `${cantidad} × ${producto.nombre} agregado al pedido`);
+  return true;
+}
 
 // =====================================================================
 //  Administrar mesas

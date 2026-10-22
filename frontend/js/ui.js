@@ -56,6 +56,51 @@ export const formato = {
   },
 };
 
+/** Quita tildes y mayúsculas para buscar: así "limon" encuentra "Limón". */
+export function normalizar(texto) {
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+/**
+ * Cambia las filas de una lista sin saltos. Cada fila trae data-clave (quién es) y, si quiere,
+ * data-version (cómo está): las que ya estaban y no cambiaron se quedan quietas, las nuevas
+ * aparecen con un fundido corto y las que cambiaron (por ejemplo su stock) se iluminan un momento.
+ */
+export function pintarSuave(contenedor, filas) {
+  const antes = new Map([...contenedor.children].map((el) => [el.dataset.clave, el.dataset.version]));
+  let nuevas = 0;
+  for (const fila of filas) {
+    const clave = fila.dataset.clave;
+    let clase = null;
+    if (clave === undefined || !antes.has(clave)) clase = 'nueva';
+    else if (antes.get(clave) !== fila.dataset.version) clase = 'cambiada';
+    if (!clase) continue;
+    if (clase === 'nueva') fila.style.setProperty('--i', Math.min(nuevas++, 8)); // cascada corta
+    fila.classList.add(clase);
+    fila.addEventListener('animationend', () => fila.classList.remove(clase), { once: true });
+  }
+  contenedor.replaceChildren(...filas);
+}
+
+/** Lleva un número de su valor anterior al nuevo en un instante, como un contador. */
+export function contarHasta(elemento, valor, formatear = String) {
+  const desde = Number(elemento.dataset.valor ?? 0);
+  elemento.dataset.valor = valor;
+  if (desde === valor || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    elemento.textContent = formatear(valor);
+    return;
+  }
+  const inicio = performance.now();
+  const paso = (ahora) => {
+    if (elemento.dataset.valor !== String(valor)) return; // llegó un valor más nuevo: ese manda
+    const avance = Math.min((ahora - inicio) / 500, 1);
+    const suave = 1 - (1 - avance) ** 3; // frena al final
+    elemento.textContent = formatear(avance < 1 ? Math.round(desde + (valor - desde) * suave) : valor);
+    if (avance < 1) requestAnimationFrame(paso);
+  };
+  requestAnimationFrame(paso);
+}
+
 // Animación de entrada de la pantalla: dura solo los primeros segundos (ver .entrando en estilos.css),
 // así las listas que se actualizan solas después no vuelven a animarse.
 document.documentElement.classList.add('entrando');
