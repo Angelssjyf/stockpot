@@ -1448,3 +1448,81 @@ dialog[open]::backdrop {
     transition: none !important;
   }
 }
+
+/* ------------------------------------------------------------ Cierre de ventanas y deslizar para cerrar */
+@keyframes cerrar-escala {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(8px) scale(0.97); }
+}
+
+@keyframes bajar-hoja {
+  from { transform: translateY(var(--desde, 0px)); }
+  to   { transform: translateY(100%); }
+}
+
+@keyframes desvanecer {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+dialog[open].cerrando {
+  animation: cerrar-escala 0.18s ease-in forwards;
+}
+
+dialog[open].cerrando::backdrop {
+  animation: desvanecer 0.18s ease-in forwards;
+}
+
+dialog {
+  overscroll-behavior: contain; /* el scroll de la ventana no arrastra la página ni la recarga */
+  transition: transform 0.25s var(--curva-suave);
+}
+
+dialog.arrastrando {
+  transition: none; /* mientras el dedo arrastra, la hoja lo sigue sin retraso */
+}
+
+@media (max-width: 600px) {
+  dialog[open].cerrando {
+    animation: bajar-hoja 0.24s ease-in forwards;
+  }
+
+  /* Zona de la barrita más fácil de agarrar */
+  dialog::before {
+    width: 48px;
+    height: 5px;
+    margin-left: -24px;
+  }
+}
+
+/* Efecto de onda al tocar */
+.boton-principal:not(.boton-flotante),
+.boton-texto,
+.tarjeta-modulo,
+.mesa,
+.fila.editable,
+.chip.filtro {
+  position: relative;
+}
+
+.boton-principal,
+.boton-texto,
+.tarjeta-modulo,
+.mesa,
+.fila.editable,
+.chip.filtro {
+  overflow: hidden;
+}
+
+@keyframes onda {
+  from { transform: scale(0); opacity: 0.35; }
+  to   { transform: scale(1); opacity: 0; }
+}
+
+.onda {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  animation: onda 0.55s ease-out forwards;
+}
