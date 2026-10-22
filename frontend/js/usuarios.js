@@ -1,6 +1,6 @@
 // Módulo de usuarios: RF-01.1 Registrar, RF-01.2 Consultar, RF-01.3 Modificar, RF-01.5 Asignar roles.
 import { api, exigirSesion } from './api.js';
-import { crear, iniciales, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, iniciales, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('usuarios.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('usuarios.gestionar');
@@ -13,16 +13,16 @@ const $ = (id) => document.getElementById(id);
 // =====================================================================
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
   try {
     const texto = encodeURIComponent($('buscar').value.trim());
     const usuarios = await api('GET', `/usuarios?q=${texto}`);
     if (usuarios.length === 0) {
       mostrarEstado('No se encontraron usuarios');
+      pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
-      $('lista').replaceChildren(...usuarios.map(filaDeUsuario));
+      pintarSuave($('lista'), ...usuarios.map(filaDeUsuario));
     }
   } catch (error) {
     mostrarEstado(error.message, true); // por ejemplo, el servidor no responde

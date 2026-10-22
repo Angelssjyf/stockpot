@@ -1,6 +1,6 @@
 // Órdenes de compra: RF-02.6 Registrar, RF-02.7 Actualizar estado y RF-02.8 Relación con inventario.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('compras.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('compras.gestionar');
@@ -26,16 +26,16 @@ const ACCIONES = {
 // =====================================================================
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
   try {
     const estado = $('filtro-estado').value;
     const ordenes = await api('GET', `/ordenes-compra${estado ? `?estado=${estado}` : ''}`);
     if (ordenes.length === 0) {
       mostrarEstado('No hay órdenes de compra');
+      pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
-      $('lista').replaceChildren(...ordenes.map(filaDeOrden));
+      pintarSuave($('lista'), ...ordenes.map(filaDeOrden));
     }
   } catch (error) {
     mostrarEstado(error.message, true);
@@ -96,14 +96,14 @@ function pintarDetalle(orden) {
     ['Recibida', formato.fecha(orden.fecha_recepcion)],
     ['Observaciones', orden.observaciones || '—'],
   ];
-  $('detalle-datos').replaceChildren(...datos.flatMap(([etiqueta, valor]) => [
+  pintarSuave($('detalle-datos'), ...datos.flatMap(([etiqueta, valor]) => [
     crear('dt', { texto: etiqueta }),
     valor === null
       ? crear('dd', {}, [crear('span', { className: `chip estado-${orden.estado}`, texto: orden.estado })])
       : crear('dd', { texto: valor }),
   ]));
 
-  $('detalle-lineas').replaceChildren(...orden.detalles.map((linea) => crear('li', {}, [
+  pintarSuave($('detalle-lineas'), ...orden.detalles.map((linea) => crear('li', {}, [
     crear('span', {
       texto: `${linea.insumo} · ${formato.cantidad(linea.cantidad)} ${linea.unidad_medida} × ${formato.dinero(linea.precio_unitario)}`,
     }),
