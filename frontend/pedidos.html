@@ -82,20 +82,18 @@
       <section class="seccion">
         <h3>Productos</h3>
         <div class="lineas" id="lineas-pedido"></div>
-        <div class="campo campo-buscar">
-          <span class="icono" aria-hidden="true">search</span>
-          <input id="p-buscar" type="search" placeholder="Buscar en la carta…" autocomplete="off" aria-label="Buscar producto">
+        <!-- Buscador de la carta: se escribe, se toca el producto y queda agregado -->
+        <div class="buscador-carta">
+          <div class="campo" id="campo-productos">
+            <span class="icono" aria-hidden="true">search</span>
+            <input id="p-buscar" type="search" placeholder="Buscar en la carta y tocar para agregar…" autocomplete="off"
+                   role="combobox" aria-expanded="false" aria-controls="p-resultados" aria-label="Buscar producto">
+          </div>
+          <ul class="resultados-carta" id="p-resultados" role="listbox" hidden></ul>
         </div>
-        <div class="linea">
-          <div class="campo"><select id="p-producto" aria-label="Producto a agregar"></select></div>
-          <div class="campo"><input id="p-cantidad" type="number" min="1" step="1" value="1" aria-label="Cantidad"></div>
-          <button type="button" class="boton-icono" id="agregar-producto" title="Agregar producto">
-            <span class="icono" aria-hidden="true">add_circle</span>
-          </button>
-        </div>
-        <div class="campo"><input id="p-nota-linea" autocomplete="off" maxlength="150"
-          placeholder="Observación del producto (ej: sin cebolla)" aria-label="Observación del producto"></div>
         <small class="error-campo" id="error-productos"></small>
+        <div class="campo"><input id="p-nota-linea" autocomplete="off" maxlength="150"
+          placeholder="Observación para el próximo producto (ej: sin cebolla)" aria-label="Observación del producto"></div>
 
         <label class="etiqueta" for="p-observaciones">Observaciones del pedido</label>
         <div class="campo"><input id="p-observaciones" autocomplete="off" maxlength="255"></div>
@@ -116,7 +114,7 @@
 
   <!-- RF-05.5 Detalle, RF-05.3 Agregar productos, RF-05.7 Confirmar, RF-05.8 Cocina y RF-05.9 Estado -->
   <dialog id="dialogo-detalle" class="ancho">
-    <h2 id="detalle-titulo"></h2>
+    <h2 id="detalle-titulo" tabindex="-1" autofocus></h2> <!-- autofocus: al abrir no salta el teclado -->
     <dl class="datos-orden" id="detalle-datos"></dl>
     <ol class="linea-tiempo" id="detalle-tiempo" aria-label="Recorrido del pedido"></ol>
 
@@ -128,12 +126,16 @@
 
     <section class="seccion" id="bloque-agregar" hidden>
       <h3>Agregar productos</h3>
-      <div class="linea">
-        <div class="campo"><select id="a-producto" aria-label="Producto a agregar"></select></div>
+      <div class="agregar-fila">
+        <div class="buscador-carta">
+          <div class="campo" id="campo-agregar">
+            <span class="icono" aria-hidden="true">search</span>
+            <input id="a-buscar" type="search" placeholder="Buscar y tocar para agregar…" autocomplete="off"
+                   role="combobox" aria-expanded="false" aria-controls="a-resultados" aria-label="Buscar producto para agregar">
+          </div>
+          <ul class="resultados-carta" id="a-resultados" role="listbox" hidden></ul>
+        </div>
         <div class="campo"><input id="a-cantidad" type="number" min="1" step="1" value="1" aria-label="Cantidad"></div>
-        <button type="button" class="boton-icono" id="boton-agregar" title="Agregar al pedido">
-          <span class="icono" aria-hidden="true">add_circle</span>
-        </button>
       </div>
     </section>
 

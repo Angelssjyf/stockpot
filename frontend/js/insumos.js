@@ -1,6 +1,6 @@
 // Módulo de inventario (RF-03.1 a RF-03.8): insumos, existencias, movimientos y alertas.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { contarHasta, crear, formato, mostrarAviso, normalizar, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('inventario.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('inventario.gestionar');
@@ -22,12 +22,27 @@ function fechaHora(iso) {
 //  RF-03.6 Existencias (resumen) y RF-03.8 Alertas de stock
 // =====================================================================
 
-function tarjetaResumen(icono, titulo, valor, clase = '') {
-  return crear('div', { className: `tarjeta-resumen ${clase}` }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
+const TARJETAS = [ // [dato del resumen, ícono, título, formato, clase cuando el dato no es cero]
+  ['total_insumos', 'inventory_2', 'Insumos activos', String, ''],
+  ['bajos', 'trending_down', 'En el mínimo', String, 'aviso-bajo'],
+  ['agotados', 'block', 'Agotados', String, 'aviso-agotado'],
+  ['valor_total', 'payments', 'Valor del inventario', formato.dinero, ''],
+];
+
+/** Las tarjetas se crean una vez; al recargar solo cambian sus números (con un conteo corto). */
+function pintarResumen(resumen) {
+  if ($('resumen').children.length !== TARJETAS.length) {
+    $('resumen').replaceChildren(...TARJETAS.map(([, icono, titulo]) => crear('div', { className: 'tarjeta-resumen' }, [
+      crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
+      crear('div', { className: 'valor' }),
+      crear('div', { texto: titulo }),
+    ])));
+  }
+  TARJETAS.forEach(([dato, , , formatear, clase], posicion) => {
+    const tarjeta = $('resumen').children[posicion];
+    if (clase) tarjeta.classList.toggle(clase, Boolean(resumen[dato]));
+    contarHasta(tarjeta.querySelector('.valor'), Number(resumen[dato]), formatear);
+  });
 }
 
 async function cargarResumen() {
@@ -36,16 +51,10 @@ async function cargarResumen() {
       api('GET', '/inventario/existencias'),
       api('GET', '/inventario/alertas'),
     ]);
-    const r = existencias.resumen;
-    $('resumen').replaceChildren(
-      tarjetaResumen('inventory_2', 'Insumos activos', String(r.total_insumos)),
-      tarjetaResumen('trending_down', 'En el mínimo', String(r.bajos), r.bajos ? 'aviso-bajo' : ''),
-      tarjetaResumen('block', 'Agotados', String(r.agotados), r.agotados ? 'aviso-agotado' : ''),
-      tarjetaResumen('payments', 'Valor del inventario', formato.dinero(r.valor_total)),
-    );
+    pintarResumen(existencias.resumen);
 
     $('alertas').hidden = alertas.length === 0;
-    $('lista-alertas').replaceChildren(...alertas.map(filaDeAlerta));
+    pintarSuave($('lista-alertas'), alertas.map(filaDeAlerta));
   } catch (error) {
     $('resumen').replaceChildren(crear('p', { className: 'nota', texto: error.message }));
   }
@@ -58,6 +67,8 @@ function filaDeAlerta(alerta) {
     crear('span', { className: `chip estado-${alerta.estado_stock}`,
                     texto: alerta.estado_stock === 'AGOTADO' ? 'Agotado' : `Faltan ${formato.cantidad(alerta.faltante)}` }),
   ]);
+  fila.dataset.clave = alerta.id;
+  fila.dataset.version = alerta.stock_actual;
   fila.addEventListener('click', () => abrirFormulario(alerta));
   fila.addEventListener('keydown', (evento) => {
     if (evento.key === 'Enter') abrirFormulario(alerta); // también con teclado
@@ -72,8 +83,8 @@ function filaDeAlerta(alerta) {
 let insumos = []; // todos los insumos, ya ordenados por nombre desde la API
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  // Solo la primera vez se ve "Cargando…"; al recargar, la lista actual se queda hasta que llegan los datos
+  if (insumos.length === 0) mostrarEstado('Cargando…');
   try {
     insumos = await api('GET', '/insumos');
     pintarLista();
@@ -82,21 +93,13 @@ async function cargar() {
   }
 }
 
-/** Quita tildes y mayúsculas: así "limon" encuentra "Limón". */
-function normalizar(texto) {
-  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
 /** Muestra solo los insumos cuyo código o nombre contiene lo escrito en el buscador. */
 function pintarLista() {
   const texto = normalizar($('buscar').value.trim());
   const visibles = insumos.filter((i) => normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
-  if (visibles.length === 0) {
-    mostrarEstado(insumos.length ? 'No se encontraron insumos' : 'Todavía no hay insumos');
-  } else {
-    $('estado').hidden = true;
-    $('lista').replaceChildren(...visibles.map(filaDeInsumo));
-  }
+  if (visibles.length === 0) mostrarEstado(insumos.length ? 'No se encontraron insumos' : 'Todavía no hay insumos');
+  else $('estado').hidden = true;
+  pintarSuave($('lista'), visibles.map(filaDeInsumo)); // las filas que siguen visibles no se mueven
 }
 
 /** Recarga todo: resumen, alertas y lista (después de cualquier cambio). */
@@ -126,6 +129,8 @@ function filaDeInsumo(insumo) {
     ]),
     crear('div', { className: 'chips' }, chips),
   ]);
+  fila.dataset.clave = insumo.id;
+  fila.dataset.version = [insumo.nombre, insumo.codigo, insumo.stock_actual, insumo.activo].join('|');
   fila.addEventListener('click', () => abrirFormulario(insumo));
   return fila;
 }
@@ -254,17 +259,21 @@ const MOTIVOS = { ENTRADA: ['COMPRA', 'AJUSTE', 'DEVOLUCION'], SALIDA: ['CONSUMO
 
 async function cargarHistorial(insumo) {
   const lista = $('historial');
-  lista.replaceChildren(crear('li', { className: 'nota', texto: 'Cargando movimientos…' }));
+  // Si ya se ve el historial de este insumo (por ejemplo después de un movimiento), se deja mientras carga
+  if (lista.dataset.insumo !== String(insumo.id)) {
+    lista.dataset.insumo = insumo.id;
+    lista.replaceChildren(crear('li', { className: 'nota', texto: 'Cargando movimientos…' }));
+  }
   try {
     const movimientos = await api('GET', `/insumos/${insumo.id}/movimientos`);
     if (movimientos.length === 0) {
       lista.replaceChildren(crear('li', { className: 'nota', texto: 'Todavía no hay movimientos' }));
       return;
     }
-    lista.replaceChildren(...movimientos.map((m) => {
+    pintarSuave(lista, movimientos.map((m) => {
       const signo = m.tipo === 'ENTRADA' ? '+' : '−';
       const detalle = [NOMBRES_MOTIVO[m.motivo], m.orden_compra, m.observacion].filter(Boolean).join(' · ');
-      return crear('li', {}, [
+      return crear('li', { 'data-clave': m.id }, [
         crear('div', {}, [
           crear('div', { texto: detalle }),
           crear('small', { className: 'nota', texto: `${fechaHora(m.fecha)} · ${m.usuario}` }),
