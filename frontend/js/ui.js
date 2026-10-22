@@ -55,3 +55,8 @@ export const formato = {
     return fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
   },
 };
+
+// Animación de entrada de la pantalla: dura solo los primeros segundos (ver .entrando en estilos.css),
+// así las listas que se actualizan solas después no vuelven a animarse.
+document.documentElement.classList.add('entrando');
+setTimeout(() => document.documentElement.classList.remove('entrando'), 2500);

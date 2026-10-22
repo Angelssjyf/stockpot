@@ -130,7 +130,7 @@ function tarjetaMesa(mesa) {
     partes.push(
       crear('span', { className: 'estado-mesa', texto: `${p.codigo} · ${formato.dinero(p.total)}` }),
       chipEstado(p.estado),
-      crear('span', { className: 'detalle-mesa', texto: `${p.productos} productos · ${espera(p.fecha)}` }),
+      crear('span', { className: 'detalle-mesa', texto: `${p.productos} producto${p.productos === 1 ? '' : 's'} · ${espera(p.fecha)}` }),
     );
   } else {
     partes.push(crear('span', { className: 'estado-mesa', texto: 'Libre' }));
