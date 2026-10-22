@@ -1222,3 +1222,229 @@ input[type="search"]::-webkit-search-cancel-button {
   font-size: 18px;
   font-weight: 600;
 }
+
+/* =====================================================================
+   Diseño fresco: animaciones suaves y ventanas adaptadas al celular
+   ===================================================================== */
+:root {
+  --curva-suave: cubic-bezier(0.2, 0.8, 0.2, 1);     /* entra rápido y frena suave */
+  --curva-rebote: cubic-bezier(0.34, 1.56, 0.64, 1); /* pasa un poquito y vuelve */
+  --sombra-elevada: 0 6px 18px rgba(64, 30, 10, 0.16), 0 2px 6px rgba(64, 30, 10, 0.08);
+}
+
+@keyframes aparecer-arriba {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes aparecer-escala {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes subir-hoja {
+  from { transform: translateY(100%); }
+  to   { transform: none; }
+}
+
+@keyframes fundido {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Ventanas: aparecen con un deslizamiento corto y el fondo se difumina */
+dialog[open] {
+  animation: aparecer-escala 0.24s var(--curva-suave);
+}
+
+dialog[open]::backdrop {
+  background: rgba(35, 20, 12, 0.45);
+  backdrop-filter: blur(2px);
+  animation: fundido 0.2s ease-out;
+}
+
+/* Los botones de una ventana bajan de línea cuando no caben (antes se salían en el celular) */
+.acciones {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Botones: responden al toque */
+.boton-principal,
+.boton-texto,
+.boton-icono,
+.chip.filtro {
+  transition: background 0.2s, transform 0.12s var(--curva-suave), box-shadow 0.2s;
+}
+
+.boton-principal:active,
+.boton-texto:active,
+.boton-icono:active,
+.chip.filtro:active {
+  transform: scale(0.96);
+}
+
+.boton-principal:hover {
+  box-shadow: var(--sombra-elevada);
+}
+
+.boton-principal:focus-visible,
+.boton-texto:focus-visible,
+.boton-icono:focus-visible,
+.tarjeta-modulo:focus-visible,
+.mesa:focus-visible {
+  outline: 3px solid var(--contenedor-primario);
+  outline-offset: 2px;
+}
+
+.boton-flotante {
+  transition: transform 0.2s var(--curva-rebote), box-shadow 0.2s;
+  animation: aparecer-escala 0.4s var(--curva-rebote) 0.2s both;
+}
+
+.boton-flotante:hover {
+  transform: translateY(-2px);
+}
+
+/* Tarjetas: se elevan un poco al pasar el mouse */
+.tarjeta-modulo,
+.mesa,
+.tarjeta-resumen {
+  transition: transform 0.2s var(--curva-suave), box-shadow 0.2s;
+}
+
+.tarjeta-modulo:hover,
+.mesa:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-elevada);
+}
+
+.tarjeta-modulo .icono {
+  transition: transform 0.25s var(--curva-rebote);
+}
+
+.tarjeta-modulo:hover .icono {
+  transform: scale(1.15);
+}
+
+.fila.editable {
+  transition: background 0.15s;
+}
+
+.chip {
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Aviso inferior: entra con un pequeño rebote */
+.aviso {
+  border-radius: 12px;
+  opacity: 0;
+  transition: transform 0.35s var(--curva-rebote), opacity 0.2s;
+}
+
+.aviso.visible {
+  opacity: 1;
+}
+
+/* Al abrir una pantalla, su contenido entra en cascada (solo esa vez: ui.js quita la clase,
+   así las listas que se refrescan solas no vuelven a parpadear) */
+.entrando .contenido > * {
+  animation: aparecer-arriba 0.35s var(--curva-suave) both;
+}
+
+.entrando .modulos > *,
+.entrando .mesas > *,
+.entrando .resumen > *,
+.entrando .lista > * {
+  animation: aparecer-escala 0.35s var(--curva-suave) both;
+}
+
+.entrando .modulos > :nth-child(2), .entrando .mesas > :nth-child(2),
+.entrando .resumen > :nth-child(2), .entrando .lista > :nth-child(2) { animation-delay: 0.04s; }
+.entrando .modulos > :nth-child(3), .entrando .mesas > :nth-child(3),
+.entrando .resumen > :nth-child(3), .entrando .lista > :nth-child(3) { animation-delay: 0.08s; }
+.entrando .modulos > :nth-child(4), .entrando .mesas > :nth-child(4),
+.entrando .resumen > :nth-child(4), .entrando .lista > :nth-child(4) { animation-delay: 0.12s; }
+.entrando .modulos > :nth-child(5), .entrando .mesas > :nth-child(5),
+.entrando .lista > :nth-child(5) { animation-delay: 0.16s; }
+.entrando .modulos > :nth-child(6), .entrando .mesas > :nth-child(6),
+.entrando .lista > :nth-child(6) { animation-delay: 0.2s; }
+.entrando .modulos > :nth-child(n+7), .entrando .mesas > :nth-child(n+7),
+.entrando .lista > :nth-child(n+7) { animation-delay: 0.24s; }
+
+/* Reportes: un degradado al borde indica que las pestañas se deslizan de lado */
+.pestanas-desplazables {
+  -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+  mask-image: linear-gradient(90deg, #000 85%, transparent);
+  padding-right: 32px;
+}
+
+/* ------------------------------------------------------------ Celular: ventanas como hoja inferior */
+@media (max-width: 600px) {
+  dialog,
+  dialog.ancho {
+    width: 100%;
+    max-width: 100%;
+    margin: auto 0 0;
+    border-radius: 24px 24px 0 0;
+    max-height: 92dvh;
+    padding: 28px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  dialog[open] {
+    animation: subir-hoja 0.3s var(--curva-suave);
+  }
+
+  /* Barrita de arriba, como en las hojas de las apps */
+  dialog::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: var(--borde);
+  }
+
+  /* Los botones quedan siempre a la vista al final de la hoja, aunque se haga scroll */
+  dialog .acciones {
+    position: sticky;
+    bottom: calc(-16px - env(safe-area-inset-bottom));
+    margin: 20px -16px calc(-16px - env(safe-area-inset-bottom));
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--superficie);
+    border-top: 1px solid var(--superficie-variante);
+    justify-content: stretch;
+    z-index: 1;
+  }
+
+  /* La acción principal ocupa todo el ancho arriba; las demás se reparten debajo */
+  dialog .acciones > * {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  dialog .acciones > .boton-principal {
+    order: -1;
+    flex-basis: 100%;
+  }
+
+  .boton-flotante {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Quien pidió menos movimiento en su celular o computador no ve animaciones */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  dialog[open],
+  dialog[open]::backdrop {
+    animation: none !important;
+    transition: none !important;
+  }
+}
