@@ -12,13 +12,6 @@
   <main class="ingreso">
     <!-- Panel de marca: a la izquierda en computador, franja superior en el celular -->
     <section class="ingreso-marca">
-      <div class="marca-logo">
-        <span class="logo-olla" aria-hidden="true">
-          <span class="vapor"><i></i><i></i><i></i></span>
-          <span class="icono">soup_kitchen</span>
-        </span>
-        <span>StockPot</span>
-      </div>
       <div class="marca-mensaje">
         <h2>Tu restaurante, en orden</h2>
         <p>Inventario, pedidos y ventas en un solo lugar, para toda la cocina y el salón.</p>
@@ -32,6 +25,10 @@
     </section>
 
     <div class="login">
+      <div class="login-logo">
+        <span class="logo-olla" aria-hidden="true"><span class="vapor"><i></i><i></i><i></i></span><span class="icono">soup_kitchen</span></span>
+        <span>StockPot</span>
+      </div>
       <h1>Bienvenido</h1>
       <p class="subtitulo">Ingresa con tu correo y contraseña</p>
 
@@ -59,6 +56,14 @@
       </form>
     </div>
   </main>
+
+  <!-- Pantalla de carga al entrar: la olla echa vapor mientras abre el menú -->
+  <div class="pantalla-carga" id="pantalla-carga" role="status" hidden>
+    <span class="logo-olla" aria-hidden="true"><span class="vapor"><i></i><i></i><i></i></span><span class="icono">soup_kitchen</span></span>
+    <p class="carga-marca">StockPot</p>
+    <p class="carga-texto">Preparando tu cocina…</p>
+    <div class="carga-barra" aria-hidden="true"><span></span></div>
+  </div>
 
   <script type="module" src="js/login.js"></script>
 </body>

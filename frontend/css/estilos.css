@@ -200,16 +200,19 @@ a.boton-texto {
   gap: 24px;
 }
 
-.marca-logo {
+/* Logo con vapor encima de «Bienvenido» */
+.login-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 24px;
-  font-weight: 600;
+  gap: 12px;
+  margin: 24px 0 28px; /* deja lugar al vapor que sube */
+  color: var(--primario);
+  font-size: 30px;
+  font-weight: 700;
 }
 
-.marca-logo .icono {
-  font-size: 36px;
+.login-logo .logo-olla {
+  font-size: 60px;
 }
 
 .marca-mensaje h2 {
@@ -255,7 +258,10 @@ a.boton-texto {
   .ingreso-marca {
     flex: 0 0 44%;
     padding: 48px 56px;
-    justify-content: space-between;
+  }
+
+  .marca-mensaje {
+    margin: auto 0; /* centrado en vertical; el pie queda abajo */
   }
 
   .marca-mensaje h2 {
@@ -2609,17 +2615,23 @@ dialog.extra-ancho {
   background: radial-gradient(circle, rgba(255, 219, 204, 0.28), transparent 70%);
 }
 
+/* Olla con vapor: el tamaño sale de font-size y el vapor toma el color del logo */
 .logo-olla {
   position: relative;
   display: inline-grid;
+  line-height: 1;
+}
+
+.logo-olla .icono {
+  font-size: 1em;
 }
 
 .vapor {
   position: absolute;
-  left: 50%;
-  bottom: 78%;
-  width: 24px;
-  height: 22px;
+  left: 40%; /* sobre la olla, no sobre el mango */
+  bottom: 74%;
+  width: 0.66em;
+  height: 0.6em;
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -2627,16 +2639,16 @@ dialog.extra-ancho {
 .vapor i {
   position: absolute;
   bottom: 0;
-  width: 4px;
-  height: 12px;
-  border-radius: 4px;
-  background: rgba(255, 248, 246, 0.85);
+  width: 0.07em;
+  height: 0.3em;
+  border-radius: 999px;
+  background: currentColor;
   opacity: 0;
 }
 
-.vapor i:nth-child(1) { left: 3px; }
-.vapor i:nth-child(2) { left: 10px; }
-.vapor i:nth-child(3) { left: 17px; }
+.vapor i:nth-child(1) { left: 0.08em; }
+.vapor i:nth-child(2) { left: 0.28em; }
+.vapor i:nth-child(3) { left: 0.47em; }
 
 @media (prefers-reduced-motion: no-preference) {
   .ingreso-marca {
@@ -2683,9 +2695,10 @@ dialog.extra-ancho {
 }
 
 @keyframes vapor {
-  0%   { opacity: 0; transform: translateY(0) scaleY(0.6); }
-  25%  { opacity: 0.9; }
-  100% { opacity: 0; transform: translateY(-16px) translateX(2px) scaleY(1.2); }
+  0%   { opacity: 0; transform: translate(0, 0) scaleY(0.6); }
+  25%  { opacity: 0.75; }
+  50%  { transform: translate(0.05em, -0.22em) scaleY(1); }
+  100% { opacity: 0; transform: translate(-0.03em, -0.45em) scaleY(1.2); }
 }
 
 /* ---------- Tarjetas con relieve: se inclinan hacia el mouse y un brillo lo sigue (ui.js) */
@@ -2889,4 +2902,71 @@ dialog.extra-ancho {
 @keyframes flotar-icono {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-6px); }
+}
+
+/* ---------- Pantalla de carga al entrar (login.js): la olla echa vapor mientras abre el menú */
+.pantalla-carga {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(150deg, var(--primario) 0%, #5a2e19 100%);
+  color: #fff8f6;
+  text-align: center;
+}
+
+.pantalla-carga .logo-olla {
+  font-size: 120px;
+  margin-bottom: 8px;
+}
+
+.carga-marca {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.carga-texto {
+  margin: 0;
+  color: #f5ded5;
+}
+
+.carga-barra {
+  width: 180px;
+  height: 4px;
+  margin-top: 20px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.carga-barra span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #ffdbcc;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pantalla-carga:not([hidden]) {
+    animation: fundido 0.3s ease-out both;
+  }
+
+  .pantalla-carga .logo-olla {
+    animation: aparecer-escala 0.5s var(--curva-rebote) both;
+  }
+
+  .carga-barra span {
+    animation: llenar-carga 1.3s var(--curva-suave) both;
+  }
+}
+
+@keyframes llenar-carga {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
 }
