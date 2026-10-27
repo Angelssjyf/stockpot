@@ -45,16 +45,35 @@ function tabla(nombre, columnas, filas) {
 
 /** Gráfica de barras en SVG: datos [{etiqueta, valor}]. */
 function graficaBarras(datos, formatoValor = formato.dinero) {
-  const ancho = 640;
-  const alto = 220;
-  const margen = { arriba: 16, abajo: 40, izquierda: 28 }; // a los lados caben las etiquetas
+  if (!datos.some((d) => d.valor > 0)) return crear('p', { className: 'nota', texto: 'No hay ventas en este periodo.' });
+  // En el celular el lienzo es más angosto para que las letras no se encojan al escalar
+  const celular = window.innerWidth < 600;
+  const ancho = celular ? 360 : 640;
+  const alto = celular ? 240 : 220;
+  const margen = { arriba: 28, abajo: 40, izquierda: 20 }; // a los lados caben las etiquetas
   const maximo = Math.max(...datos.map((d) => d.valor), 1);
   const paso = (ancho - margen.izquierda * 2) / datos.length;
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
-  svg.setAttribute('class', 'grafica');
+  svg.setAttribute('class', celular ? 'grafica movil' : 'grafica');
   svg.setAttribute('role', 'img');
-  const cada = Math.ceil(datos.length / 12); // no más de 12 etiquetas abajo
+  svg.setAttribute('aria-label', `Máximo del periodo: ${formatoValor(maximo)}`);
+  const cada = Math.ceil(datos.length / (celular ? 4 : 10)); // pocas etiquetas abajo para que se lean
+
+  // Línea base y valor máximo como referencia
+  const base = document.createElementNS(NS, 'line');
+  base.setAttribute('x1', margen.izquierda);
+  base.setAttribute('x2', ancho - margen.izquierda);
+  base.setAttribute('y1', alto - margen.abajo);
+  base.setAttribute('y2', alto - margen.abajo);
+  base.setAttribute('class', 'base');
+  svg.appendChild(base);
+  const tope = document.createElementNS(NS, 'text');
+  tope.setAttribute('x', margen.izquierda);
+  tope.setAttribute('y', 16);
+  tope.setAttribute('class', 'tope');
+  tope.textContent = `Máx. ${formatoValor(maximo)}`;
+  svg.appendChild(tope);
 
   datos.forEach((d, i) => {
     const altura = ((alto - margen.arriba - margen.abajo) * d.valor) / maximo;
@@ -69,7 +88,7 @@ function graficaBarras(datos, formatoValor = formato.dinero) {
     titulo.textContent = `${d.etiqueta}: ${formatoValor(d.valor)}`; // se ve al pasar el mouse
     rect.appendChild(titulo);
     svg.appendChild(rect);
-    if (i % cada === 0) {
+    if ((i - Math.floor(cada / 2)) % cada === 0) { // etiquetas centradas, ninguna pegada al borde
       const texto = document.createElementNS(NS, 'text');
       texto.setAttribute('x', x + paso * 0.35);
       texto.setAttribute('y', alto - margen.abajo + 16);
@@ -86,7 +105,7 @@ function barrasHorizontales(pares) {
   const maximo = Math.max(...pares.map(([, v]) => v), 1);
   return crear('ul', { className: 'barras' }, pares.map(([texto, valor]) => {
     const barra = crear('div', { className: 'barra-progreso' });
-    barra.style.width = `${Math.max(2, (valor / maximo) * 100)}%`;
+    barra.style.width = valor > 0 ? `${Math.max(2, (valor / maximo) * 100)}%` : '0'; // en $0 no se dibuja
     return crear('li', {}, [
       crear('div', { className: 'barra-texto' }, [crear('span', { texto }), crear('span', { texto: formato.dinero(valor) })]),
       barra,
@@ -117,11 +136,11 @@ const REPORTES = {
       return [
         crear('div', { className: 'resumen' }, [
           tarjeta('payments', 'Total vendido', formato.dinero(i.total), `${porcentaje(i.variacion_total)} vs. periodo anterior`),
-          tarjeta('receipt_long', 'Ventas por día', String(i.ventas_por_dia), `${i.ventas} ventas`),
+          tarjeta('receipt_long', 'Ventas por día', formato.cantidad(i.ventas_por_dia), `${i.ventas} ${i.ventas === 1 ? 'venta' : 'ventas'}`),
           tarjeta('shopping_bag', 'Ticket promedio', formato.dinero(i.ticket_promedio)),
           tarjeta('star', 'Producto estrella', i.producto_estrella ?? '—'),
           tarjeta('event', 'Día de más ventas', i.dia_mas_ventas ?? '—'),
-          tarjeta('schedule', 'Hora pico', i.hora_pico ?? '—'),
+          tarjeta('schedule', 'Hora pico', i.hora_pico?.replace(' - ', '–') ?? '—'),
         ]),
         panel('Recomendaciones', recomendaciones),
         panel('Cobertura del inventario (días que alcanza al ritmo actual)', tabla('cobertura', [
@@ -152,12 +171,12 @@ const REPORTES = {
           panel('Por método de pago', barrasHorizontales(Object.entries(r.por_metodo).map(([m, v]) => [METODOS[m], v]))),
           panel('Por tipo de pedido', barrasHorizontales(Object.entries(r.por_tipo).map(([t, d]) => [`${TIPOS[t]} (${d.ventas})`, d.total]))),
         ]),
-        panel('Detalle por día', tabla('ventas-por-dia', [
+        panel('Detalle por día', crear('p', { className: 'nota', texto: 'Solo los días con ventas.' }), tabla('ventas-por-dia', [
           { titulo: 'Fecha', valor: (f) => f.fecha },
           { titulo: 'Ventas', valor: (f) => f.ventas, numero: true },
           { titulo: 'Total', valor: (f) => formato.dinero(f.total), numero: true },
           { titulo: 'Ganancia', valor: (f) => formato.dinero(f.ganancia), numero: true },
-        ], r.por_dia)),
+        ], r.por_dia.filter((d) => d.ventas > 0))),
       ];
     },
   },

@@ -91,11 +91,11 @@ function pintarVentas(ventas) {
   $('estado').hidden = ventas.length > 0;
   $('estado').textContent = 'No hay ventas en esas fechas';
   pintarSuave($('lista'), ...ventas.map((venta) => {
-    const detalle = [TIPOS[venta.tipo], venta.cliente, fechaHora(venta.fecha)].filter(Boolean).join(' · ');
+    const detalle = [venta.orden, TIPOS[venta.tipo], venta.cliente, fechaHora(venta.fecha)].filter(Boolean).join(' · ');
     const fila = crear('li', { className: 'fila editable' }, [
       crear('div', { className: 'avatar' }, [crear('span', { className: 'icono', texto: 'point_of_sale', 'aria-hidden': 'true' })]),
       crear('div', { className: 'datos' }, [
-        crear('div', { className: 'nombre', texto: `${venta.codigo} · ${venta.orden}` }),
+        crear('div', { className: 'nombre', texto: venta.codigo }),
         crear('div', { className: 'correo', texto: detalle }),
       ]),
       crear('div', { className: 'chips' }, [crear('span', { className: 'chip', texto: formato.dinero(venta.total) })]),

@@ -1060,8 +1060,22 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .grafica text {
-  font-size: 11px;
+  font-size: 12px;
   fill: var(--texto-suave);
+}
+
+.grafica.movil text {
+  font-size: 15px;
+}
+
+.grafica .base {
+  stroke: var(--superficie-variante);
+  stroke-width: 1;
+}
+
+.grafica .tope {
+  font-weight: 600;
+  fill: var(--texto);
 }
 
 .recomendaciones {
