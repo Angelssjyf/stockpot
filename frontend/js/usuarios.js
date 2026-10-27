@@ -1,6 +1,6 @@
 // Módulo de usuarios: RF-01.1 Registrar, RF-01.2 Consultar, RF-01.3 Modificar, RF-01.5 Asignar roles.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, iniciales, mostrarAviso, pintarSuave } from './ui.js';
+import { crear, empezarCarga, iniciales, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('usuarios.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('usuarios.gestionar');
@@ -18,22 +18,18 @@ async function cargar() {
     const texto = encodeURIComponent($('buscar').value.trim());
     const usuarios = await api('GET', `/usuarios?q=${texto}`);
     if (usuarios.length === 0) {
-      mostrarEstado('No se encontraron usuarios');
+      mostrarEstado('No se encontraron usuarios', {
+        icono: 'person_search', detalle: 'Prueba con otro nombre, apellido o correo.',
+        accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
+      });
       pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
       pintarSuave($('lista'), ...usuarios.map(filaDeUsuario));
     }
   } catch (error) {
-    mostrarEstado(error.message, true); // por ejemplo, el servidor no responde
+    mostrarEstado(error.message, { reintentar: true }); // por ejemplo, el servidor no responde
   }
-}
-
-/** Muestra un mensaje en lugar de la lista (cargando, vacío o error con "Reintentar"). */
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 /** Una fila: círculo con iniciales, nombre, correo, rol y "Inactivo" si aplica. */

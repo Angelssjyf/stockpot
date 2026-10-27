@@ -1,6 +1,6 @@
 // Módulo de productos y menú (RF-04.1 a RF-04.6): carta, recetas, precios y disponibilidad.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('productos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('productos.gestionar');
@@ -48,7 +48,7 @@ async function cargar() {
     productos = await api('GET', '/productos');
     pintarLista();
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
 }
 
@@ -58,18 +58,22 @@ function pintarLista() {
     (!categoriaElegida || p.categoria === categoriaElegida)
     && normalizar(`${p.codigo} ${p.nombre}`).includes(texto));
   if (visibles.length === 0) {
-    mostrarEstado(productos.length ? 'No se encontraron productos' : 'Todavía no hay productos');
+    if (productos.length) {
+      mostrarEstado('No se encontraron productos', {
+        icono: 'search_off', detalle: 'Prueba con otro nombre o código, o elige otra categoría.',
+        accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
+      });
+    } else {
+      mostrarEstado('Todavía no hay productos', {
+        icono: 'restaurant_menu', detalle: 'Crea los platos de la carta con su receta para calcular el costo.',
+        accion: puedeGestionar ? { texto: 'Crear el primer producto', alHacer: () => abrirFormulario(null) } : null,
+      });
+    }
     pintarSuave($('lista'));
   } else {
     $('estado').hidden = true;
     pintarSuave($('lista'), ...visibles.map(filaDeProducto));
   }
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 /** Una fila: nombre, categoría, precio, avisos y el interruptor de disponibilidad. */
