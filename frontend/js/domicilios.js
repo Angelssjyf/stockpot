@@ -404,7 +404,7 @@ $('form-nuevo').addEventListener('submit', async (evento) => {
       items: lineas.map((l) => ({ producto_id: l.producto_id, cantidad: l.cantidad })),
     });
     dialogoNuevo.close();
-    mostrarAviso(`Domicilio ${domicilio.codigo} registrado`);
+    mostrarAviso(`Domicilio ${domicilio.codigo} registrado`, 'exito');
     cargar();
   } catch (error) {
     mostrarErrorNuevo(error.message); // por ejemplo "No alcanza 'Pollo' para este pedido…"
@@ -440,7 +440,7 @@ async function abrirDetalle(id) {
     pintarDetalle(domicilio);
     if (!dialogoDetalle.open) dialogoDetalle.showModal();
   } catch (error) {
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   }
 }
 
@@ -538,7 +538,7 @@ async function ejecutar(metodo, ruta, datos, aviso) {
   $('error-detalle').hidden = true;
   try {
     const actualizado = await api(metodo, ruta, datos);
-    mostrarAviso(aviso);
+    mostrarAviso(aviso, 'exito');
     pintarDetalle(actualizado);
     cargar();
   } catch (error) {

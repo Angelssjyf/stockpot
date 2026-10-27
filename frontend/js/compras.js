@@ -26,7 +26,7 @@ const ACCIONES = {
 // =====================================================================
 
 async function cargar() {
-  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     const estado = $('filtro-estado').value;
     const ordenes = await api('GET', `/ordenes-compra${estado ? `?estado=${estado}` : ''}`);
@@ -79,7 +79,7 @@ async function abrirDetalle(id) {
     pintarDetalle(orden);
     if (!dialogoDetalle.open) dialogoDetalle.showModal();
   } catch (error) {
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   }
 }
 
@@ -138,7 +138,7 @@ async function cambiarEstado(orden, estado) {
     pintarDetalle(actualizada);
     mostrarAviso(estado === 'RECIBIDA'
       ? 'Orden recibida: el inventario se actualizó'
-      : `Orden ${actualizada.estado.toLowerCase()}`);
+      : `Orden ${actualizada.estado.toLowerCase()}`, 'exito');
     cargar();
   } catch (error) {
     $('error-detalle').textContent = error.message;
@@ -274,7 +274,7 @@ $('form-orden').addEventListener('submit', async (evento) => {
       })),
     });
     dialogoNueva.close();
-    mostrarAviso(`Orden ${orden.codigo} registrada`);
+    mostrarAviso(`Orden ${orden.codigo} registrada`, 'exito');
     cargar();
   } catch (error) {
     $('error-nueva').textContent = error.message; // por ejemplo "El insumo 'Arroz' está repetido"

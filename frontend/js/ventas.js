@@ -142,7 +142,7 @@ async function abrirVenta(id) {
     $('ver-comprobante').hidden = !puedeVerComprobantes;
     dialogo.showModal();
   } catch (error) {
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   }
 }
 

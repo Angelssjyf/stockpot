@@ -2571,3 +2571,322 @@ dialog.extra-ancho {
   margin-top: 8px !important;
   text-align: center;
 }
+
+/* =====================================================================
+   Animaciones que dan vida a la interfaz (todas se apagan con "reducir movimiento")
+   ===================================================================== */
+
+/* ---------- Pantalla de ingreso: fondo que se mueve, luces flotando y vapor en la olla */
+.ingreso-marca {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ingreso-marca::before,
+.ingreso-marca::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.ingreso-marca::before {
+  width: 360px;
+  height: 360px;
+  top: -120px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(224, 137, 58, 0.55), transparent 70%);
+}
+
+.ingreso-marca::after {
+  width: 420px;
+  height: 420px;
+  bottom: -160px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(255, 219, 204, 0.28), transparent 70%);
+}
+
+.logo-olla {
+  position: relative;
+  display: inline-grid;
+}
+
+.vapor {
+  position: absolute;
+  left: 50%;
+  bottom: 78%;
+  width: 24px;
+  height: 22px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.vapor i {
+  position: absolute;
+  bottom: 0;
+  width: 4px;
+  height: 12px;
+  border-radius: 4px;
+  background: rgba(255, 248, 246, 0.85);
+  opacity: 0;
+}
+
+.vapor i:nth-child(1) { left: 3px; }
+.vapor i:nth-child(2) { left: 10px; }
+.vapor i:nth-child(3) { left: 17px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ingreso-marca {
+    background-size: 160% 160%;
+    animation: fondo-marca 16s ease-in-out infinite alternate;
+  }
+
+  .ingreso-marca::before { animation: flotar 14s ease-in-out infinite alternate; }
+  .ingreso-marca::after { animation: flotar 18s ease-in-out -6s infinite alternate-reverse; }
+
+  .vapor i { animation: vapor 2.4s ease-out infinite; }
+  .vapor i:nth-child(2) { animation-delay: 0.8s; }
+  .vapor i:nth-child(3) { animation-delay: 1.6s; }
+
+  .marca-mensaje h2,
+  .marca-mensaje p,
+  .marca-puntos li {
+    animation: aparecer-arriba 0.6s var(--curva-suave) both;
+  }
+
+  .marca-mensaje p { animation-delay: 0.1s; }
+  .marca-puntos li:nth-child(1) { animation-delay: 0.25s; }
+  .marca-puntos li:nth-child(2) { animation-delay: 0.38s; }
+  .marca-puntos li:nth-child(3) { animation-delay: 0.51s; }
+
+  .marca-puntos .icono {
+    transition: transform 0.3s var(--curva-rebote), background 0.3s;
+  }
+
+  .marca-puntos li:hover .icono {
+    transform: rotate(-8deg) scale(1.12);
+    background: rgba(255, 255, 255, 0.24);
+  }
+}
+
+@keyframes fondo-marca {
+  from { background-position: 0% 0%; }
+  to   { background-position: 100% 100%; }
+}
+
+@keyframes flotar {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-60px, 50px) scale(1.15); }
+}
+
+@keyframes vapor {
+  0%   { opacity: 0; transform: translateY(0) scaleY(0.6); }
+  25%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-16px) translateX(2px) scaleY(1.2); }
+}
+
+/* ---------- Tarjetas con relieve: se inclinan hacia el mouse y un brillo lo sigue (ui.js) */
+.tarjeta-modulo,
+.mesa,
+.tarjeta-resumen {
+  position: relative;
+  isolation: isolate; /* el brillo queda detrás del texto, sobre el fondo */
+}
+
+.tarjeta-modulo::after,
+.mesa::after,
+.tarjeta-resumen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 219, 204, 0.85), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.tarjeta-modulo.relieve,
+.mesa.relieve,
+.tarjeta-resumen.relieve {
+  transform: perspective(800px) rotateX(var(--rx, 0)) rotateY(var(--ry, 0)) translateY(-3px);
+  transition: transform 0.12s ease-out, box-shadow 0.2s;
+  box-shadow: var(--sombra-elevada);
+  z-index: 1;
+}
+
+.relieve::after {
+  opacity: 1;
+}
+
+/* ---------- Cargando: filas esqueleto con un brillo que pasa */
+.estado.cargando {
+  padding: 0;
+}
+
+.estado.cargando #estado-texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%); /* solo para lectores de pantalla */
+}
+
+.esqueleto {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  text-align: left;
+}
+
+.esqueleto-fila {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--superficie-variante);
+}
+
+.esqueleto-fila:last-child {
+  border-bottom: none;
+}
+
+.esqueleto-circulo,
+.esqueleto-lineas i {
+  background: linear-gradient(90deg, var(--superficie-variante) 25%, #fbeee8 45%, var(--superficie-variante) 65%);
+  background-size: 300% 100%;
+}
+
+.esqueleto-circulo {
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.esqueleto-lineas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.esqueleto-lineas i {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  width: 55%;
+}
+
+.esqueleto-lineas i + i {
+  width: 35%;
+  height: 10px;
+}
+
+.esqueleto-fila:nth-child(2) .esqueleto-lineas i:first-child { width: 68%; }
+.esqueleto-fila:nth-child(3) .esqueleto-lineas i:first-child { width: 48%; }
+.esqueleto-fila:nth-child(4) .esqueleto-lineas i:first-child { width: 60%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .esqueleto-circulo,
+  .esqueleto-lineas i {
+    animation: brillo 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes brillo {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+/* ---------- Aviso: palomita que se dibuja (éxito) o ícono que tiembla (error) */
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aviso-palomita {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.aviso-palomita circle {
+  stroke: #8fcb9b;
+  stroke-width: 2;
+  stroke-dasharray: 63;
+  stroke-dashoffset: 0;
+}
+
+.aviso-palomita path {
+  stroke: #ffffff;
+  stroke-width: 2.4;
+  stroke-dasharray: 16;
+  stroke-dashoffset: 0;
+}
+
+.aviso.error .aviso-icono {
+  color: #ffb4ab;
+  font-size: 22px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aviso.visible .aviso-palomita circle {
+    animation: trazar-circulo 0.45s ease-out both;
+  }
+
+  .aviso.visible .aviso-palomita path {
+    animation: trazar-palomita 0.3s ease-out 0.35s both;
+  }
+
+  .aviso.visible.error .aviso-icono {
+    animation: temblar 0.4s ease-in-out 0.15s;
+  }
+}
+
+@keyframes trazar-circulo {
+  from { stroke-dashoffset: 63; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes trazar-palomita {
+  from { stroke-dashoffset: 16; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes temblar {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px); }
+  75%      { transform: translateX(3px); }
+}
+
+/* ---------- Paneles que entran al llegar a la vista (ui.js) */
+@media (prefers-reduced-motion: no-preference) {
+  .por-revelar {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  .por-revelar.revelado {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.5s ease-out, transform 0.6s var(--curva-suave);
+  }
+
+  /* El ícono de una lista vacía flota suavemente */
+  .estado-icono {
+    animation: flotar-icono 3.2s ease-in-out infinite;
+  }
+}
+
+@keyframes flotar-icono {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}

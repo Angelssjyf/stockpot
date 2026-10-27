@@ -13,7 +13,7 @@ const $ = (id) => document.getElementById(id);
 // =====================================================================
 
 async function cargar() {
-  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     const texto = encodeURIComponent($('buscar').value.trim());
     const usuarios = await api('GET', `/usuarios?q=${texto}`);
@@ -168,7 +168,7 @@ $('form-usuario').addEventListener('submit', async (evento) => {
       await api('POST', '/usuarios', datos); // RF-01.1
     }
     dialogo.close();
-    mostrarAviso(usuarioEditado ? 'Usuario actualizado' : 'Usuario creado');
+    mostrarAviso(usuarioEditado ? 'Usuario actualizado' : 'Usuario creado', 'exito');
   } catch (error) {
     mostrarErrorFormulario(error.message); // por ejemplo "Ya existe un usuario con ese correo"
   } finally {
@@ -213,7 +213,7 @@ async function elegirRol(rol) {
     await api('PATCH', `/usuarios/${usuarioEditado.id}/rol`, { rol_id: rol.id });
     $('rol-actual').textContent = rol.nombre;
     $('error-formulario').hidden = true;
-    mostrarAviso(`Rol cambiado a ${rol.nombre}. Aplica cuando el usuario vuelva a iniciar sesión.`);
+    mostrarAviso(`Rol cambiado a ${rol.nombre}. Aplica cuando el usuario vuelva a iniciar sesión.`, 'exito');
   } catch (error) {
     // Por ejemplo: "No puedes quitarle el rol al último administrador activo"
     mostrarErrorFormulario(error.message);

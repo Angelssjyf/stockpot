@@ -16,7 +16,7 @@ const $ = (id) => document.getElementById(id);
 // =====================================================================
 
 async function cargar() {
-  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     const texto = encodeURIComponent($('buscar').value.trim());
     const proveedores = await api('GET', `/proveedores?q=${texto}`);
@@ -239,10 +239,10 @@ $('form-proveedor').addEventListener('submit', async (evento) => {
         })),
       });
       dialogo.close();
-      mostrarAviso('Proveedor actualizado');
+      mostrarAviso('Proveedor actualizado', 'exito');
     } else {
       const nuevo = await api('POST', '/proveedores', datos); // RF-02.1
-      mostrarAviso('Proveedor registrado. Ahora puedes agregar los insumos que vende.');
+      mostrarAviso('Proveedor registrado. Ahora puedes agregar los insumos que vende.', 'exito');
       await abrirFormulario(nuevo.id); // se abre en modo edición para agregar insumos
     }
     cargar();
