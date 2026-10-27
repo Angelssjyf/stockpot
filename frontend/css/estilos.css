@@ -398,6 +398,44 @@ a.boton-texto {
   padding: 48px 16px;
 }
 
+/* Estado vacío: ícono en un círculo, mensaje, explicación y botón para crear el primero */
+.estado.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 56px 16px;
+}
+
+.estado-icono {
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+.estado.vacio #estado-texto {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.estado-detalle {
+  margin: 0;
+  max-width: 340px;
+  line-height: 1.5;
+}
+
+.estado-accion {
+  margin-top: 16px;
+}
+
 .lista {
   list-style: none;
   margin: 0;

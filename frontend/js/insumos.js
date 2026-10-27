@@ -1,6 +1,6 @@
 // Módulo de inventario (RF-03.1 a RF-03.8): insumos, existencias, movimientos y alertas.
 import { api, exigirSesion } from './api.js';
-import { contarHasta, crear, formato, mostrarAviso, normalizar, pintarSuave } from './ui.js';
+import { contarHasta, crear, formato, mostrarAviso, mostrarEstado, normalizar, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('inventario.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('inventario.gestionar');
@@ -89,7 +89,7 @@ async function cargar() {
     insumos = await api('GET', '/insumos');
     pintarLista();
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
 }
 
@@ -97,8 +97,18 @@ async function cargar() {
 function pintarLista() {
   const texto = normalizar($('buscar').value.trim());
   const visibles = insumos.filter((i) => normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
-  if (visibles.length === 0) mostrarEstado(insumos.length ? 'No se encontraron insumos' : 'Todavía no hay insumos');
-  else $('estado').hidden = true;
+  if (visibles.length > 0) $('estado').hidden = true;
+  else if (insumos.length) {
+    mostrarEstado('No se encontraron insumos', {
+      icono: 'search_off', detalle: 'Prueba con otro nombre o código.',
+      accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
+    });
+  } else {
+    mostrarEstado('Todavía no hay insumos', {
+      icono: 'inventory_2', detalle: 'Registra los insumos de la cocina para controlar el stock y recibir alertas.',
+      accion: puedeGestionar ? { texto: 'Crear el primer insumo', alHacer: () => abrirFormulario(null) } : null,
+    });
+  }
   pintarSuave($('lista'), visibles.map(filaDeInsumo)); // las filas que siguen visibles no se mueven
 }
 
@@ -106,12 +116,6 @@ function pintarLista() {
 function recargar() {
   cargarResumen();
   cargar();
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 /** Una fila: código, nombre y el stock con color según su estado (OK, BAJO, AGOTADO). */

@@ -99,6 +99,45 @@ export function empezarCarga(contenedor) {
   return true;
 }
 
+/**
+ * Muestra el bloque #estado en lugar de la lista: cargando, lista vacía o error.
+ * opciones: { icono, detalle, accion: { texto, icono, alHacer }, reintentar }.
+ * Con un ícono se ve como estado vacío (ícono grande, mensaje y botón para crear el primero).
+ */
+export function mostrarEstado(texto, { icono = '', detalle = '', accion = null, reintentar = false } = {}) {
+  const estado = document.getElementById('estado');
+  const botonReintentar = document.getElementById('reintentar');
+  const conIcono = icono || (reintentar ? 'cloud_off' : '');
+  // El ícono, el detalle y el botón se crean la primera vez que hacen falta
+  let simbolo = estado.querySelector('.estado-icono');
+  if (!simbolo) {
+    simbolo = crear('span', { className: 'icono estado-icono', 'aria-hidden': 'true' });
+    estado.prepend(simbolo);
+  }
+  let explicacion = estado.querySelector('.estado-detalle');
+  if (!explicacion) {
+    explicacion = crear('p', { className: 'estado-detalle' });
+    document.getElementById('estado-texto').after(explicacion);
+  }
+  simbolo.textContent = conIcono;
+  simbolo.hidden = !conIcono;
+  explicacion.textContent = detalle;
+  explicacion.hidden = !detalle;
+  document.getElementById('estado-texto').textContent = texto;
+  estado.querySelector('.estado-accion')?.remove();
+  if (accion) {
+    const boton = crear('button', { type: 'button', className: 'boton-principal estado-accion' }, [
+      crear('span', { className: 'icono', texto: accion.icono ?? 'add', 'aria-hidden': 'true' }),
+      document.createTextNode(` ${accion.texto}`),
+    ]);
+    boton.addEventListener('click', accion.alHacer);
+    estado.insertBefore(boton, botonReintentar);
+  }
+  botonReintentar.hidden = !reintentar;
+  estado.classList.toggle('vacio', Boolean(conIcono));
+  estado.hidden = false;
+}
+
 /** Lleva un número de su valor anterior al nuevo en un instante, como un contador. */
 export function contarHasta(elemento, valor, formatear = String) {
   const desde = Number(elemento.dataset.valor ?? 0);

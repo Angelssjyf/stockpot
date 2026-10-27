@@ -1,6 +1,6 @@
 // Órdenes de compra: RF-02.6 Registrar, RF-02.7 Actualizar estado y RF-02.8 Relación con inventario.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('compras.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('compras.gestionar');
@@ -31,21 +31,19 @@ async function cargar() {
     const estado = $('filtro-estado').value;
     const ordenes = await api('GET', `/ordenes-compra${estado ? `?estado=${estado}` : ''}`);
     if (ordenes.length === 0) {
-      mostrarEstado('No hay órdenes de compra');
+      mostrarEstado(estado ? 'No hay órdenes con ese estado' : 'Todavía no hay órdenes de compra', {
+        icono: 'shopping_cart',
+        detalle: estado ? 'Elige otro estado en el filtro.' : 'Pide insumos a un proveedor y registra aquí cuando lleguen.',
+        accion: !estado && puedeGestionar ? { texto: 'Crear la primera orden', alHacer: abrirNueva } : null,
+      });
       pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
       pintarSuave($('lista'), ...ordenes.map(filaDeOrden));
     }
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 function filaDeOrden(orden) {

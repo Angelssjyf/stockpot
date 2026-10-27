@@ -1,7 +1,7 @@
 // Módulo de proveedores: RF-02.1 Registrar, RF-02.2 Consultar, RF-02.3 Modificar,
 // RF-02.4 Productos suministrados y RF-02.5 Historial de compras.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('proveedores.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('proveedores.gestionar');
@@ -21,21 +21,25 @@ async function cargar() {
     const texto = encodeURIComponent($('buscar').value.trim());
     const proveedores = await api('GET', `/proveedores?q=${texto}`);
     if (proveedores.length === 0) {
-      mostrarEstado('No se encontraron proveedores');
+      if (texto) {
+        mostrarEstado('No se encontraron proveedores', {
+          icono: 'search_off', detalle: 'Prueba con otro nombre o NIT.',
+          accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
+        });
+      } else {
+        mostrarEstado('Todavía no hay proveedores', {
+          icono: 'local_shipping', detalle: 'Registra a quienes te venden los insumos para hacerles órdenes de compra.',
+          accion: puedeGestionar ? { texto: 'Crear el primer proveedor', alHacer: () => abrirFormulario(null) } : null,
+        });
+      }
       pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
       pintarSuave($('lista'), ...proveedores.map(filaDeProveedor));
     }
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 function filaDeProveedor(proveedor) {

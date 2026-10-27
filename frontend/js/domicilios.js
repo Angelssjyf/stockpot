@@ -1,6 +1,6 @@
 // Módulo de domicilios (RF-08.1 a RF-08.8): pedidos, clientes, asignación, estados y entregas.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('domicilios.ver'); // sin el permiso vuelve al menú
 // CAJERO y ADMINISTRADOR gestionan; el DOMICILIARIO solo ve y entrega lo suyo
@@ -98,7 +98,7 @@ async function cargar() {
     domicilios = await api('GET', '/domicilios');
     pintarLista();
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
 }
 
@@ -106,18 +106,23 @@ function pintarLista() {
   pintarFiltros();
   const visibles = domicilios.filter((d) => !estadoElegido || d.estado === estadoElegido);
   if (visibles.length === 0) {
-    mostrarEstado(puedeGestionar ? 'No hay domicilios en curso' : 'No tienes domicilios asignados');
+    if (estadoElegido) {
+      mostrarEstado('No hay domicilios en ese estado', { icono: 'filter_alt_off', detalle: 'Elige otro estado arriba.' });
+    } else if (puedeGestionar) {
+      mostrarEstado('No hay domicilios en curso', {
+        icono: 'delivery_dining', detalle: 'Los pedidos a domicilio aparecen aquí hasta que se entregan.',
+        accion: { texto: 'Registrar un domicilio', alHacer: abrirNuevo },
+      });
+    } else {
+      mostrarEstado('No tienes domicilios asignados', {
+        icono: 'delivery_dining', detalle: 'Cuando te asignen una entrega, aparecerá aquí.',
+      });
+    }
     pintarSuave($('lista'));
   } else {
     $('estado').hidden = true;
     pintarSuave($('lista'), ...visibles.map((d) => filaDeDomicilio(d, true)));
   }
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 $('reintentar').addEventListener('click', cargar);
