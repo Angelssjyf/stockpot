@@ -44,6 +44,7 @@
     <form id="form-producto" novalidate>
       <h2 id="titulo-formulario">Nuevo producto</h2>
 
+      <h3 class="titulo-seccion"><span class="icono" aria-hidden="true">restaurant_menu</span>Datos del plato</h3>
       <div class="dos-columnas">
         <div>
           <label class="etiqueta" for="f-codigo">Código *</label>
@@ -64,13 +65,14 @@
       <label class="etiqueta" for="f-descripcion">Descripción</label>
       <div class="campo"><input id="f-descripcion" autocomplete="off" maxlength="255"></div>
 
-      <label class="etiqueta" for="f-precio">Precio de venta ($) *</label>
-      <div class="campo" id="campo-precio"><input id="f-precio" type="number" min="0" step="any"></div>
-      <small class="error-campo" id="error-precio"></small>
-
       <!-- RF-04.4 Asociar insumos a productos -->
       <section class="seccion">
-        <h3>Receta (por porción)</h3>
+        <h3 class="titulo-seccion"><span class="icono" aria-hidden="true">payments</span>Precio y receta</h3>
+        <label class="etiqueta" for="f-precio">Precio de venta ($) *</label>
+        <div class="campo" id="campo-precio"><input id="f-precio" type="number" min="0" step="any"></div>
+        <small class="error-campo" id="error-precio"></small>
+
+        <p class="etiqueta">Receta por porción</p>
         <p class="nota">Cuánto de cada insumo lleva una porción. Con esto se calcula el costo del plato.</p>
         <div class="lineas" id="lineas-receta"></div>
         <div class="linea" id="agregar-linea">
@@ -81,10 +83,11 @@
           </button>
         </div>
         <small class="error-campo" id="error-receta"></small>
-        <dl class="datos-orden costos" id="costos"></dl>
+        <div class="costos-plato" id="costos" aria-live="polite"></div>
       </section>
 
       <div class="seccion">
+        <h3 class="titulo-seccion"><span class="icono" aria-hidden="true">menu_book</span>En la carta</h3>
         <label class="interruptor">
           <span>Disponible hoy<small>Si se acaba, apágalo y sale de la carta</small></span>
           <input type="checkbox" id="f-disponible" checked>
@@ -97,7 +100,7 @@
 
       <div class="alerta-error" id="error-formulario" role="alert" hidden></div>
 
-      <div class="acciones">
+      <div class="acciones fijas">
         <button type="button" class="boton-texto" id="cancelar">Cerrar</button>
         <button type="submit" class="boton-principal" id="guardar">
           <span class="icono" aria-hidden="true">save</span> Guardar

@@ -925,6 +925,93 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-top: 12px;
 }
 
+/* Ventana de producto: títulos de sección, tarjetas de costo y botones siempre visibles */
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primario);
+  margin: 16px 0 8px;
+}
+
+.seccion > .titulo-seccion {
+  margin-top: 0;
+}
+
+.titulo-seccion .icono {
+  font-size: 20px;
+}
+
+.costos-plato {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.costos-plato:empty {
+  display: none; /* el costo y la ganancia solo los ve el administrador */
+}
+
+.costo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: var(--radio);
+  background: var(--fondo);
+  border: 1px solid var(--superficie-variante);
+  min-width: 0;
+}
+
+.costo strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.costo small {
+  color: var(--texto-suave);
+  font-size: 12px;
+}
+
+.costo.ganancia {
+  background: #e6f4ea;
+  border-color: #b7dfc2;
+}
+
+.costo.ganancia strong {
+  color: #1f5130;
+}
+
+.costo.perdida {
+  background: var(--contenedor-error);
+  border-color: #f2b8b5;
+}
+
+.costo.perdida strong {
+  color: var(--error);
+}
+
+.acciones.fijas {
+  position: sticky;
+  bottom: -24px; /* cubre el relleno inferior de la ventana */
+  margin: 24px -24px -24px;
+  padding: 12px 24px;
+  background: var(--superficie);
+  border-top: 1px solid var(--superficie-variante);
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  .acciones.fijas {
+    bottom: calc(-16px - env(safe-area-inset-bottom));
+    margin: 24px -16px calc(-16px - env(safe-area-inset-bottom));
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
 /* ------------------------------------------------------------ Domicilios (RF-08) */
 .pestanas {
   display: flex;
