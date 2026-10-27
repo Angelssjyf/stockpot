@@ -43,7 +43,7 @@ function pintarCategorias() {
 }
 
 async function cargar() {
-  if (empezarCarga($('lista'))) mostrarEstado('Cargando…'); // al recargar, la lista se queda atenuada
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     productos = await api('GET', '/productos');
     pintarLista();
@@ -120,11 +120,11 @@ async function cambiarDisponibilidad(producto, interruptor) {
     const actualizado = await api('PATCH', `/productos/${producto.id}/disponibilidad`,
       { disponible: interruptor.checked });
     Object.assign(producto, actualizado);
-    mostrarAviso(actualizado.disponible ? `${producto.nombre} disponible` : `${producto.nombre} agotado por hoy`);
+    mostrarAviso(actualizado.disponible ? `${producto.nombre} disponible` : `${producto.nombre} agotado por hoy`, 'exito');
     pintarLista();
   } catch (error) {
     interruptor.checked = !interruptor.checked; // vuelve a como estaba
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   } finally {
     interruptor.disabled = false;
   }
@@ -352,7 +352,7 @@ $('form-producto').addEventListener('submit', async (evento) => {
       await api('POST', '/productos', datos); // RF-04.1
     }
     dialogo.close();
-    mostrarAviso(productoId ? 'Producto actualizado' : 'Producto registrado');
+    mostrarAviso(productoId ? 'Producto actualizado' : 'Producto registrado', 'exito');
     cargar();
   } catch (error) {
     $('error-formulario').textContent = error.message; // por ejemplo "Ya existe un producto con ese código"

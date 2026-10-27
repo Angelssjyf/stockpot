@@ -437,7 +437,7 @@ function elegirPlato(producto) {
       if (existente) existente.cantidad += cantidad; // el mismo plato con la misma observación: suma
       else lineas.push({ producto_id: producto.id, nombre: producto.nombre, precio: producto.precio_venta, cantidad, observacion });
       pintarLineas();
-      mostrarAviso(`${cantidad} × ${producto.nombre} agregado`);
+      mostrarAviso(`${cantidad} × ${producto.nombre} agregado`, 'exito');
     },
   });
 }
@@ -617,7 +617,7 @@ $('form-pedido').addEventListener('submit', async (evento) => {
       ? await api('PUT', `/pedidos/${pedidoEditado.id}`, datos) // RF-05.4
       : await api('POST', '/pedidos', datos); // RF-05.1
     dialogoPedido.close();
-    mostrarAviso(pedidoEditado ? `${pedido.codigo} actualizado` : `Pedido ${pedido.codigo} registrado en la mesa ${pedido.mesa.numero}`);
+    mostrarAviso(pedidoEditado ? `${pedido.codigo} actualizado` : `Pedido ${pedido.codigo} registrado en la mesa ${pedido.mesa.numero}`, 'exito');
     refrescar();
     abrirDetalle(pedido.id);
   } catch (error) {
@@ -644,7 +644,7 @@ async function abrirDetalle(id) {
     pintarDetalle(pedido);
     if (!dialogoDetalle.open) dialogoDetalle.showModal();
   } catch (error) {
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   }
 }
 
@@ -720,7 +720,7 @@ async function ejecutar(metodo, ruta, datos, aviso) {
   $('error-detalle').hidden = true;
   try {
     const actualizado = await api(metodo, ruta, datos);
-    mostrarAviso(aviso);
+    mostrarAviso(aviso, 'exito');
     pintarDetalle(actualizado);
     refrescar();
     return true;
@@ -877,7 +877,7 @@ $('form-mesa').addEventListener('submit', async (evento) => {
     const mesa = mesaEditada
       ? await api('PUT', `/mesas/${mesaEditada.id}`, datos)
       : await api('POST', '/mesas', datos);
-    mostrarAviso(`Mesa ${mesa.numero} guardada`);
+    mostrarAviso(`Mesa ${mesa.numero} guardada`, 'exito');
     editarMesa(null);
     await pintarAdminMesas();
   } catch (error) {

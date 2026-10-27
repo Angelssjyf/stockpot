@@ -84,7 +84,7 @@ let insumos = []; // todos los insumos, ya ordenados por nombre desde la API
 
 async function cargar() {
   // Solo la primera vez se ve "Cargando…"; al recargar, la lista actual se queda hasta que llegan los datos
-  if (insumos.length === 0) mostrarEstado('Cargando…');
+  if (insumos.length === 0) mostrarEstado('Cargando…', { cargando: true });
   try {
     insumos = await api('GET', '/insumos');
     pintarLista();
@@ -239,7 +239,7 @@ $('form-insumo').addEventListener('submit', async (evento) => {
       await api('POST', '/insumos', datos); // RF-03.1
     }
     dialogo.close();
-    mostrarAviso(insumoEditado ? 'Insumo actualizado' : 'Insumo registrado');
+    mostrarAviso(insumoEditado ? 'Insumo actualizado' : 'Insumo registrado', 'exito');
     recargar();
   } catch (error) {
     $('error-formulario').textContent = error.message; // por ejemplo "Ya existe un insumo con ese código"
@@ -334,7 +334,7 @@ $('form-movimiento').addEventListener('submit', async (evento) => {
       observacion: $('m-observacion').value.trim(),
     });
     dialogoMovimiento.close();
-    mostrarAviso(tipoMovimiento === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada');
+    mostrarAviso(tipoMovimiento === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada', 'exito');
     abrirFormulario(respuesta.insumo); // la ficha muestra el nuevo stock y el historial
     recargar();
   } catch (error) {

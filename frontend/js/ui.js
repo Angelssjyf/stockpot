@@ -2,8 +2,25 @@
 
 let temporizadorAviso;
 
-/** Muestra un aviso abajo de la pantalla durante 3 segundos. */
-export function mostrarAviso(texto) {
+/** Palomita en SVG que se dibuja sola (ver .aviso-palomita en estilos.css). */
+function palomita() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('class', 'aviso-palomita');
+  svg.setAttribute('aria-hidden', 'true');
+  const circulo = document.createElementNS(ns, 'circle');
+  circulo.setAttribute('cx', '12');
+  circulo.setAttribute('cy', '12');
+  circulo.setAttribute('r', '10');
+  const trazo = document.createElementNS(ns, 'path');
+  trazo.setAttribute('d', 'M7 12.5l3.2 3.2L17 9');
+  svg.append(circulo, trazo);
+  return svg;
+}
+
+/** Muestra un aviso abajo de la pantalla durante 3 segundos. tipo: 'exito' (palomita) o 'error'. */
+export function mostrarAviso(texto, tipo = '') {
   let aviso = document.getElementById('aviso');
   if (!aviso) {
     aviso = document.createElement('div');
@@ -12,7 +29,11 @@ export function mostrarAviso(texto) {
     aviso.setAttribute('role', 'status');
     document.body.appendChild(aviso);
   }
-  aviso.textContent = texto;
+  const visible = aviso.classList.contains('visible');
+  aviso.className = ['aviso', tipo, visible ? 'visible' : ''].filter(Boolean).join(' ');
+  const icono = tipo === 'exito' ? [palomita()]
+    : tipo === 'error' ? [crear('span', { className: 'icono aviso-icono', texto: 'error', 'aria-hidden': 'true' })] : [];
+  aviso.replaceChildren(...icono, crear('span', { texto }));
   aviso.classList.add('visible');
   clearTimeout(temporizadorAviso);
   temporizadorAviso = setTimeout(() => aviso.classList.remove('visible'), 3000);
@@ -104,8 +125,20 @@ export function empezarCarga(contenedor) {
  * opciones: { icono, detalle, accion: { texto, icono, alHacer }, reintentar }.
  * Con un ícono se ve como estado vacío (ícono grande, mensaje y botón para crear el primero).
  */
-export function mostrarEstado(texto, { icono = '', detalle = '', accion = null, reintentar = false } = {}) {
+export function mostrarEstado(texto, { icono = '', detalle = '', accion = null, reintentar = false, cargando = false } = {}) {
   const estado = document.getElementById('estado');
+  // Cargando: filas «esqueleto» con un brillo que pasa, en vez del texto solo
+  let esqueleto = estado.querySelector('.esqueleto');
+  if (cargando && !esqueleto) {
+    esqueleto = crear('div', { className: 'esqueleto', 'aria-hidden': 'true' },
+      [1, 2, 3, 4].map(() => crear('div', { className: 'esqueleto-fila' }, [
+        crear('span', { className: 'esqueleto-circulo' }),
+        crear('span', { className: 'esqueleto-lineas' }, [crear('i'), crear('i')]),
+      ])));
+    estado.prepend(esqueleto);
+  }
+  if (esqueleto) esqueleto.hidden = !cargando;
+  estado.classList.toggle('cargando', cargando);
   const botonReintentar = document.getElementById('reintentar');
   const conIcono = icono || (reintentar ? 'cloud_off' : '');
   // El ícono, el detalle y el botón se crean la primera vez que hacen falta
@@ -316,3 +349,66 @@ function prepararPestanas(barra) {
 }
 
 document.querySelectorAll('.pestanas').forEach(prepararPestanas);
+
+// =====================================================================
+//  Tarjetas con relieve: se inclinan hacia el mouse y un brillo lo sigue.
+//  Solo con mouse (en el celular no hay "pasar por encima") y si no se pidió menos movimiento.
+// =====================================================================
+
+const TARJETAS_RELIEVE = '.tarjeta-modulo, .mesa, .tarjeta-resumen';
+
+if (matchMedia('(hover: hover) and (pointer: fine)').matches && !sinMovimiento()) {
+  let actual = null;
+  const soltar = () => {
+    if (!actual) return;
+    actual.classList.remove('relieve');
+    actual.style.removeProperty('--rx');
+    actual.style.removeProperty('--ry');
+    actual = null;
+  };
+  document.addEventListener('pointermove', (evento) => {
+    const tarjeta = evento.target.closest?.(TARJETAS_RELIEVE);
+    if (tarjeta !== actual) soltar();
+    if (!tarjeta) return;
+    actual = tarjeta;
+    const caja = tarjeta.getBoundingClientRect();
+    const x = (evento.clientX - caja.left) / caja.width; // 0 a 1
+    const y = (evento.clientY - caja.top) / caja.height;
+    tarjeta.classList.add('relieve');
+    tarjeta.style.setProperty('--rx', `${(0.5 - y) * 8}deg`);
+    tarjeta.style.setProperty('--ry', `${(x - 0.5) * 10}deg`);
+    tarjeta.style.setProperty('--mx', `${x * 100}%`);
+    tarjeta.style.setProperty('--my', `${y * 100}%`);
+  });
+  document.addEventListener('pointerleave', soltar);
+}
+
+// =====================================================================
+//  Paneles que aparecen al hacer scroll: los que se pintan fuera de la vista entran
+//  cuando llegan a ella (menú, ventas y reportes vuelven a pintar sus paneles).
+// =====================================================================
+
+if (!sinMovimiento() && 'IntersectionObserver' in window) {
+  const vigia = new IntersectionObserver((entradas) => {
+    for (const entrada of entradas) {
+      if (!entrada.isIntersecting) continue;
+      entrada.target.classList.add('revelado');
+      vigia.unobserve(entrada.target);
+    }
+  }, { rootMargin: '0px 0px -40px 0px' });
+  const preparar = (panel) => {
+    if (panel.dataset.revelar) return;
+    panel.dataset.revelar = '1';
+    if (panel.getBoundingClientRect().top < innerHeight) return; // ya se ve: no se esconde
+    panel.classList.add('por-revelar');
+    vigia.observe(panel);
+  };
+  const buscar = (raiz) => {
+    if (!(raiz instanceof Element)) return;
+    if (raiz.matches('main .panel')) preparar(raiz);
+    raiz.querySelectorAll('main .panel').forEach(preparar);
+  };
+  new MutationObserver((cambios) => cambios.forEach((c) => c.addedNodes.forEach(buscar)))
+    .observe(document.body, { childList: true, subtree: true });
+  buscar(document.body);
+}
