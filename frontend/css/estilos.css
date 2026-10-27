@@ -184,33 +184,132 @@ a.boton-texto {
 }
 
 /* ------------------------------------------------------------ Login */
-.pantalla-centrada {
+/* Pantalla de ingreso: panel de marca + formulario (en el celular, la marca va arriba) */
+.ingreso {
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.ingreso-marca {
+  background: linear-gradient(150deg, var(--primario) 0%, #5a2e19 100%);
+  color: #fff8f6;
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.marca-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.marca-logo .icono {
+  font-size: 36px;
+}
+
+.marca-mensaje h2 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.marca-mensaje p {
+  margin: 6px 0 0;
+  color: #f5ded5;
+  line-height: 1.5;
+}
+
+.marca-puntos,
+.marca-pie {
+  display: none; /* solo en pantallas grandes */
+}
+
+.ingreso .login {
+  margin: 0 auto;
+  padding: 32px 24px 40px;
 }
 
 .login {
   width: 100%;
-  max-width: 380px;
-  text-align: center;
-}
-
-.login .icono-logo {
-  font-size: 80px;
-  color: var(--primario);
+  max-width: 400px;
 }
 
 .login h1 {
-  font-size: 32px;
-  margin-top: 8px;
+  font-size: 28px;
 }
 
 .login .subtitulo {
   color: var(--texto-suave);
-  margin: 4px 0 32px;
+  margin: 4px 0 28px;
+}
+
+@media (min-width: 900px) {
+  .ingreso {
+    flex-direction: row;
+  }
+
+  .ingreso-marca {
+    flex: 0 0 44%;
+    padding: 48px 56px;
+    justify-content: space-between;
+  }
+
+  .marca-mensaje h2 {
+    font-size: 40px;
+    line-height: 1.15;
+  }
+
+  .marca-mensaje p {
+    font-size: 18px;
+    max-width: 420px;
+  }
+
+  .marca-puntos {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    list-style: none;
+    margin: 32px 0 0;
+    padding: 0;
+    font-size: 17px;
+  }
+
+  .marca-puntos li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .marca-puntos .icono {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .marca-pie {
+    display: block;
+    margin: 0;
+    color: #f5ded5;
+    font-size: 14px;
+  }
+
+  .ingreso .login {
+    align-self: center;
+    padding: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ingreso .login {
+    animation: fundido 0.35s ease-out both;
+  }
 }
 
 .login form {

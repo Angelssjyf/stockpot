@@ -9,11 +9,28 @@
 </head>
 <body>
   <!-- RF-01.4 Iniciar sesión -->
-  <main class="pantalla-centrada">
+  <main class="ingreso">
+    <!-- Panel de marca: a la izquierda en computador, franja superior en el celular -->
+    <section class="ingreso-marca">
+      <div class="marca-logo">
+        <span class="icono" aria-hidden="true">soup_kitchen</span>
+        <span>StockPot</span>
+      </div>
+      <div class="marca-mensaje">
+        <h2>Tu restaurante, en orden</h2>
+        <p>Inventario, pedidos y ventas en un solo lugar, para toda la cocina y el salón.</p>
+        <ul class="marca-puntos">
+          <li><span class="icono" aria-hidden="true">inventory_2</span>Inventario con alertas de stock</li>
+          <li><span class="icono" aria-hidden="true">table_restaurant</span>Pedidos en mesa y domicilios</li>
+          <li><span class="icono" aria-hidden="true">insights</span>Reportes para decidir</li>
+        </ul>
+      </div>
+      <p class="marca-pie">Gestión para restaurantes</p>
+    </section>
+
     <div class="login">
-      <span class="icono icono-logo" aria-hidden="true">soup_kitchen</span>
-      <h1>StockPot</h1>
-      <p class="subtitulo">Gestión para restaurantes</p>
+      <h1>Bienvenido</h1>
+      <p class="subtitulo">Ingresa con tu correo y contraseña</p>
 
       <form id="form-login" novalidate>
         <label class="campo" id="campo-email">
