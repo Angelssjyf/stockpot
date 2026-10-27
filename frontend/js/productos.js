@@ -259,14 +259,18 @@ function pintarCostos() {
   }
   const costo = receta.reduce((total, linea) => total + (linea.cantidad || 0) * linea.costo_unitario, 0);
   const precio = Number($('f-precio').value) || 0;
-  const filas = [['Costo por porción', formato.dinero(costo)]];
-  if (precio > 0) {
-    const margen = precio - costo;
-    filas.push(['Ganancia por porción', `${formato.dinero(margen)} (${Math.round((margen / precio) * 100)} %)`]);
-  }
-  pintarSuave($('costos'), ...filas.flatMap(([titulo, valor]) => [
-    crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
-  ]));
+  const margen = precio - costo;
+  const ganancia = precio > 0 ? `${Math.round((margen / precio) * 100)} % del precio` : 'Escribe el precio';
+  // Tres tarjetas: precio, costo y ganancia (en rojo si el plato se vende a pérdida)
+  const tarjeta = (titulo, valor, detalle, clase = '') => crear('div', { className: `costo ${clase}` }, [
+    crear('small', { texto: titulo }),
+    crear('strong', { texto: valor }),
+    crear('small', { texto: detalle }),
+  ]);
+  pintarSuave($('costos'),
+    tarjeta('Precio', formato.dinero(precio), 'por porción'),
+    tarjeta('Costo', formato.dinero(costo), `${receta.length} ${receta.length === 1 ? 'insumo' : 'insumos'}`),
+    tarjeta('Ganancia', precio > 0 ? formato.dinero(margen) : '—', ganancia, precio > 0 && margen < 0 ? 'perdida' : 'ganancia'));
 }
 
 $('f-precio').addEventListener('input', pintarCostos);
