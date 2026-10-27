@@ -113,7 +113,7 @@ function barrasSemana(ventas) {
     if (totales.has(dia)) totales.set(dia, totales.get(dia) + venta.total);
   }
   const maximo = Math.max(...totales.values(), 1);
-  return crear('div', { className: 'barras', role: 'img', 'aria-label': 'Ventas de los últimos 7 días' }, dias.map((d, i) => {
+  return crear('div', { className: 'barras-semana', role: 'img', 'aria-label': 'Ventas de los últimos 7 días' }, dias.map((d, i) => {
     const total = totales.get(iso(d));
     const nombreDia = d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric' });
     return crear('div', { className: `barra-dia${i === 6 ? ' hoy-dia' : ''}`, title: `${nombreDia}: ${formato.dinero(total)}` }, [

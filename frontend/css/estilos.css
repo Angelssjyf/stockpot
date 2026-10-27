@@ -2151,8 +2151,8 @@ dialog.extra-ancho {
   margin: 0;
 }
 
-/* Barras de ventas de la semana */
-.barras {
+/* Barras de ventas de la semana (menú) */
+.barras-semana {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   align-items: end;
