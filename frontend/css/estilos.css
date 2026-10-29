@@ -1034,6 +1034,91 @@ input[type="search"]::-webkit-search-cancel-button {
   }
 }
 
+/* RF-03.10 Inventario por categorías: una tarjeta por categoría («como módulos») */
+.categorias-inventario {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.categoria-inventario {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px;
+  border: 2px solid transparent;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s var(--curva-suave), border-color 0.2s, background 0.2s;
+}
+
+.categoria-inventario:hover {
+  transform: translateY(-2px);
+}
+
+.categoria-inventario .icono {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  margin-bottom: 6px;
+}
+
+.categoria-inventario strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.categoria-inventario small {
+  color: var(--texto-suave);
+}
+
+.categoria-inventario .por-reponer {
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #fff3d6;
+  color: #7a5200;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.categoria-inventario[aria-pressed="true"] {
+  border-color: var(--primario);
+  background: var(--contenedor-primario);
+}
+
+.categoria-inventario[aria-pressed="true"] .icono {
+  background: var(--primario);
+  color: var(--sobre-primario);
+}
+
+/* En el celular las tarjetas se deslizan de lado en una sola fila */
+@media (max-width: 600px) {
+  .categorias-inventario {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 136px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+
+  .categoria-inventario {
+    scroll-snap-align: start;
+  }
+}
+
 /* Reportes: el atajo de fechas elegido (Hoy, 7 días...) se ve relleno para que se note cuál está activo */
 #atajos .chip[aria-pressed="true"] {
   background: var(--primario);

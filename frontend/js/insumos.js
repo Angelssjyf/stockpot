@@ -87,26 +87,68 @@ function filaDeAlerta(alerta) {
 // =====================================================================
 
 let insumos = []; // todos los insumos, ya ordenados por nombre desde la API
+let categoriaElegida = ''; // RF-03.10 '' = todas
+
+const ICONOS_CATEGORIA = {
+  CARNES: 'set_meal', GRANOS: 'grain', LACTEOS: 'egg', FRUTAS_VERDURAS: 'nutrition', BEBIDAS: 'local_drink',
+  ABARROTES: 'shopping_basket', DESECHABLES: 'takeout_dining', LIMPIEZA: 'cleaning_services', MOBILIARIO: 'chair', OTROS: 'category',
+};
+
+/** RF-03.10 Una tarjeta por categoría con cuántos insumos tiene y cuántos hay que reponer. */
+function pintarCategorias() {
+  const conteo = {};
+  for (const insumo of insumos) {
+    const grupo = (conteo[insumo.categoria] ??= { total: 0, reponer: 0 });
+    grupo.total += 1;
+    if (insumo.estado_stock !== 'OK') grupo.reponer += 1;
+  }
+  const reponer = Object.values(conteo).reduce((suma, g) => suma + g.reponer, 0);
+  const tarjetas = [['', 'Todas', 'apps', insumos.length, reponer],
+    ...Object.entries(CATEGORIAS_INSUMO).filter(([clave]) => conteo[clave])
+      .map(([clave, nombre]) => [clave, nombre, ICONOS_CATEGORIA[clave], conteo[clave].total, conteo[clave].reponer])];
+  $('categorias-inventario').hidden = insumos.length === 0;
+  $('categorias-inventario').replaceChildren(...tarjetas.map(([clave, nombre, icono, total, porReponer]) => {
+    const tarjeta = crear('button', {
+      type: 'button', className: 'categoria-inventario', 'aria-pressed': String(clave === categoriaElegida),
+      title: clave ? `Ver solo ${nombre.toLowerCase()}` : 'Ver todos los insumos',
+    }, [
+      crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
+      crear('strong', { texto: nombre }),
+      crear('small', { texto: `${total} ${total === 1 ? 'insumo' : 'insumos'}` }),
+      ...(porReponer ? [crear('span', { className: 'por-reponer', texto: `${porReponer} por reponer` })] : []),
+    ]);
+    tarjeta.addEventListener('click', () => {
+      categoriaElegida = clave === categoriaElegida ? '' : clave; // tocarla otra vez vuelve a todas
+      pintarCategorias();
+      pintarLista();
+    });
+    return tarjeta;
+  }));
+}
 
 async function cargar() {
   // Solo la primera vez se ve "Cargando…"; al recargar, la lista actual se queda hasta que llegan los datos
   if (insumos.length === 0) mostrarEstado('Cargando…', { cargando: true });
   try {
     insumos = await api('GET', '/insumos');
+    if (categoriaElegida && !insumos.some((i) => i.categoria === categoriaElegida)) categoriaElegida = '';
+    pintarCategorias();
     pintarLista();
   } catch (error) {
     mostrarEstado(error.message, { reintentar: true });
   }
 }
 
-/** Muestra solo los insumos cuyo código o nombre contiene lo escrito en el buscador. */
+/** Muestra los insumos de la categoría elegida cuyo código o nombre contiene lo escrito en el buscador. */
 function pintarLista() {
   const texto = normalizar($('buscar').value.trim());
-  const visibles = insumos.filter((i) => normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
+  const visibles = insumos.filter((i) => (!categoriaElegida || i.categoria === categoriaElegida)
+    && normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
   if (visibles.length > 0) $('estado').hidden = true;
   else if (insumos.length) {
     mostrarEstado('No se encontraron insumos', {
-      icono: 'search_off', detalle: 'Prueba con otro nombre o código.',
+      icono: 'search_off',
+      detalle: categoriaElegida ? `Prueba con otro nombre o código, o elige «Todas» arriba.` : 'Prueba con otro nombre o código.',
       accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
     });
   } else {
