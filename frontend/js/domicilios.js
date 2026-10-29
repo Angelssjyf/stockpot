@@ -1,5 +1,6 @@
 // Módulo de domicilios (RF-08.1 a RF-08.8): pedidos, clientes, asignación, estados y entregas.
 import { api, exigirSesion } from './api.js';
+import { reportarIncidencia } from './reportar.js';
 import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('domicilios.ver'); // sin el permiso vuelve al menú
@@ -517,6 +518,18 @@ function pintarAcciones(domicilio) {
   }
   if (domicilio.estado === 'EN_CAMINO') {
     botones.push(botonPrincipal('Registrar entrega', 'task_alt', registrarEntrega));
+  }
+  // RF-12.5 Reportar un inconveniente (el cliente no salió, dirección errada, demora...)
+  if (yo.permisos.includes('incidencias.reportar')) {
+    const reportar = crear('button', { type: 'button', className: 'boton-texto' }, [
+      crear('span', { className: 'icono', texto: 'report', 'aria-hidden': 'true' }), crear('span', { texto: ' Reportar un inconveniente' }),
+    ]);
+    reportar.addEventListener('click', () => reportarIncidencia({
+      modulo: 'DOMICILIOS',
+      referencia: { domicilio_id: domicilio.id },
+      descripcion: `Domicilio ${domicilio.codigo} · ${domicilio.cliente.nombre} · ${[domicilio.direccion, domicilio.barrio].filter(Boolean).join(', ')}`,
+    }));
+    botones.splice(1, 0, reportar);
   }
   $('detalle-acciones').replaceChildren(...botones);
 }

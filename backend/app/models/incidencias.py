@@ -2,7 +2,7 @@
 
 from ..extensions import db
 
-MODULOS_INCIDENCIA = ("INVENTARIO", "VENTAS", "COMPRAS", "OTRO")
+MODULOS_INCIDENCIA = ("INVENTARIO", "VENTAS", "COMPRAS", "DOMICILIOS", "OTRO")
 
 
 class CodigoIncidencia(db.Model):
@@ -16,6 +16,9 @@ class CodigoIncidencia(db.Model):
     nombre = db.Column(db.String(120), nullable=False)
     # Si es true, al reportar se indica la cantidad real y el sistema hace el ajuste de inventario
     corrige_stock = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
+    # Causa externa (el cliente no salió, no pagó...): queda en la bitácora, pero no se le
+    # cuenta como error a nadie del restaurante en «quién comete más errores»
+    causa_externa = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
 
     def to_dict(self):
@@ -25,6 +28,7 @@ class CodigoIncidencia(db.Model):
             "modulo": self.modulo,
             "nombre": self.nombre,
             "corrige_stock": self.corrige_stock,
+            "causa_externa": self.causa_externa,
             "activo": self.activo,
         }
 
@@ -41,6 +45,7 @@ class Incidencia(db.Model):
     movimiento_id = db.Column(db.Integer, db.ForeignKey("movimientos_inventario.id"))
     venta_id = db.Column(db.Integer, db.ForeignKey("ventas.id"))
     orden_compra_id = db.Column(db.Integer, db.ForeignKey("ordenes_compra.id"))
+    domicilio_id = db.Column(db.Integer, db.ForeignKey("domicilios.id"))
     responsable_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)  # quien hizo el registro
     reportado_por_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
     observacion = db.Column(db.String(500), nullable=False)
@@ -55,6 +60,7 @@ class Incidencia(db.Model):
     ajuste = db.relationship("MovimientoInventario", foreign_keys=[ajuste_id])
     venta = db.relationship("Venta")
     orden_compra = db.relationship("OrdenCompra")
+    domicilio = db.relationship("Domicilio")
     responsable = db.relationship("Usuario", foreign_keys=[responsable_id])
     reportado_por = db.relationship("Usuario", foreign_keys=[reportado_por_id])
 
@@ -68,6 +74,9 @@ class Incidencia(db.Model):
             return f"Venta {self.venta.codigo}"
         if self.orden_compra:
             return f"Orden {self.orden_compra.codigo}"
+        if self.domicilio:
+            d = self.domicilio
+            return f"Domicilio {d.orden.codigo} · {d.barrio or d.direccion}"
         return "—"
 
     def to_dict(self):
@@ -81,6 +90,7 @@ class Incidencia(db.Model):
             "movimiento_id": self.movimiento_id,
             "venta_id": self.venta_id,
             "orden_compra_id": self.orden_compra_id,
+            "domicilio_id": self.domicilio_id,
             "responsable_id": self.responsable_id,
             "responsable": nombre(self.responsable),
             "reportado_por": nombre(self.reportado_por),

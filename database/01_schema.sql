@@ -414,9 +414,10 @@ CREATE TABLE consumos (
 CREATE TABLE codigos_incidencia (
     id             INT AUTO_INCREMENT PRIMARY KEY,
     codigo         VARCHAR(10)  NOT NULL UNIQUE,        -- INV-01, VEN-02...
-    modulo         ENUM('INVENTARIO','VENTAS','COMPRAS','OTRO') NOT NULL,
+    modulo         ENUM('INVENTARIO','VENTAS','COMPRAS','DOMICILIOS','OTRO') NOT NULL,
     nombre         VARCHAR(120) NOT NULL,
     corrige_stock  BOOLEAN      NOT NULL DEFAULT FALSE, -- RF-12.3 pide la cantidad real y ajusta
+    causa_externa  BOOLEAN      NOT NULL DEFAULT FALSE, -- RF-12.5 no cuenta contra el personal
     activo         BOOLEAN      NOT NULL DEFAULT TRUE
 );
 
@@ -431,6 +432,7 @@ CREATE TABLE incidencias (
     movimiento_id         INT,                           -- el registro con el error: uno de los tres
     venta_id              INT,
     orden_compra_id       INT,
+    domicilio_id          INT,                           -- RF-12.5
     responsable_id        INT           NOT NULL,
     reportado_por_id      INT           NOT NULL,
     observacion           VARCHAR(500)  NOT NULL,
@@ -442,6 +444,7 @@ CREATE TABLE incidencias (
     CONSTRAINT fk_inc_movimiento  FOREIGN KEY (movimiento_id)        REFERENCES movimientos_inventario(id),
     CONSTRAINT fk_inc_venta       FOREIGN KEY (venta_id)             REFERENCES ventas(id),
     CONSTRAINT fk_inc_orden       FOREIGN KEY (orden_compra_id)      REFERENCES ordenes_compra(id),
+    CONSTRAINT fk_inc_domicilio   FOREIGN KEY (domicilio_id)         REFERENCES domicilios(id),
     CONSTRAINT fk_inc_responsable FOREIGN KEY (responsable_id)       REFERENCES usuarios(id),
     CONSTRAINT fk_inc_reporta     FOREIGN KEY (reportado_por_id)     REFERENCES usuarios(id),
     CONSTRAINT fk_inc_ajuste      FOREIGN KEY (ajuste_id)            REFERENCES movimientos_inventario(id)
