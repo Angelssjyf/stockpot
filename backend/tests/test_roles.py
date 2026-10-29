@@ -72,15 +72,15 @@ def test_cp_01_6_1_listar_roles_con_permisos(client, admin_headers):
     assert r.status_code == 200
     roles = {rol["nombre"]: rol["permisos"] for rol in r.get_json()}
     assert len(roles) == 6
-    assert len(roles["ADMINISTRADOR"]) == 23
-    assert roles["DOMICILIARIO"] == ["domicilios.ver"]
+    assert len(roles["ADMINISTRADOR"]) == 26
+    assert roles["DOMICILIARIO"] == ["domicilios.ver", "incidencias.reportar"]
 
 
 def test_cp_01_6_2_listar_permisos(client, admin_headers):
-    """CP-01.6-2 | RF-01.6 | Listar los 23 permisos disponibles."""
+    """CP-01.6-2 | RF-01.6 | Listar los 26 permisos disponibles (23 + 3 de incidencias, RF-12)."""
     r = client.get("/api/permisos", headers=admin_headers)
     assert r.status_code == 200
-    assert len(r.get_json()) == 23
+    assert len(r.get_json()) == 26
 
 
 def test_cp_01_6_3_cambiar_permisos_de_rol(client, admin_headers, roles):

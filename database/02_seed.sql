@@ -50,7 +50,11 @@ INSERT INTO permisos (codigo, modulo, descripcion) VALUES
  ('pagos.ver',             'pagos',       'Consultar pagos'),
  ('pagos.gestionar',       'pagos',       'Registrar pagos y generar comprobantes'),
  ('ventas.ver',            'ventas',      'Consultar ventas y consumo'),
- ('reportes.ver',          'reportes',    'Generar reportes y estadísticas');
+ ('reportes.ver',          'reportes',    'Generar reportes y estadísticas'),
+ -- Incidencias (RF-12, sugerencia de la sustentación del 2.º corte)
+ ('incidencias.reportar',  'incidencias', 'Reportar errores en inventario, ventas y compras'),
+ ('incidencias.ver',       'incidencias', 'Ver la bitácora de incidencias'),
+ ('incidencias.gestionar', 'incidencias', 'Administrar el catálogo de códigos de incidencia');
 
 -- ---------------------------------------------------------------------
 -- 3. Permisos de cada rol (tabla rol_permisos)
@@ -70,14 +74,31 @@ SELECT r.id, p.id
 FROM roles r
 JOIN permisos p ON (
      (r.nombre = 'MESERO'       AND p.codigo IN ('productos.ver', 'pedidos.ver', 'pedidos.gestionar',
-                                                 'reservas.ver', 'reservas.gestionar'))
+                                                 'reservas.ver', 'reservas.gestionar', 'incidencias.reportar'))
   OR (r.nombre = 'COCINERO'     AND p.codigo IN ('cocina.ver', 'cocina.gestionar',
-                                                 'productos.ver', 'inventario.ver'))
+                                                 'productos.ver', 'inventario.ver', 'incidencias.reportar'))
   OR (r.nombre = 'CAJERO'       AND p.codigo IN ('pedidos.ver', 'pedidos.gestionar', 'productos.ver',
                                                  'pagos.ver', 'pagos.gestionar', 'ventas.ver',
-                                                 'domicilios.ver', 'domicilios.gestionar'))
+                                                 'domicilios.ver', 'domicilios.gestionar', 'incidencias.reportar'))
   OR (r.nombre = 'BODEGUERO'    AND p.codigo IN ('inventario.ver', 'inventario.gestionar',
                                                  'proveedores.ver', 'proveedores.gestionar',
-                                                 'compras.ver', 'compras.gestionar', 'productos.ver'))
-  OR (r.nombre = 'DOMICILIARIO' AND p.codigo IN ('domicilios.ver'))
+                                                 'compras.ver', 'compras.gestionar', 'productos.ver',
+                                                 'incidencias.reportar'))
+  OR (r.nombre = 'DOMICILIARIO' AND p.codigo IN ('domicilios.ver', 'incidencias.reportar'))
 );
+
+-- ---------------------------------------------------------------------
+-- 4. RF-12.1 Catálogo inicial de códigos de incidencia
+--    corrige_stock = 1: al reportarlo se indica la cantidad real y se hace el ajuste.
+-- ---------------------------------------------------------------------
+INSERT INTO codigos_incidencia (codigo, modulo, nombre, corrige_stock) VALUES
+ ('INV-01', 'INVENTARIO', 'Cantidad registrada de más',          1),
+ ('INV-02', 'INVENTARIO', 'Cantidad registrada de menos',        1),
+ ('INV-03', 'INVENTARIO', 'Insumo equivocado',                   0),
+ ('INV-04', 'INVENTARIO', 'Motivo del movimiento equivocado',    0),
+ ('VEN-01', 'VENTAS',     'Método de pago equivocado',           0),
+ ('VEN-02', 'VENTAS',     'Monto cobrado errado',                0),
+ ('VEN-03', 'VENTAS',     'Producto equivocado en el pedido',    0),
+ ('COM-01', 'COMPRAS',    'Precio o cantidad errados en la orden', 0),
+ ('COM-02', 'COMPRAS',    'Proveedor equivocado',                0),
+ ('OTR-01', 'OTRO',       'Otro error',                          0);

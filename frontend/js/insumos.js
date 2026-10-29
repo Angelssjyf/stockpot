@@ -1,9 +1,11 @@
 // Módulo de inventario (RF-03.1 a RF-03.8): insumos, existencias, movimientos y alertas.
 import { api, exigirSesion } from './api.js';
+import { reportarIncidencia } from './reportar.js';
 import { CATEGORIAS_INSUMO, contarHasta, crear, formato, mostrarAviso, mostrarEstado, normalizar, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('inventario.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('inventario.gestionar');
+const puedeReportar = yo.permisos.includes('incidencias.reportar'); // RF-12.2
 
 const $ = (id) => document.getElementById(id);
 
@@ -268,6 +270,27 @@ const NOMBRES_MOTIVO = {
 // Los mismos motivos que acepta la API para un movimiento manual
 const MOTIVOS = { ENTRADA: ['COMPRA', 'AJUSTE', 'DEVOLUCION'], SALIDA: ['CONSUMO', 'MERMA', 'AJUSTE'] };
 
+/** RF-12.2 Botón para reportar un error en un movimiento; si se corrige la cantidad, la ficha se actualiza. */
+function botonReportar(m) {
+  const boton = crear('button', { type: 'button', className: 'boton-icono reportar', title: 'Reportar un error en este movimiento' }, [
+    crear('span', { className: 'icono', texto: 'report', 'aria-hidden': 'true' }),
+  ]);
+  boton.addEventListener('click', () => reportarIncidencia({
+    modulo: 'INVENTARIO',
+    referencia: { movimiento_id: m.id },
+    descripcion: `${m.tipo === 'ENTRADA' ? 'Entrada' : 'Salida'} de ${formato.cantidad(m.cantidad)} ${m.unidad_medida} de ${m.insumo} · ${fechaHora(m.fecha)} · ${m.usuario}`,
+    cantidad: m.motivo === 'CONSUMO' ? null : m.cantidad, // un consumo de venta se reporta sobre la venta
+    unidad: m.unidad_medida,
+    tipo: m.tipo,
+    alGuardar: async (incidencia) => {
+      if (!incidencia.ajuste) return;
+      abrirFormulario(await api('GET', `/insumos/${m.insumo_id}`)); // nuevo stock e historial con el ajuste
+      recargar();
+    },
+  }));
+  return boton;
+}
+
 async function cargarHistorial(insumo) {
   const lista = $('historial');
   // Si ya se ve el historial de este insumo (por ejemplo después de un movimiento), se deja mientras carga
@@ -293,6 +316,7 @@ async function cargarHistorial(insumo) {
           crear('div', { className: `movimiento-${m.tipo}`, texto: `${signo}${formato.cantidad(m.cantidad)}` }),
           crear('small', { className: 'nota', texto: `Queda ${formato.cantidad(m.stock_resultante)}` }),
         ]),
+        ...(puedeReportar ? [botonReportar(m)] : []),
       ]);
     }));
   } catch (error) {

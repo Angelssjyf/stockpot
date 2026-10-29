@@ -244,7 +244,7 @@ HTMLDialogElement.prototype.showModal = function abrirSinChocar() {
   abrirNativo.call(this);
 };
 
-function prepararVentana(dialogo) {
+export function prepararVentana(dialogo) {
   // Tocar la zona oscura de afuera cierra la ventana (igual que el botón Cancelar o Cerrar)
   dialogo.addEventListener('click', (evento) => {
     if (evento.target !== dialogo) return;

@@ -1,5 +1,6 @@
 """Reúne todos los modelos para importarlos desde app.models."""
 
+from .incidencias import CodigoIncidencia, Incidencia
 from .inventario import Insumo, MovimientoInventario
 from .ordenes import Cliente, DetalleOrden, Domicilio, Orden
 from .pedidos import Mesa, PedidoMesa
@@ -10,9 +11,11 @@ from .ventas import Consumo, Pago, Venta
 
 __all__ = [
     "Cliente",
+    "CodigoIncidencia",
     "Consumo",
     "DetalleOrden",
     "DetalleOrdenCompra",
+    "Incidencia",
     "Domicilio",
     "Insumo",
     "Mesa",

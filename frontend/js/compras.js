@@ -1,5 +1,6 @@
 // Órdenes de compra: RF-02.6 Registrar, RF-02.7 Actualizar estado y RF-02.8 Relación con inventario.
 import { api, exigirSesion } from './api.js';
+import { reportarIncidencia } from './reportar.js';
 import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('compras.ver'); // sin el permiso vuelve al menú
@@ -123,7 +124,20 @@ function pintarDetalle(orden) {
   }) : [];
   const cerrar = crear('button', { type: 'button', className: 'boton-texto', texto: 'Cerrar' });
   cerrar.addEventListener('click', () => dialogoDetalle.close());
-  $('detalle-acciones').replaceChildren(cerrar, ...botones);
+  // RF-12.2 Reportar un error en la orden (precio, cantidad, proveedor...)
+  const reportar = [];
+  if (yo.permisos.includes('incidencias.reportar')) {
+    const boton = crear('button', { type: 'button', className: 'boton-texto' }, [
+      crear('span', { className: 'icono', texto: 'report', 'aria-hidden': 'true' }), crear('span', { texto: ' Reportar un error' }),
+    ]);
+    boton.addEventListener('click', () => reportarIncidencia({
+      modulo: 'COMPRAS',
+      referencia: { orden_compra_id: orden.id },
+      descripcion: `Orden ${orden.codigo} · ${orden.proveedor} · ${formato.dinero(orden.total)} · registró ${orden.usuario}`,
+    }));
+    reportar.push(boton);
+  }
+  $('detalle-acciones').replaceChildren(cerrar, ...reportar, ...botones);
 }
 
 async function cambiarEstado(orden, estado) {
