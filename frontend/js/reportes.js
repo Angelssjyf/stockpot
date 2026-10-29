@@ -1,8 +1,10 @@
 // Módulo de reportes y estadísticas (RF-11.1 a RF-11.6).
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, pintarSuave } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
-await exigirSesion('reportes.ver'); // solo el ADMINISTRADOR
+const yo = await exigirSesion('reportes.ver'); // solo el ADMINISTRADOR
+const puedeVerIncidencias = yo.permisos.includes('incidencias.ver'); // RF-12.4
+const puedeGestionarCodigos = yo.permisos.includes('incidencias.gestionar'); // RF-12.1
 
 const $ = (id) => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
@@ -272,12 +274,153 @@ const REPORTES = {
       ];
     },
   },
+
+  // RF-12.4 Bitácora de incidencias: errores reportados desde inventario, ventas y compras
+  incidencias: {
+    titulo: 'Incidencias: errores registrados',
+    async pintar(p) {
+      if (filtroIncidencias.modulo) p.set('modulo', filtroIncidencias.modulo);
+      if (filtroIncidencias.campo) p.set(filtroIncidencias.campo, filtroIncidencias.valor);
+      const [{ incidencias, resumen: r }, codigos] = await Promise.all([
+        api('GET', `/incidencias?${p}`),
+        api('GET', '/codigos-incidencia?todos=true'),
+      ]);
+      const tipo = r.por_tipo[0];
+      const quien = r.por_usuario[0];
+      return [
+        filtrosIncidencias(),
+        crear('div', { className: 'resumen' }, [
+          tarjeta('report', 'Incidencias', String(r.total)),
+          tarjeta('build', 'Corregidas en inventario', String(r.corregidas)),
+          tarjeta('category', 'Error más común', tipo ? tipo.codigo : '—', tipo ? `${tipo.nombre} · ${tipo.total}` : ''),
+          tarjeta('person', 'Comete más errores', quien ? quien.nombre : '—',
+            quien ? `${quien.total} ${quien.total === 1 ? 'incidencia' : 'incidencias'}` : ''),
+        ]),
+        crear('div', { className: 'dos-columnas paneles' }, [
+          panel('Quién comete más errores', barrasFiltrables(r.por_usuario, 'responsable_id', (u) => u.usuario_id, (u) => u.nombre)),
+          panel('Errores más comunes', barrasFiltrables(r.por_tipo, 'codigo_id',
+            (t) => codigos.find((c) => c.codigo === t.codigo)?.id ?? '', (t) => `${t.codigo} · ${t.nombre}`)),
+        ]),
+        panel('Todas las incidencias',
+          crear('p', { className: 'nota', texto: 'Se reportan con «Reportar un error» en el historial de cada insumo, el detalle de una venta o el de una orden de compra.' }),
+          tabla('incidencias', [
+            { titulo: 'Fecha', valor: (f) => fechaHora(f.fecha) },
+            { titulo: 'Error', valor: (f) => `${f.tipo.codigo} · ${f.tipo.nombre}` },
+            { titulo: 'Observación', valor: (f) => f.observacion },
+            { titulo: 'Registro', valor: (f) => f.registro },
+            { titulo: 'Responsable', valor: (f) => f.responsable },
+            { titulo: 'Reportó', valor: (f) => f.reportado_por },
+            { titulo: 'Ajuste', valor: (f) => (f.ajuste ? `${f.ajuste.tipo === 'ENTRADA' ? '+' : '−'}${formato.cantidad(f.ajuste.cantidad)}` : '—'), numero: true },
+            { titulo: 'Incidencia', valor: (f) => f.codigo },
+          ], incidencias)),
+        ...(puedeGestionarCodigos ? [catalogoCodigos(codigos)] : []),
+      ];
+    },
+  },
 };
 
 const NOMBRES_PESTANA = {
   estadisticas: 'Estadísticas', ventas: 'Ventas', inventario: 'Inventario',
   consumo: 'Consumo', productos: 'Más vendidos', historico: 'Histórico',
+  ...(puedeVerIncidencias ? { incidencias: 'Incidencias' } : {}),
 };
+
+// =====================================================================
+//  RF-12.4 Incidencias: filtros, barras que filtran y RF-12.1 catálogo de códigos
+// =====================================================================
+
+const MODULOS_INCIDENCIA = { INVENTARIO: 'Inventario', VENTAS: 'Ventas', COMPRAS: 'Compras', OTRO: 'Otro' };
+const filtroIncidencias = { modulo: '', campo: '', valor: '', texto: '' };
+let catalogoAbierto = false;
+const fechaHora = (texto) => new Date(texto).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+
+/** Chips por módulo y, si se tocó una barra, el filtro activo con su X para quitarlo. */
+function filtrosIncidencias() {
+  const chips = [['', 'Todos'], ...Object.entries(MODULOS_INCIDENCIA)].map(([valor, texto]) => {
+    const boton = crear('button', { type: 'button', className: 'chip filtro', texto, 'aria-pressed': String(valor === filtroIncidencias.modulo) });
+    boton.addEventListener('click', () => { filtroIncidencias.modulo = valor; generar(); });
+    return boton;
+  });
+  if (filtroIncidencias.campo) {
+    const quitar = crear('button', { type: 'button', className: 'chip filtro', 'aria-pressed': 'true', title: 'Quitar este filtro' }, [
+      crear('span', { texto: filtroIncidencias.texto }), crear('span', { className: 'icono', texto: 'close', 'aria-hidden': 'true' }),
+    ]);
+    quitar.addEventListener('click', () => { Object.assign(filtroIncidencias, { campo: '', valor: '', texto: '' }); generar(); });
+    chips.push(quitar);
+  }
+  return crear('div', { className: 'categorias', role: 'group', 'aria-label': 'Filtrar incidencias' }, chips);
+}
+
+/** Barras proporcionales; tocar una deja la bitácora solo con ese responsable o ese tipo de error. */
+function barrasFiltrables(lista, campo, valor, texto) {
+  if (lista.length === 0) return crear('p', { className: 'nota', texto: 'Sin incidencias en este periodo.' });
+  const maximo = lista[0].total;
+  return crear('ul', { className: 'barras' }, lista.map((item) => {
+    const barra = crear('div', { className: 'barra-progreso' });
+    barra.style.width = `${Math.max(4, (item.total / maximo) * 100)}%`;
+    const fila = crear('li', { className: 'barra-filtrable', tabindex: '0', title: 'Ver solo estas incidencias' }, [
+      crear('div', { className: 'barra-texto' }, [crear('span', { texto: texto(item) }), crear('span', { texto: String(item.total) })]),
+      barra,
+    ]);
+    const elegir = () => { Object.assign(filtroIncidencias, { campo, valor: valor(item), texto: texto(item) }); generar(); };
+    fila.addEventListener('click', elegir);
+    fila.addEventListener('keydown', (e) => { if (e.key === 'Enter') elegir(); });
+    return fila;
+  }));
+}
+
+/** RF-12.1 Catálogo de códigos: activar o desactivar y agregar nuevos (plegable, al final de la pestaña). */
+function catalogoCodigos(codigos) {
+  const lista = crear('ul', { className: 'mini-lista' }, codigos.map((c) => {
+    const interruptor = crear('input', { type: 'checkbox', 'aria-label': `Código ${c.codigo} activo` });
+    interruptor.checked = c.activo;
+    interruptor.addEventListener('change', async () => {
+      try {
+        await api('PUT', `/codigos-incidencia/${c.id}`, { activo: interruptor.checked });
+        mostrarAviso(`${c.codigo} ${interruptor.checked ? 'activado' : 'desactivado'}`, 'exito');
+      } catch (error) {
+        interruptor.checked = !interruptor.checked;
+        mostrarAviso(error.message, 'error');
+      }
+    });
+    return crear('li', {}, [
+      crear('span', { texto: `${c.codigo} · ${c.nombre}` }),
+      crear('label', { className: 'interruptor compacto' }, [crear('span', { className: 'nota', texto: MODULOS_INCIDENCIA[c.modulo] }), interruptor]),
+    ]);
+  }));
+  const codigo = crear('input', { id: 'c-codigo', placeholder: 'INV-05', maxlength: '6', 'aria-label': 'Código', autocomplete: 'off' });
+  const nombre = crear('input', { id: 'c-nombre', placeholder: 'Nombre del error', maxlength: '120', 'aria-label': 'Nombre del error', autocomplete: 'off' });
+  const modulo = crear('select', { id: 'c-modulo', 'aria-label': 'Módulo' },
+    Object.entries(MODULOS_INCIDENCIA).map(([valor, texto]) => crear('option', { value: valor, texto })));
+  const error = crear('div', { className: 'alerta-error', role: 'alert', hidden: '' });
+  const formulario = crear('form', { className: 'nuevo-codigo', novalidate: '' }, [
+    crear('div', { className: 'campo' }, [codigo]),
+    crear('div', { className: 'campo' }, [nombre]),
+    crear('div', { className: 'campo' }, [modulo]),
+    crear('button', { type: 'submit', className: 'boton-principal' }, [
+      crear('span', { className: 'icono', texto: 'add', 'aria-hidden': 'true' }), document.createTextNode(' Agregar'),
+    ]),
+  ]);
+  formulario.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    error.hidden = true;
+    try {
+      const nuevo = await api('POST', '/codigos-incidencia', { codigo: codigo.value.trim(), nombre: nombre.value.trim(), modulo: modulo.value });
+      mostrarAviso(`Código ${nuevo.codigo} agregado`, 'exito');
+      generar();
+    } catch (excepcion) {
+      error.textContent = excepcion.message;
+      error.hidden = false;
+    }
+  });
+  const plegable = crear('details', { className: 'panel catalogo' }, [
+    crear('summary', {}, [crear('span', { className: 'icono', texto: 'tune', 'aria-hidden': 'true' }), document.createTextNode(' Catálogo de códigos de error')]),
+    lista, formulario, error,
+  ]);
+  plegable.open = catalogoAbierto;
+  plegable.addEventListener('toggle', () => { catalogoAbierto = plegable.open; });
+  return plegable;
+}
 
 // =====================================================================
 //  Periodo, pestañas, descarga e impresión
