@@ -343,22 +343,22 @@ const REPORTES = {
       return [
         filtrosIncidencias(),
         crear('div', { className: 'resumen' }, [
-          tarjeta('report', 'Incidencias', String(r.total)),
+          tarjeta('report', 'Incidencias', String(r.total), r.causa_externa ? `${r.causa_externa} por causa externa` : ''),
           tarjeta('build', 'Corregidas en inventario', String(r.corregidas)),
           tarjeta('category', 'Error más común', tipo ? tipo.codigo : '—', tipo ? `${tipo.nombre} · ${tipo.total}` : ''),
           tarjeta('person', 'Comete más errores', quien ? quien.nombre : '—',
             quien ? `${quien.total} ${quien.total === 1 ? 'incidencia' : 'incidencias'}` : ''),
         ]),
         crear('div', { className: 'dos-columnas paneles' }, [
-          panel('Quién comete más errores', barrasFiltrables(r.por_usuario, 'responsable_id', (u) => u.usuario_id, (u) => u.nombre)),
+          panel('Quién comete más errores', ...(r.causa_externa ? [crear('p', { className: 'nota', texto: 'No incluye las de causa externa (por ejemplo, el cliente no salió).' })] : []), barrasFiltrables(r.por_usuario, 'responsable_id', (u) => u.usuario_id, (u) => u.nombre)),
           panel('Errores más comunes', barrasFiltrables(r.por_tipo, 'codigo_id',
             (t) => codigos.find((c) => c.codigo === t.codigo)?.id ?? '', (t) => `${t.codigo} · ${t.nombre}`)),
         ]),
         panel('Todas las incidencias',
-          crear('p', { className: 'nota', texto: 'Se reportan con «Reportar un error» en el historial de cada insumo, el detalle de una venta o el de una orden de compra.' }),
+          crear('p', { className: 'nota', texto: 'Se reportan desde el historial de cada insumo y el detalle de una venta, una orden de compra o un domicilio.' }),
           tabla('incidencias', [
             { titulo: 'Fecha', valor: (f) => fechaHora(f.fecha) },
-            { titulo: 'Error', valor: (f) => `${f.tipo.codigo} · ${f.tipo.nombre}` },
+            { titulo: 'Error', valor: (f) => `${f.tipo.codigo} · ${f.tipo.nombre}${f.tipo.causa_externa ? ' (causa externa)' : ''}` },
             { titulo: 'Observación', valor: (f) => f.observacion },
             { titulo: 'Registro', valor: (f) => f.registro },
             { titulo: 'Responsable', valor: (f) => f.responsable },
@@ -389,7 +389,7 @@ const ESTADOS_DOMICILIO = {
   EN_CAMINO: 'En camino', ENTREGADO: 'Entregado', CANCELADO: 'Cancelado',
 };
 
-const MODULOS_INCIDENCIA = { INVENTARIO: 'Inventario', VENTAS: 'Ventas', COMPRAS: 'Compras', OTRO: 'Otro' };
+const MODULOS_INCIDENCIA = { INVENTARIO: 'Inventario', VENTAS: 'Ventas', COMPRAS: 'Compras', DOMICILIOS: 'Domicilios', OTRO: 'Otro' };
 const filtroIncidencias = { modulo: '', campo: '', valor: '', texto: '' };
 let catalogoAbierto = false;
 const fechaHora = (texto) => new Date(texto).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
@@ -444,7 +444,7 @@ function catalogoCodigos(codigos) {
       }
     });
     return crear('li', {}, [
-      crear('span', { texto: `${c.codigo} · ${c.nombre}` }),
+      crear('span', { texto: `${c.codigo} · ${c.nombre}${c.causa_externa ? ' · causa externa' : ''}` }),
       crear('label', { className: 'interruptor compacto' }, [crear('span', { className: 'nota', texto: MODULOS_INCIDENCIA[c.modulo] }), interruptor]),
     ]);
   }));
@@ -452,6 +452,7 @@ function catalogoCodigos(codigos) {
   const nombre = crear('input', { id: 'c-nombre', placeholder: 'Nombre del error', maxlength: '120', 'aria-label': 'Nombre del error', autocomplete: 'off' });
   const modulo = crear('select', { id: 'c-modulo', 'aria-label': 'Módulo' },
     Object.entries(MODULOS_INCIDENCIA).map(([valor, texto]) => crear('option', { value: valor, texto })));
+  const externa = crear('input', { type: 'checkbox', id: 'c-externa' });
   const error = crear('div', { className: 'alerta-error', role: 'alert', hidden: '' });
   const formulario = crear('form', { className: 'nuevo-codigo', novalidate: '' }, [
     crear('div', { className: 'campo' }, [codigo]),
@@ -465,7 +466,9 @@ function catalogoCodigos(codigos) {
     evento.preventDefault();
     error.hidden = true;
     try {
-      const nuevo = await api('POST', '/codigos-incidencia', { codigo: codigo.value.trim(), nombre: nombre.value.trim(), modulo: modulo.value });
+      const nuevo = await api('POST', '/codigos-incidencia', {
+        codigo: codigo.value.trim(), nombre: nombre.value.trim(), modulo: modulo.value, causa_externa: externa.checked,
+      });
       mostrarAviso(`Código ${nuevo.codigo} agregado`, 'exito');
       generar();
     } catch (excepcion) {
@@ -475,7 +478,11 @@ function catalogoCodigos(codigos) {
   });
   const plegable = crear('details', { className: 'panel catalogo' }, [
     crear('summary', {}, [crear('span', { className: 'icono', texto: 'tune', 'aria-hidden': 'true' }), document.createTextNode(' Catálogo de códigos de error')]),
-    lista, formulario, error,
+    lista, formulario,
+    crear('label', { className: 'interruptor compacto causa-externa', for: 'c-externa' }, [
+      crear('span', { texto: 'Causa externa: lo causa el cliente y no cuenta como error del personal' }), externa,
+    ]),
+    error,
   ]);
   plegable.open = catalogoAbierto;
   plegable.addEventListener('toggle', () => { catalogoAbierto = plegable.open; });

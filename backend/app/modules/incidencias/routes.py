@@ -1,4 +1,4 @@
-"""Módulo 12 - Incidencias: errores en inventario, ventas y compras (RF-12.1 a RF-12.4).
+"""Módulo 12 - Incidencias: errores en inventario, ventas, compras y domicilios (RF-12.1 a RF-12.5).
 
 Sugerencia de la docente en la sustentación del 2.º corte: registrar los errores con un
 código y una observación, saber quién los cometió y darle al administrador una bitácora.
@@ -10,9 +10,10 @@ from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt
 
 from ...extensions import db
-from ...models import CodigoIncidencia, Incidencia, MovimientoInventario, OrdenCompra, Venta
+from ...models import CodigoIncidencia, Domicilio, Incidencia, MovimientoInventario, OrdenCompra, Venta
 from ...models.incidencias import MODULOS_INCIDENCIA
 from ...services.inventario import StockInsuficiente, registrar_movimiento
 from ...utils.auth import permiso_requerido, usuario_actual
@@ -25,7 +26,16 @@ REGISTROS = {
     "movimiento_id": (MovimientoInventario, "INVENTARIO"),
     "venta_id": (Venta, "VENTAS"),
     "orden_compra_id": (OrdenCompra, "COMPRAS"),
+    "domicilio_id": (Domicilio, "DOMICILIOS"),  # RF-12.5
 }
+
+
+def _responsable(registro):
+    """Quién hizo el registro. En un domicilio es el domiciliario asignado; si aún no tiene,
+    quien registró el pedido."""
+    if isinstance(registro, Domicilio):
+        return registro.domiciliario_id or registro.orden.usuario_id
+    return registro.usuario_id
 
 
 def _texto(valor):
@@ -66,7 +76,8 @@ def crear_codigo():
         return jsonify(error=f"Módulo inválido. Opciones: {', '.join(MODULOS_INCIDENCIA)}"), 422
     if CodigoIncidencia.query.filter_by(codigo=codigo).first():
         return jsonify(error=f"Ya existe el código {codigo}"), 409
-    nuevo = CodigoIncidencia(codigo=codigo, nombre=nombre, modulo=modulo)
+    nuevo = CodigoIncidencia(codigo=codigo, nombre=nombre, modulo=modulo,
+                             causa_externa=data.get("causa_externa") is True)
     db.session.add(nuevo)
     db.session.commit()
     return jsonify(nuevo.to_dict()), 201
@@ -85,10 +96,11 @@ def modificar_codigo(codigo_id):
         if not nombre:
             return jsonify(error="El nombre no puede quedar vacío"), 422
         codigo.nombre = nombre
-    if "activo" in data:
-        if not isinstance(data["activo"], bool):
-            return jsonify(error="'activo' debe ser true o false"), 422
-        codigo.activo = data["activo"]
+    for campo in ("activo", "causa_externa"):
+        if campo in data:
+            if not isinstance(data[campo], bool):
+                return jsonify(error=f"'{campo}' debe ser true o false"), 422
+            setattr(codigo, campo, data[campo])
     db.session.commit()
     return jsonify(codigo.to_dict())
 
@@ -126,18 +138,22 @@ def reportar_incidencia():
 
     referencias = [campo for campo in REGISTROS if data.get(campo) is not None]
     if len(referencias) != 1:
-        return jsonify(error="Indica el registro con el error: un movimiento, una venta o una orden de compra"), 422
+        return jsonify(error="Indica el registro con el error: un movimiento, una venta, una orden de compra o un domicilio"), 422
     campo = referencias[0]
     modelo, modulo = REGISTROS[campo]
     if tipo.modulo not in (modulo, "OTRO"):
         return jsonify(error=f"El código {tipo.codigo} es de {tipo.modulo.lower()}, no de {modulo.lower()}"), 422
     registro = db.session.get(modelo, data[campo] or 0)
+    # RF-12.5 El domiciliario solo reporta sobre sus propias entregas
+    if (isinstance(registro, Domicilio) and "domicilios.gestionar" not in get_jwt().get("permisos", [])
+            and registro.domiciliario_id != usuario.id):
+        registro = None
     if registro is None:
         return jsonify(error="El registro con el error no existe"), 404
 
     incidencia = Incidencia(
         codigo=f"TMP-{uuid4().hex[:12]}",  # temporal; el definitivo depende del id
-        tipo=tipo, responsable_id=registro.usuario_id, reportado_por_id=usuario.id,
+        tipo=tipo, responsable_id=_responsable(registro), reportado_por_id=usuario.id,
         observacion=observacion[:500], **{campo: registro.id},
     )
 
@@ -205,7 +221,9 @@ def bitacora():
         consulta = consulta.filter(CodigoIncidencia.modulo == modulo)
 
     incidencias = consulta.order_by(Incidencia.created_at.desc(), Incidencia.id.desc()).all()
-    por_usuario = Counter((i.responsable_id, f"{i.responsable.nombre} {i.responsable.apellido}") for i in incidencias)
+    # Las de causa externa (el cliente no salió...) no se le cuentan a nadie del restaurante
+    por_usuario = Counter((i.responsable_id, f"{i.responsable.nombre} {i.responsable.apellido}")
+                          for i in incidencias if not i.tipo.causa_externa)
     por_tipo = Counter((i.tipo.codigo, i.tipo.nombre) for i in incidencias)
     por_modulo = Counter(i.tipo.modulo for i in incidencias)
     return jsonify({
@@ -213,6 +231,7 @@ def bitacora():
         "resumen": {
             "total": len(incidencias),
             "corregidas": sum(1 for i in incidencias if i.ajuste_id),
+            "causa_externa": sum(1 for i in incidencias if i.tipo.causa_externa),
             "por_usuario": [{"usuario_id": uid, "nombre": nombre, "total": total}
                             for (uid, nombre), total in por_usuario.most_common()],
             "por_tipo": [{"codigo": codigo, "nombre": nombre, "total": total}

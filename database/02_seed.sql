@@ -102,3 +102,12 @@ INSERT INTO codigos_incidencia (codigo, modulo, nombre, corrige_stock) VALUES
  ('COM-01', 'COMPRAS',    'Precio o cantidad errados en la orden', 0),
  ('COM-02', 'COMPRAS',    'Proveedor equivocado',                0),
  ('OTR-01', 'OTRO',       'Otro error',                          0);
+
+-- RF-12.5 Domicilios. causa_externa = 1: lo causa el cliente y no se le cuenta al domiciliario
+INSERT INTO codigos_incidencia (codigo, modulo, nombre, corrige_stock, causa_externa) VALUES
+ ('DOM-01', 'DOMICILIOS', 'El cliente no salió o no contestó', 0, 1),
+ ('DOM-02', 'DOMICILIOS', 'Dirección errada o incompleta', 0, 1),
+ ('DOM-03', 'DOMICILIOS', 'Pedido incompleto o equivocado', 0, 0),
+ ('DOM-04', 'DOMICILIOS', 'Pedido llegó dañado o derramado', 0, 0),
+ ('DOM-05', 'DOMICILIOS', 'Demora en la entrega', 0, 0),
+ ('DOM-06', 'DOMICILIOS', 'El cliente no pagó o rechazó el pedido', 0, 1);

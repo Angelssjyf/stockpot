@@ -43,8 +43,8 @@ def _reportar(client, headers, **datos):
 
 
 def test_cp_12_1_1_catalogo_inicial(client, admin_headers, codigos):
-    """CP-12.1-1 | RF-12.1 | Hay 10 códigos iniciales; ?modulo=VENTAS trae los de ventas y el genérico OTR-01."""
-    assert len(codigos) == 10
+    """CP-12.1-1 | RF-12.1 | Hay 16 códigos iniciales (10 + 6 de domicilios); ?modulo=VENTAS trae los de ventas y OTR-01."""
+    assert len(codigos) == 16
     r = client.get("/api/codigos-incidencia?modulo=ventas", headers=admin_headers)
     assert [c["codigo"] for c in r.get_json()] == ["OTR-01", "VEN-01", "VEN-02", "VEN-03"]
 
@@ -65,7 +65,7 @@ def test_cp_12_1_3_desactivar_codigo(client, admin_headers, codigos):
     """CP-12.1-3 | RF-12.1 | Un código desactivado ya no aparece para reportar."""
     client.put(f"/api/codigos-incidencia/{codigos['COM-02']}", headers=admin_headers, json={"activo": False})
     activos = [c["codigo"] for c in client.get("/api/codigos-incidencia", headers=admin_headers).get_json()]
-    assert "COM-02" not in activos and len(activos) == 9
+    assert "COM-02" not in activos and len(activos) == 15
 
 
 # ------------------------------------------------------- RF-12.2 Reportar
@@ -159,3 +159,57 @@ def test_cp_seg_23_solo_admin_ve_la_bitacora(client, bodeguero_headers, codigos,
                   observacion="Lo registré en el insumo equivocado")
     assert r.status_code == 201
     assert client.get("/api/incidencias", headers=bodeguero_headers).status_code == 403
+
+
+# ------------------------------------------------------- RF-12.5 Domicilios
+
+
+@pytest.fixture()
+def domicilio_de_carlos(client, admin_headers):
+    """Un domicilio asignado al domiciliario Carlos; devuelve ids y su sesión."""
+    from app.extensions import db
+    from app.models import Insumo, Producto, Receta
+    pollo = Insumo(codigo="INS-002", nombre="Pollo", unidad_medida="KG", stock_actual=5)
+    bandeja = Producto(codigo="PRD-001", nombre="Bandeja", categoria="PLATO_FUERTE",
+                       precio_venta=22000, receta=[Receta(insumo=pollo, cantidad=0.25)])
+    db.session.add_all([pollo, bandeja])
+    db.session.commit()
+    carlos = crear_usuario("DOMICILIARIO", "carlos@stockpot.test")
+    otro = crear_usuario("DOMICILIARIO", "luisa@stockpot.test")
+    cliente = client.post("/api/clientes", headers=admin_headers, json={
+        "nombre": "María Gómez", "telefono": "3001234567", "direccion": "Calle 45 # 27-30", "barrio": "La Aurora"}).get_json()
+    d = client.post("/api/domicilios", headers=admin_headers, json={
+        "cliente_id": cliente["id"], "items": [{"producto_id": bandeja.id, "cantidad": 1}]}).get_json()
+    client.patch(f"/api/domicilios/{d['id']}/asignar", headers=admin_headers, json={"domiciliario_id": carlos.id})
+    return {"id": d["id"], "carlos": carlos.id, "otro": otro.id,
+            "sesion": iniciar_sesion(client, "carlos@stockpot.test"),
+            "sesion_otro": iniciar_sesion(client, "luisa@stockpot.test")}
+
+
+def test_cp_12_5_1_domiciliario_reporta_su_entrega(client, codigos, domicilio_de_carlos):
+    """CP-12.5-1 | RF-12.5 | El domiciliario reporta «el cliente no salió» sobre su domicilio; queda a su nombre."""
+    r = _reportar(client, domicilio_de_carlos["sesion"], codigo_id=codigos["DOM-01"],
+                  domicilio_id=domicilio_de_carlos["id"], observacion="Toqué el timbre y llamé, nadie salió")
+    assert r.status_code == 201, r.get_json()
+    datos = r.get_json()
+    assert datos["responsable_id"] == domicilio_de_carlos["carlos"]
+    assert datos["tipo"]["causa_externa"] is True
+    assert datos["registro"].startswith("Domicilio PED-") and datos["registro"].endswith("La Aurora")
+
+
+def test_cp_12_5_2_solo_sus_domicilios(client, codigos, domicilio_de_carlos):
+    """CP-12.5-2 | RF-12.5 | Otro domiciliario no puede reportar sobre un domicilio que no es suyo (404)."""
+    r = _reportar(client, domicilio_de_carlos["sesion_otro"], codigo_id=codigos["DOM-05"],
+                  domicilio_id=domicilio_de_carlos["id"], observacion="Llegó tarde")
+    assert r.status_code == 404
+
+
+def test_cp_12_5_3_causa_externa_no_cuenta(client, admin_headers, codigos, domicilio_de_carlos):
+    """CP-12.5-3 | RF-12.5 | DOM-01 (causa externa) no suma en «quién comete más errores»; DOM-05 (demora) sí."""
+    base = {"domicilio_id": domicilio_de_carlos["id"]}
+    _reportar(client, admin_headers, codigo_id=codigos["DOM-01"], observacion="El cliente no contestó", **base)
+    _reportar(client, admin_headers, codigo_id=codigos["DOM-05"], observacion="Salió 40 minutos tarde", **base)
+    resumen = client.get("/api/incidencias", headers=admin_headers).get_json()["resumen"]
+    assert resumen["total"] == 2 and resumen["causa_externa"] == 1
+    assert [(u["usuario_id"], u["total"]) for u in resumen["por_usuario"]] == [(domicilio_de_carlos["carlos"], 1)]
+    assert resumen["por_modulo"] == {"DOMICILIOS": 2}

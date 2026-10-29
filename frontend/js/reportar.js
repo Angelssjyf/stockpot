@@ -11,7 +11,7 @@ let codigos = [];
 function armarVentana() {
   dialogo = crear('dialog', { id: 'dialogo-incidencia' }, [
     crear('form', { id: 'form-incidencia', novalidate: '' }, [
-      crear('h2', { texto: 'Reportar un error' }),
+      crear('h2', { id: 'inc-titulo', texto: 'Reportar un error' }),
       crear('p', { className: 'nota', id: 'inc-registro' }),
       crear('label', { className: 'etiqueta', for: 'inc-codigo', texto: 'Tipo de error *' }),
       crear('div', { className: 'campo' }, [crear('select', { id: 'inc-codigo' })]),
@@ -72,8 +72,8 @@ function explicarAjuste() {
 
 /**
  * Abre la ventana para reportar un error.
- * modulo: 'INVENTARIO' | 'VENTAS' | 'COMPRAS'
- * referencia: { movimiento_id } | { venta_id } | { orden_compra_id }
+ * modulo: 'INVENTARIO' | 'VENTAS' | 'COMPRAS' | 'DOMICILIOS'
+ * referencia: { movimiento_id } | { venta_id } | { orden_compra_id } | { domicilio_id }
  * descripcion: texto corto del registro (se muestra arriba)
  * cantidad, unidad, tipo: solo para movimientos que se pueden corregir (RF-12.3)
  * alGuardar(incidencia): se llama después de registrarla
@@ -83,6 +83,7 @@ export async function reportarIncidencia({ modulo, referencia, descripcion, cant
   contexto = { modulo, referencia, cantidad, unidad, tipo, alGuardar };
   $('form-incidencia').reset();
   $('inc-error').hidden = true;
+  $('inc-titulo').textContent = modulo === 'DOMICILIOS' ? 'Reportar un inconveniente' : 'Reportar un error';
   $('inc-registro').textContent = descripcion;
   $('inc-correccion').hidden = true;
   try {
@@ -94,7 +95,7 @@ export async function reportarIncidencia({ modulo, referencia, descripcion, cant
   }
   $('inc-codigo').replaceChildren(
     crear('option', { value: '', texto: 'Elige el tipo de error…' }),
-    ...codigos.map((c) => crear('option', { value: c.id, texto: `${c.codigo} · ${c.nombre}` })),
+    ...codigos.map((c) => crear('option', { value: c.id, texto: `${c.codigo} · ${c.nombre}${c.causa_externa ? ' (causa externa)' : ''}` })),
   );
   dialogo.showModal();
 }
