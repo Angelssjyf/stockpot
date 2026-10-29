@@ -969,6 +969,15 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-top: 12px;
 }
 
+/* RF-02.9 Lo que vende un proveedor, debajo de su NIT */
+.fila .vende {
+  font-size: 13px;
+  color: var(--primario);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Ventana de producto: títulos de sección, tarjetas de costo y botones siempre visibles */
 .titulo-seccion {
   display: flex;

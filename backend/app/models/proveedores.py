@@ -54,6 +54,7 @@ class ProveedorInsumo(db.Model):
         return {
             "insumo_id": self.insumo_id,
             "insumo": self.insumo.nombre,
+            "categoria": self.insumo.categoria,
             "unidad_medida": self.insumo.unidad_medida,
             "precio_referencia": (
                 float(self.precio_referencia) if self.precio_referencia is not None else None

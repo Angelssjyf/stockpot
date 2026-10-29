@@ -74,6 +74,23 @@ UPDATE insumos SET stock_minimo = 24,  costo_unitario = 2200  WHERE codigo = 'IN
 UPDATE insumos SET stock_minimo = 3,   costo_unitario = 4000  WHERE codigo = 'INS-012';
 
 -- ---------------------------------------------------------------------
+-- Categoría de cada insumo de ejemplo (RF-03.10). Requiere la columna categoria
+-- (01_schema.sql actual o 10).
+-- ---------------------------------------------------------------------
+UPDATE insumos SET categoria = 'GRANOS' WHERE codigo = 'INS-001';
+UPDATE insumos SET categoria = 'CARNES' WHERE codigo = 'INS-002';
+UPDATE insumos SET categoria = 'CARNES' WHERE codigo = 'INS-003';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-004';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-005';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-006';
+UPDATE insumos SET categoria = 'ABARROTES' WHERE codigo = 'INS-007';
+UPDATE insumos SET categoria = 'ABARROTES' WHERE codigo = 'INS-008';
+UPDATE insumos SET categoria = 'LACTEOS' WHERE codigo = 'INS-009';
+UPDATE insumos SET categoria = 'LACTEOS' WHERE codigo = 'INS-010';
+UPDATE insumos SET categoria = 'BEBIDAS' WHERE codigo = 'INS-011';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-012';
+
+-- ---------------------------------------------------------------------
 -- Productos de la carta (RF-04.1) y sus recetas (RF-04.4).
 -- Requiere las tablas de productos (01_schema.sql actual o script 06).
 -- Cantidades por UNA porción, en la unidad de cada insumo.

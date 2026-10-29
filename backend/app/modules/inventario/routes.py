@@ -7,7 +7,7 @@ from sqlalchemy import or_
 
 from ...extensions import db
 from ...models import Insumo, MovimientoInventario
-from ...models.inventario import UNIDADES_MEDIDA
+from ...models.inventario import CATEGORIAS_INSUMO, UNIDADES_MEDIDA
 from ...services.inventario import StockInsuficiente, registrar_movimiento
 from ...utils.auth import permiso_requerido, usuario_actual
 
@@ -68,6 +68,13 @@ def _aplicar_datos(insumo, data):
             return f"Unidad de medida inválida. Opciones: {', '.join(UNIDADES_MEDIDA)}", 422
         insumo.unidad_medida = unidad
 
+    # RF-03.10 Clasificar el insumo por categoría
+    if "categoria" in data:
+        categoria = _texto(data["categoria"]).upper()
+        if categoria not in CATEGORIAS_INSUMO:
+            return f"Categoría inválida. Opciones: {', '.join(CATEGORIAS_INSUMO)}", 422
+        insumo.categoria = categoria
+
     # RF-03.7 Establecer niveles mínimos de stock (y el costo unitario de referencia)
     for campo in ("stock_minimo", "costo_unitario"):
         if campo in data:
@@ -87,14 +94,18 @@ def _aplicar_datos(insumo, data):
 @bp.get("/insumos")
 @permiso_requerido("inventario.ver", "proveedores.ver", "compras.ver")
 def listar_insumos():
-    """RF-03.2 Consultar insumos. Filtros opcionales: ?q= (código o nombre) y
-    ?activo=true|false. También lo usan proveedores y compras para elegir insumos."""
+    """RF-03.2 Consultar insumos. Filtros opcionales: ?q= (código o nombre), ?categoria=
+    (RF-03.10) y ?activo=true|false. También lo usan proveedores y compras para elegir insumos."""
     consulta = Insumo.query
 
     texto = request.args.get("q", "").strip()
     if texto:
         patron = f"%{texto}%"
         consulta = consulta.filter(or_(Insumo.codigo.ilike(patron), Insumo.nombre.ilike(patron)))
+
+    categoria = request.args.get("categoria", "").strip().upper()
+    if categoria:
+        consulta = consulta.filter(Insumo.categoria == categoria)
 
     activo = request.args.get("activo")
     if activo in ("true", "false"):

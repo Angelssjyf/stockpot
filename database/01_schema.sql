@@ -98,6 +98,8 @@ CREATE TABLE insumos (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     codigo          VARCHAR(30)    NOT NULL UNIQUE,  -- ej: INS-001
     nombre          VARCHAR(120)   NOT NULL,
+    categoria       ENUM('CARNES','GRANOS','LACTEOS','FRUTAS_VERDURAS','BEBIDAS','ABARROTES','DESECHABLES','LIMPIEZA','MOBILIARIO','OTROS')
+                    NOT NULL DEFAULT 'OTROS',  -- RF-03.10 (y RF-02.9 proveedores)
     unidad_medida   ENUM('KG','G','L','ML','UNIDAD') NOT NULL,
     stock_actual    DECIMAL(12,3)  NOT NULL DEFAULT 0,
     stock_minimo    DECIMAL(12,3)  NOT NULL DEFAULT 0,  -- RF-03.7 nivel de alerta
