@@ -1034,6 +1034,14 @@ input[type="search"]::-webkit-search-cancel-button {
   }
 }
 
+/* Reportes: el atajo de fechas elegido (Hoy, 7 días...) se ve relleno para que se note cuál está activo */
+#atajos .chip[aria-pressed="true"] {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--sobre-primario);
+  font-weight: 600;
+}
+
 /* RF-02.9 Lo que vende un proveedor, debajo de su NIT */
 .fila .vende {
   font-size: 13px;

@@ -1,4 +1,4 @@
-"""Casos de prueba: reportes y estadísticas (RF-11.1 a RF-11.6).
+"""Casos de prueba: reportes y estadísticas (RF-11.1 a RF-11.7).
 
 Formato del docstring:  ID del caso | requisito | qué se verifica
 """
@@ -171,6 +171,66 @@ def test_cp_11_6_2_alerta_de_cobertura_y_caida(client, admin_headers, negocio, h
     db.session.commit()
     r = _get(client, admin_headers, f"/api/reportes/estadisticas?desde={ayer}&hasta={ayer}")
     assert any("'Pollo' alcanza para 2.0 días" in rec for rec in r["recomendaciones"])
+
+
+# ------------------------------------------------------- RF-11.7 Domicilios por domiciliario
+
+
+@pytest.fixture()
+def domicilios(client, admin_headers):
+    """Tres domicilios: Carlos entrega uno y tiene otro en camino; uno queda sin asignar.
+    Cada uno es 1 bandeja ($22.000) + $3.000 de envío = $25.000."""
+    pollo = Insumo(codigo="INS-002", nombre="Pollo", unidad_medida="KG", stock_actual=5)
+    bandeja = Producto(codigo="PRD-001", nombre="Bandeja", categoria="PLATO_FUERTE",
+                       precio_venta=22000, receta=[Receta(insumo=pollo, cantidad=0.25)])
+    db.session.add_all([pollo, bandeja])
+    db.session.commit()
+    carlos = crear_usuario("DOMICILIARIO", "carlos@stockpot.test")
+    cliente = client.post("/api/clientes", headers=admin_headers, json={
+        "nombre": "María Gómez", "telefono": "3001234567", "direccion": "Calle 45 # 27-30"}).get_json()
+    ids = []
+    for _ in range(3):
+        r = client.post("/api/domicilios", headers=admin_headers, json={
+            "cliente_id": cliente["id"], "costo_envio": 3000,
+            "items": [{"producto_id": bandeja.id, "cantidad": 1}]})
+        assert r.status_code == 201, r.get_json()
+        ids.append(r.get_json()["id"])
+    moto = iniciar_sesion(client, "carlos@stockpot.test")
+    for domicilio_id in ids[:2]:  # los dos primeros salen con Carlos
+        client.patch(f"/api/domicilios/{domicilio_id}/asignar", headers=admin_headers, json={"domiciliario_id": carlos.id})
+        for estado in ("EN_PREPARACION", "LISTO"):
+            client.patch(f"/api/domicilios/{domicilio_id}/estado", headers=admin_headers, json={"estado": estado})
+        client.patch(f"/api/domicilios/{domicilio_id}/estado", headers=moto, json={"estado": "EN_CAMINO"})
+    r = client.post(f"/api/domicilios/{ids[0]}/entrega", headers=moto, json={"recibido_por": "María Gómez"})
+    assert r.status_code == 200, r.get_json()
+    return {"carlos": carlos.id, "ids": ids}
+
+
+def test_cp_11_7_1_domicilios_por_domiciliario(client, admin_headers, domicilios, hoy):
+    """CP-11.7-1 | RF-11.7 | Cuenta por domiciliario: entregados, en curso y valor entregado; «Sin asignar» al final."""
+    datos = _get(client, admin_headers, f"/api/reportes/domicilios?desde={hoy}&hasta={hoy}")
+    assert datos["resumen"]["total"] == 3 and datos["resumen"]["entregados"] == 1
+    carlos, sin_asignar = datos["por_domiciliario"]
+    assert (carlos["nombre"], carlos["entregados"], carlos["en_curso"], carlos["valor_entregado"]) == (
+        "Prueba Domiciliario", 1, 1, 25000.0)
+    assert (sin_asignar["nombre"], sin_asignar["total"]) == ("Sin asignar", 1)
+    assert len(datos["domicilios"]) == 3
+
+
+def test_cp_11_7_2_filtrar_por_domiciliario(client, admin_headers, domicilios, hoy):
+    """CP-11.7-2 | RF-11.7 | ?domiciliario_id= deja solo los de esa persona; 0 = los que siguen sin asignar."""
+    base = f"/api/reportes/domicilios?desde={hoy}&hasta={hoy}"
+    suyos = _get(client, admin_headers, f"{base}&domiciliario_id={domicilios['carlos']}")
+    assert {d["estado"] for d in suyos["domicilios"]} == {"ENTREGADO", "EN_CAMINO"}
+    libres = _get(client, admin_headers, f"{base}&domiciliario_id=0")
+    assert [d["domiciliario"] for d in libres["domicilios"]] == [None]
+
+
+def test_cp_11_7_3_periodo_sin_domicilios(client, admin_headers, domicilios, hoy):
+    """CP-11.7-3 | RF-11.7 | Un periodo sin domicilios responde vacío (sin error)."""
+    ayer = hoy - timedelta(days=1)
+    datos = _get(client, admin_headers, f"/api/reportes/domicilios?desde={ayer}&hasta={ayer}")
+    assert datos["resumen"]["total"] == 0 and datos["por_domiciliario"] == []
 
 
 # ------------------------------------------------------- Permisos por rol
