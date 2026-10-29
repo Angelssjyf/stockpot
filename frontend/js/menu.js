@@ -19,6 +19,7 @@ const MODULOS = [
   { titulo: 'Pagos', icono: 'payments', permiso: 'pagos.ver', pagina: 'caja.html' },
   { titulo: 'Ventas', icono: 'point_of_sale', permiso: 'ventas.ver', pagina: 'ventas.html' },
   { titulo: 'Reportes', icono: 'bar_chart', permiso: 'reportes.ver', pagina: 'reportes.html' },
+  { titulo: 'Incidencias', icono: 'report', permiso: 'incidencias.ver', pagina: 'incidencias.html' }, // RF-12
 ];
 
 const usuario = await exigirSesion(); // sin sesión vuelve al login

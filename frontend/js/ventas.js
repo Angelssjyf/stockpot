@@ -1,5 +1,6 @@
 // Módulo de ventas y consumo (RF-10.2 a RF-10.6).
 import { api, exigirSesion } from './api.js';
+import { reportarIncidencia } from './reportar.js';
 import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('ventas.ver'); // sin el permiso vuelve al menú
@@ -140,6 +141,7 @@ async function abrirVenta(id) {
       crear('span', { texto: formato.dinero(c.costo) }),
     ])) : [crear('li', { className: 'nota', texto: 'Sus productos no tienen receta' })]));
     $('ver-comprobante').hidden = !puedeVerComprobantes;
+    $('reportar-venta').hidden = !yo.permisos.includes('incidencias.reportar');
     dialogo.showModal();
   } catch (error) {
     mostrarAviso(error.message, 'error');
@@ -152,3 +154,10 @@ $('ver-comprobante').addEventListener('click', () => {
 });
 
 cargar();
+
+// RF-12.2 Reportar un error en la venta abierta (método de pago, monto, producto...)
+$('reportar-venta').addEventListener('click', () => reportarIncidencia({
+  modulo: 'VENTAS',
+  referencia: { venta_id: ventaAbierta.id },
+  descripcion: `${ventaAbierta.codigo} · ${formato.dinero(ventaAbierta.total)} · cobró ${ventaAbierta.usuario}`,
+}));

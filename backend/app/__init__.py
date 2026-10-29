@@ -32,6 +32,7 @@ def create_app(config_class=Config):
     from .modules.auth.routes import bp as auth_bp
     from .modules.compras.routes import bp as compras_bp
     from .modules.domicilios.routes import bp as domicilios_bp
+    from .modules.incidencias.routes import bp as incidencias_bp
     from .modules.inventario.routes import bp as inventario_bp
     from .modules.pagos.routes import bp as pagos_bp
     from .modules.pedidos.routes import bp as pedidos_bp
@@ -52,6 +53,7 @@ def create_app(config_class=Config):
     app.register_blueprint(pagos_bp, url_prefix="/api")
     app.register_blueprint(ventas_bp, url_prefix="/api")
     app.register_blueprint(reportes_bp, url_prefix="/api")
+    app.register_blueprint(incidencias_bp, url_prefix="/api")
 
     from .cli import register_cli
 

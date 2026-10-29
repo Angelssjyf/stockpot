@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Incidencias</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Incidencias</h1>
+  </header>
+
+  <!-- RF-12.4 Bitácora de incidencias (solo el administrador) -->
+  <main class="contenido">
+    <form class="filtros" id="form-fechas">
+      <div class="campo"><input type="date" id="desde" aria-label="Desde"></div>
+      <div class="campo"><input type="date" id="hasta" aria-label="Hasta"></div>
+      <button type="submit" class="boton-icono" title="Consultar">
+        <span class="icono" aria-hidden="true">search</span>
+      </button>
+    </form>
+    <div class="categorias" id="modulos" role="group" aria-label="Filtrar por módulo"></div>
+    <div class="categorias" id="filtro-activo" hidden></div>
+
+    <section class="resumen" id="resumen"></section>
+
+    <div class="dos-columnas paneles">
+      <section class="panel">
+        <h3><span class="icono" aria-hidden="true">manage_accounts</span> Quién comete más errores</h3>
+        <ul class="barras" id="por-usuario"></ul>
+      </section>
+      <section class="panel">
+        <h3><span class="icono" aria-hidden="true">category</span> Errores más comunes</h3>
+        <ul class="barras" id="por-tipo"></ul>
+      </section>
+    </div>
+
+    <h3>Todas las incidencias</h3>
+    <div class="estado" id="estado" hidden>
+      <p id="estado-texto"></p>
+      <button type="button" class="boton-texto" id="reintentar" hidden>Reintentar</button>
+    </div>
+    <ul class="lista" id="lista"></ul>
+
+    <!-- RF-12.1 Catálogo de códigos (incidencias.gestionar) -->
+    <details class="panel catalogo" id="catalogo" hidden>
+      <summary><span class="icono" aria-hidden="true">tune</span> Catálogo de códigos de error</summary>
+      <ul class="mini-lista" id="lista-codigos"></ul>
+      <form id="form-codigo" class="nuevo-codigo" novalidate>
+        <div class="campo"><input id="c-codigo" placeholder="INV-05" maxlength="6" aria-label="Código" autocomplete="off"></div>
+        <div class="campo"><input id="c-nombre" placeholder="Nombre del error" maxlength="120" aria-label="Nombre del error" autocomplete="off"></div>
+        <div class="campo">
+          <select id="c-modulo" aria-label="Módulo">
+            <option value="INVENTARIO">Inventario</option>
+            <option value="VENTAS">Ventas</option>
+            <option value="COMPRAS">Compras</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </div>
+        <button type="submit" class="boton-principal"><span class="icono" aria-hidden="true">add</span> Agregar</button>
+      </form>
+      <div class="alerta-error" id="error-codigo" role="alert" hidden></div>
+    </details>
+  </main>
+
+  <script type="module" src="js/incidencias.js"></script>
+</body>
+</html>
