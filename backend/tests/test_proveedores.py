@@ -251,3 +251,42 @@ def test_cp_seg_11_mesero_no_ve_proveedores(client, mesero_headers):
     r = client.post("/api/proveedores", headers=mesero_headers,
                     json={"nit": "700", "razon_social": "X"})
     assert r.status_code == 403
+
+# ------------------------------------------------------- RF-02.9 Subdividir y buscar por lo que vende
+
+
+@pytest.fixture()
+def dos_proveedores(client, admin_headers, insumos, cosecha):
+    """La Cosecha vende arroz (GRANOS); Carnes del Norte vende pollo (CARNES)."""
+    for nombre, categoria in (("Arroz", "GRANOS"), ("Pollo", "CARNES")):
+        client.put(f"/api/insumos/{insumos[nombre]}", headers=admin_headers, json={"categoria": categoria})
+    norte = client.post("/api/proveedores", headers=admin_headers,
+                        json={"nit": "800555111-2", "razon_social": "Carnes del Norte"}).get_json()
+    client.put(f"/api/proveedores/{cosecha['id']}/insumos", headers=admin_headers,
+               json={"insumos": [{"insumo_id": insumos["Arroz"], "precio_referencia": 4200}]})
+    client.put(f"/api/proveedores/{norte['id']}/insumos", headers=admin_headers,
+               json={"insumos": [{"insumo_id": insumos["Pollo"], "precio_referencia": 13000}]})
+    return {"cosecha": cosecha["id"], "norte": norte["id"]}
+
+
+def test_cp_02_9_1_buscar_por_insumo(client, admin_headers, dos_proveedores):
+    """CP-02.9-1 | RF-02.9 | Buscar «pollo» trae a quien lo vende y dice qué insumo coincidió."""
+    r = client.get("/api/proveedores?q=pollo", headers=admin_headers)
+    datos = r.get_json()
+    assert [p["razon_social"] for p in datos] == ["Carnes del Norte"]
+    assert datos[0]["coincidencias"] == ["Pollo"]
+
+
+def test_cp_02_9_2_filtrar_por_categoria(client, admin_headers, dos_proveedores):
+    """CP-02.9-2 | RF-02.9 | ?categoria=GRANOS trae solo a los proveedores que venden granos."""
+    r = client.get("/api/proveedores?categoria=granos", headers=admin_headers)
+    assert [p["razon_social"] for p in r.get_json()] == ["Distribuidora La Cosecha"]
+
+
+def test_cp_02_9_3_categorias_del_proveedor(client, admin_headers, dos_proveedores):
+    """CP-02.9-3 | RF-02.9 | La lista trae las categorías de lo que vende cada proveedor (sin buscar, sin coincidencias)."""
+    r = client.get("/api/proveedores", headers=admin_headers)
+    por_nombre = {p["razon_social"]: p for p in r.get_json()}
+    assert por_nombre["Carnes del Norte"]["categorias"] == ["CARNES"]
+    assert por_nombre["Distribuidora La Cosecha"]["categorias"] == ["GRANOS"]
+    assert por_nombre["Carnes del Norte"]["coincidencias"] == []

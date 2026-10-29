@@ -66,19 +66,28 @@ def _con_insumos(proveedor):
 @bp.get("/proveedores")
 @permiso_requerido("proveedores.ver")
 def listar_proveedores():
-    """RF-02.2 Consultar proveedores. Filtros opcionales: ?q= (razón social, NIT o contacto)
-    y ?activo=true|false."""
+    """RF-02.2 Consultar proveedores. Filtros opcionales: ?q= (razón social, NIT, contacto o
+    RF-02.9 un insumo que vende), ?categoria= (RF-02.9, categoría de lo que vende) y
+    ?activo=true|false. Cada proveedor trae sus categorías y, si la búsqueda dio con un
+    insumo, cuáles de los que vende coinciden."""
     consulta = Proveedor.query
 
     texto = request.args.get("q", "").strip()
+    patron = f"%{texto}%"
     if texto:
-        patron = f"%{texto}%"
         consulta = consulta.filter(
             or_(
                 Proveedor.razon_social.ilike(patron),
                 Proveedor.nit.ilike(patron),
                 Proveedor.contacto.ilike(patron),
+                Proveedor.insumos.any(ProveedorInsumo.insumo.has(Insumo.nombre.ilike(patron))),
             )
+        )
+
+    categoria = request.args.get("categoria", "").strip().upper()
+    if categoria:
+        consulta = consulta.filter(
+            Proveedor.insumos.any(ProveedorInsumo.insumo.has(Insumo.categoria == categoria))
         )
 
     activo = request.args.get("activo")
@@ -86,7 +95,17 @@ def listar_proveedores():
         consulta = consulta.filter(Proveedor.activo.is_(activo == "true"))
 
     proveedores = consulta.order_by(Proveedor.razon_social).all()
-    return jsonify([p.to_dict() for p in proveedores])
+    buscado = texto.casefold()
+    respuesta = []
+    for proveedor in proveedores:
+        datos = proveedor.to_dict()
+        datos["categorias"] = sorted({pi.insumo.categoria for pi in proveedor.insumos})
+        datos["coincidencias"] = sorted(
+            pi.insumo.nombre for pi in proveedor.insumos
+            if buscado and buscado in pi.insumo.nombre.casefold()
+        )
+        respuesta.append(datos)
+    return jsonify(respuesta)
 
 
 @bp.get("/proveedores/<int:proveedor_id>")

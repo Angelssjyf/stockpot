@@ -2,6 +2,13 @@
 
 let temporizadorAviso;
 
+/** RF-03.10 Categorías de insumos (también subdividen a los proveedores, RF-02.9). */
+export const CATEGORIAS_INSUMO = {
+  CARNES: 'Carnes', GRANOS: 'Granos', LACTEOS: 'Lácteos y huevos', FRUTAS_VERDURAS: 'Frutas y verduras',
+  BEBIDAS: 'Bebidas', ABARROTES: 'Abarrotes', DESECHABLES: 'Desechables', LIMPIEZA: 'Limpieza',
+  MOBILIARIO: 'Mobiliario y menaje', OTROS: 'Otros',
+};
+
 /** Palomita en SVG que se dibuja sola (ver .aviso-palomita en estilos.css). */
 function palomita() {
   const ns = 'http://www.w3.org/2000/svg';

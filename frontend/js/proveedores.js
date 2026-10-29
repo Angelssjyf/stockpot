@@ -1,7 +1,7 @@
 // Módulo de proveedores: RF-02.1 Registrar, RF-02.2 Consultar, RF-02.3 Modificar,
 // RF-02.4 Productos suministrados y RF-02.5 Historial de compras.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { CATEGORIAS_INSUMO, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('proveedores.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('proveedores.gestionar');
@@ -11,6 +11,22 @@ document.getElementById('ir-compras').hidden = !yo.permisos.includes('compras.ve
 
 const $ = (id) => document.getElementById(id);
 
+let categoriaElegida = ''; // RF-02.9 '' = todas
+
+/** Chips para filtrar por la categoría de lo que vende el proveedor. */
+function pintarCategorias() {
+  const opciones = [['', 'Todos'], ...Object.entries(CATEGORIAS_INSUMO)];
+  $('categorias').replaceChildren(...opciones.map(([valor, texto]) => {
+    const boton = crear('button', { type: 'button', className: 'chip filtro', texto, 'aria-pressed': String(valor === categoriaElegida) });
+    boton.addEventListener('click', () => {
+      categoriaElegida = valor;
+      pintarCategorias();
+      cargar();
+    });
+    return boton;
+  }));
+}
+
 // =====================================================================
 //  RF-02.2 Consultar proveedores: lista con buscador
 // =====================================================================
@@ -19,11 +35,15 @@ async function cargar() {
   if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     const texto = encodeURIComponent($('buscar').value.trim());
-    const proveedores = await api('GET', `/proveedores?q=${texto}`);
+    const proveedores = await api('GET', `/proveedores?q=${texto}&categoria=${categoriaElegida}`);
     if (proveedores.length === 0) {
-      if (texto) {
+      if (categoriaElegida && !texto) {
+        mostrarEstado(`Ningún proveedor vende ${CATEGORIAS_INSUMO[categoriaElegida].toLowerCase()}`, {
+          icono: 'filter_alt_off', detalle: 'Asigna insumos de esa categoría a un proveedor o elige otra categoría.',
+        });
+      } else if (texto) {
         mostrarEstado('No se encontraron proveedores', {
-          icono: 'search_off', detalle: 'Prueba con otro nombre o NIT.',
+          icono: 'search_off', detalle: 'Prueba con otro nombre, NIT o insumo.',
           accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
         });
       } else {
@@ -43,6 +63,9 @@ async function cargar() {
 }
 
 function filaDeProveedor(proveedor) {
+  const vende = proveedor.coincidencias?.length
+    ? `Vende: ${proveedor.coincidencias.join(', ')}`
+    : (proveedor.categorias ?? []).map((c) => CATEGORIAS_INSUMO[c] ?? c).join(' · ');
   const chips = [];
   if (!proveedor.activo) chips.push(crear('span', { className: 'chip', texto: 'Inactivo' }));
   if (proveedor.telefono) chips.push(crear('span', { className: 'chip', texto: proveedor.telefono }));
@@ -54,6 +77,8 @@ function filaDeProveedor(proveedor) {
     crear('div', { className: 'datos' }, [
       crear('div', { className: 'nombre', texto: proveedor.razon_social }),
       crear('div', { className: 'correo', texto: `NIT ${proveedor.nit}` + (proveedor.contacto ? ` · ${proveedor.contacto}` : '') }),
+      // RF-02.9 Qué vende: lo que coincidió con la búsqueda o, si no se buscó, sus categorías
+      ...(vende.length ? [crear('div', { className: 'vende', texto: vende })] : []),
     ]),
     crear('div', { className: 'chips' }, chips),
   ]);
@@ -255,4 +280,5 @@ $('form-proveedor').addEventListener('submit', async (evento) => {
 
 $('cancelar').addEventListener('click', () => dialogo.close());
 
+pintarCategorias();
 cargar();

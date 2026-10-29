@@ -1,11 +1,15 @@
 // Módulo de inventario (RF-03.1 a RF-03.8): insumos, existencias, movimientos y alertas.
 import { api, exigirSesion } from './api.js';
-import { contarHasta, crear, formato, mostrarAviso, mostrarEstado, normalizar, pintarSuave } from './ui.js';
+import { CATEGORIAS_INSUMO, contarHasta, crear, formato, mostrarAviso, mostrarEstado, normalizar, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('inventario.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('inventario.gestionar');
 
 const $ = (id) => document.getElementById(id);
+
+// RF-03.10 Opciones de categoría del formulario (OTROS queda al final y es la de un insumo nuevo)
+$('f-categoria').replaceChildren(...Object.entries(CATEGORIAS_INSUMO).map(([valor, texto]) => crear('option', { value: valor, texto })));
+$('f-categoria').value = 'OTROS';
 
 function textoStock(insumo) {
   return `${formato.cantidad(insumo.stock_actual)} ${insumo.unidad_medida}`;
@@ -129,7 +133,7 @@ function filaDeInsumo(insumo) {
     ]),
     crear('div', { className: 'datos' }, [
       crear('div', { className: 'nombre', texto: insumo.nombre }),
-      crear('div', { className: 'correo', texto: insumo.codigo }),
+      crear('div', { className: 'correo', texto: `${insumo.codigo} · ${CATEGORIAS_INSUMO[insumo.categoria] ?? 'Otros'}` }),
     ]),
     crear('div', { className: 'chips' }, chips),
   ]);
@@ -162,7 +166,7 @@ if (puedeGestionar) {
 
 /** Quien solo puede ver (por ejemplo el COCINERO) abre la ficha sin poder editarla. */
 function soloLectura(activar) {
-  for (const id of ['f-codigo', 'f-nombre', 'f-unidad', 'f-minimo', 'f-costo', 'f-activo']) {
+  for (const id of ['f-codigo', 'f-nombre', 'f-categoria', 'f-unidad', 'f-minimo', 'f-costo', 'f-activo']) {
     $(id).disabled = activar;
   }
   $('guardar').hidden = activar;
@@ -174,6 +178,7 @@ function abrirFormulario(insumo) {
   const esEdicion = insumo !== null;
 
   $('form-insumo').reset();
+  $('f-categoria').value = 'OTROS'; // el reset dejaría la primera categoría
   for (const campo of ['codigo', 'nombre', 'unidad', 'minimo', 'costo']) marcarCampo(campo, '');
   $('error-formulario').hidden = true;
   soloLectura(!puedeGestionar);
@@ -185,6 +190,7 @@ function abrirFormulario(insumo) {
   if (esEdicion) {
     $('f-codigo').value = insumo.codigo;
     $('f-nombre').value = insumo.nombre;
+    $('f-categoria').value = insumo.categoria;
     $('f-unidad').value = insumo.unidad_medida;
     $('f-minimo').value = insumo.stock_minimo;
     $('f-costo').value = insumo.costo_unitario;
@@ -225,6 +231,7 @@ $('form-insumo').addEventListener('submit', async (evento) => {
   const datos = {
     codigo: $('f-codigo').value.trim(),
     nombre: $('f-nombre').value.trim(),
+    categoria: $('f-categoria').value, // RF-03.10
     unidad_medida: $('f-unidad').value,
     stock_minimo: Number($('f-minimo').value || 0), // RF-03.7
     costo_unitario: Number($('f-costo').value || 0),
