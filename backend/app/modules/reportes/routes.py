@@ -1,4 +1,4 @@
-"""Módulo 11 - Reportes y estadísticas (RF-11.1 a RF-11.6).
+"""Módulo 11 - Reportes y estadísticas (RF-11.1 a RF-11.7).
 
 Los reportes leen lo que registran los demás módulos (inventario, compras, ventas, pagos y
 domicilios); no guardan nada. Los totales se calculan en Python para que funcionen igual en
@@ -272,6 +272,62 @@ def reporte_historico():
 
     return jsonify([{**f, "total": _dinero(f["total"]), "ganancia": _dinero(f["ganancia"]),
                      "compras": _dinero(f["compras"])} for f in filas.values()])
+
+
+# =====================================================================
+#  RF-11.7 Domicilios por domiciliario (recomendación de la docente, tercer corte)
+# =====================================================================
+
+@bp.get("/reportes/domicilios")
+@permiso_requerido("reportes.ver")
+@_con_rango
+def reporte_domicilios(desde, hasta):
+    """RF-11.7 Cuántos domicilios hizo cada domiciliario y cuáles fueron.
+
+    Cuenta los domicilios registrados en el periodo por domiciliario (y los que siguen sin
+    asignar): entregados, en curso y cancelados, el valor entregado y el tiempo promedio de
+    entrega (de la salida a la entrega). ?domiciliario_id= deja solo los de uno (0 = sin asignar).
+    """
+    consulta = filtrar_por_fechas(Domicilio.query, Domicilio.created_at, _args(desde, hasta))
+    elegido = request.args.get("domiciliario_id", "")
+    if elegido.isdigit():
+        consulta = consulta.filter(Domicilio.domiciliario_id.is_(None) if elegido == "0"
+                                   else Domicilio.domiciliario_id == int(elegido))
+    domicilios = consulta.order_by(Domicilio.created_at.desc(), Domicilio.id.desc()).all()
+
+    grupos = defaultdict(list)
+    for d in domicilios:
+        grupos[d.domiciliario_id or 0].append(d)
+
+    def resumen(lista):
+        entregados = [d for d in lista if d.estado == "ENTREGADO"]
+        minutos = [(d.fecha_entrega - d.fecha_salida).total_seconds() / 60
+                   for d in entregados if d.fecha_entrega and d.fecha_salida]
+        return {
+            "total": len(lista),
+            "entregados": len(entregados),
+            "en_curso": sum(1 for d in lista if d.estado not in Domicilio.FINALES),
+            "cancelados": sum(1 for d in lista if d.estado == "CANCELADO"),
+            "valor_entregado": _dinero(sum((d.orden.total for d in entregados), Decimal("0"))),
+            "minutos_promedio": round(sum(minutos) / len(minutos)) if minutos else None,
+        }
+
+    por_domiciliario = []
+    for clave, lista in grupos.items():
+        persona = lista[0].domiciliario
+        por_domiciliario.append({
+            "domiciliario_id": clave,
+            "nombre": f"{persona.nombre} {persona.apellido}" if persona else "Sin asignar",
+            **resumen(lista),
+        })
+    # Primero quien más entregó; "Sin asignar" siempre al final
+    por_domiciliario.sort(key=lambda f: (f["domiciliario_id"] == 0, -f["entregados"], -f["total"], f["nombre"]))
+
+    return jsonify({
+        "resumen": resumen(domicilios),
+        "por_domiciliario": por_domiciliario,
+        "domicilios": [d.to_dict(con_orden=False) for d in domicilios],
+    })
 
 
 # =====================================================================
