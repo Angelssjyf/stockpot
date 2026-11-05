@@ -255,6 +255,7 @@ CREATE TABLE ordenes (
     usuario_id     INT           NOT NULL,             -- quién la registró
     subtotal       DECIMAL(14,2) NOT NULL DEFAULT 0,   -- suma de las líneas
     observaciones  VARCHAR(255),
+    incluye_propina BOOLEAN      NOT NULL DEFAULT TRUE,  -- propina sugerida del 10 % en mesa (Ley 1935/2018)
     created_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_orden_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     CONSTRAINT fk_orden_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
@@ -384,6 +385,7 @@ CREATE TABLE ventas (
     costo_envio    DECIMAL(12,2) NOT NULL DEFAULT 0,
     total          DECIMAL(14,2) NOT NULL,
     costo_insumos  DECIMAL(14,2) NOT NULL DEFAULT 0,   -- lo que costaron los insumos gastados
+    propina        DECIMAL(12,2) NOT NULL DEFAULT 0,   -- del personal: no es venta ni ganancia
     usuario_id     INT           NOT NULL,
     created_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_venta_orden   FOREIGN KEY (orden_id)   REFERENCES ordenes(id),

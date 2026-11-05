@@ -189,12 +189,16 @@ function pintarCuenta(cuenta) {
   filas.push(
     ['Total', formato.dinero(cuenta.total)],
     ['Impoconsumo incluido (8 %)', formato.dinero(cuenta.impoconsumo_incluido)],
+  );
+  if (cuenta.propina) filas.push(['Propina (voluntaria)', formato.dinero(cuenta.propina)], ['A pagar', formato.dinero(cuenta.a_pagar)]);
+  filas.push(
     ['Pagado', formato.dinero(cuenta.pagado)],
     ['Saldo', formato.dinero(cuenta.saldo)],
   );
   pintarSuave($('cuenta-totales'), ...filas.flatMap(([titulo, valor]) => [
     crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
   ]));
+  pintarPropina(cuenta);
 
   // Pagos ya hechos, con opción de anular mientras la orden siga abierta
   $('bloque-pagos-hechos').hidden = cuenta.pagos.length === 0;
@@ -235,6 +239,32 @@ function pintarCuenta(cuenta) {
   }
   $('cuenta-acciones').replaceChildren(...botones);
 }
+
+// Propina sugerida del 10 % en mesa: el cliente decide si la paga (Ley 1935 de 2018)
+function pintarPropina(cuenta) {
+  const bloque = $('bloque-propina');
+  bloque.hidden = !cuenta.propina_sugerida;
+  if (bloque.hidden) return;
+  const casilla = $('c-propina');
+  casilla.checked = cuenta.incluye_propina;
+  casilla.disabled = !puedeCobrar || cuenta.estado_orden !== 'ABIERTA';
+  $('c-propina-valor').textContent = `Propina sugerida (10 %): ${formato.dinero(cuenta.propina_sugerida)}`;
+}
+
+$('c-propina').addEventListener('change', async (evento) => {
+  const casilla = evento.target;
+  casilla.disabled = true;
+  try {
+    const cuenta = await api('PATCH', `/ordenes/${cuentaAbierta.orden_id}/propina`, { incluir: casilla.checked });
+    mostrarAviso(casilla.checked ? 'Propina incluida' : 'Propina quitada: el cliente no la quiso', 'exito');
+    pintarCuenta(cuenta);
+    cargarPorCobrar();
+  } catch (error) {
+    casilla.checked = !casilla.checked;
+    casilla.disabled = false;
+    mostrarErrorCuenta(error.message); // por ejemplo "Ya se pagó parte de la propina"
+  }
+});
 
 function mostrarErrorCuenta(mensaje) {
   $('error-cuenta').textContent = mensaje;

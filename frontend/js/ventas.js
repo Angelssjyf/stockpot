@@ -56,6 +56,7 @@ function pintarResumen(r) {
     tarjetaResumen('payments', 'Total vendido', formato.dinero(r.total)),
     tarjetaResumen('shopping_bag', 'Ticket promedio', formato.dinero(r.ticket_promedio)),
     tarjetaResumen('trending_up', 'Ganancia (sin insumos)', formato.dinero(r.ganancia)),
+    tarjetaResumen('volunteer_activism', 'Propinas (del personal)', formato.dinero(r.propinas)),
   );
 }
 
@@ -131,6 +132,7 @@ async function abrirVenta(id) {
       ['Pagos', venta.pagos.map((p) => `${p.metodo.toLowerCase()} ${formato.dinero(p.monto)}`).join(' + ')],
       ['Costo de insumos', formato.dinero(venta.costo_insumos)],
       ['Ganancia', formato.dinero(venta.ganancia)],
+      ['Propina (del personal)', venta.propina ? formato.dinero(venta.propina) : null],
     ].filter(([, valor]) => valor);
     pintarSuave($('venta-datos'), ...datos.flatMap(([t, v]) => [crear('dt', { texto: t }), crear('dd', { texto: v })]));
     pintarSuave($('venta-productos'), ...venta.productos.map((d) => crear('li', {}, [

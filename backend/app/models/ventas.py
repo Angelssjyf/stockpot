@@ -58,6 +58,7 @@ class Venta(db.Model):
     costo_envio = db.Column(db.Numeric(12, 2), nullable=False, default=0, server_default="0")
     total = db.Column(db.Numeric(14, 2), nullable=False)
     costo_insumos = db.Column(db.Numeric(14, 2), nullable=False, default=0, server_default="0")
+    propina = db.Column(db.Numeric(12, 2), nullable=False, default=0, server_default="0")  # del personal
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
@@ -79,6 +80,7 @@ class Venta(db.Model):
             "total": float(self.total),
             "costo_insumos": float(self.costo_insumos),
             "ganancia": float(self.subtotal - self.costo_insumos),  # el envío no es ganancia
+            "propina": float(self.propina),  # ni la propina: es del personal
             "usuario": f"{self.usuario.nombre} {self.usuario.apellido}",
         }
         if completo:

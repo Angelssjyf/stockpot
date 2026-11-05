@@ -3137,3 +3137,15 @@ dialog.extra-ancho {
   from { transform: translateX(-100%); }
   to   { transform: translateX(0); }
 }
+
+/* Propina sugerida en la cuenta y el comprobante */
+.interruptor.propina {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--superficie-variante);
+}
+
+.centrado.pequena {
+  font-size: 12px;
+  color: var(--texto-suave);
+}

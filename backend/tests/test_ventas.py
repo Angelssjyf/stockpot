@@ -93,7 +93,7 @@ def test_cp_10_2_1_consultar_ventas(client, cajero_headers, dos_ventas):
     assert r["resumen"] == {
         "ventas": 2, "total": 62000.0, "ticket_promedio": 31000.0,
         "costo_insumos": 14800.0,   # 0,5 × 12.000 + 4 × 2.200
-        "ganancia": 47200.0,
+        "ganancia": 47200.0, "propinas": 0.0,  # para llevar y domicilio no llevan propina
     }
     vacio = client.get("/api/ventas?desde=2000-01-01&hasta=2000-01-31", headers=cajero_headers)
     assert vacio.get_json()["ventas"] == []
