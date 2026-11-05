@@ -8,13 +8,28 @@ const verClave = document.getElementById('ver-clave');
 const botonIngresar = document.getElementById('boton-ingresar');
 const errorLogin = document.getElementById('error-login');
 
+/** Muestra la pantalla de carga (la olla echando vapor) y luego abre el menú. */
+function entrar() {
+  document.getElementById('pantalla-carga').hidden = false;
+  const espera = matchMedia('(prefers-reduced-motion: reduce)').matches ? 200 : 1400;
+  setTimeout(() => location.replace('/menu.html'), espera);
+}
+
 // Si ya hay una sesión guardada y sigue vigente, entra directo al menú
 if (sesion.token) {
   api('GET', '/auth/me')
-    .then(() => location.replace('/menu.html'))
+    .then(entrar)
     .catch((error) => {
-      if (error.codigo === 401) sesion.cerrar(); // token vencido: hay que iniciar sesión
+      if (error.codigo === 401 || error.codigo === 403) sesion.cerrar(); // vencido o restaurante desactivado
     });
+}
+
+// Si la sesión se cerró por algo que el usuario debe saber (por ejemplo, restaurante desactivado)
+const aviso = sessionStorage.getItem('stockpot_aviso');
+if (aviso) {
+  sessionStorage.removeItem('stockpot_aviso');
+  errorLogin.textContent = aviso;
+  errorLogin.hidden = false;
 }
 
 // Botón del ojo: muestra u oculta la contraseña
@@ -53,7 +68,7 @@ formulario.addEventListener('submit', async (evento) => {
       password: password.value,
     });
     sesion.guardar(respuesta.access_token);
-    location.replace('/menu.html');
+    entrar();
   } catch (error) {
     errorLogin.textContent = error.message; // mensaje que envía la API, en español
     errorLogin.hidden = false;

@@ -14,6 +14,27 @@ USE stockpot;
 
 
 -- =====================================================================
+--  Varios restaurantes (tercer corte)
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- Empresas: cada restaurante que usa StockPot. Sus datos llevan empresa_id
+-- y la aplicación filtra cada consulta por el restaurante de la sesión.
+-- El súper administrador (sin empresa) solo crea y activa restaurantes.
+-- ---------------------------------------------------------------------
+CREATE TABLE empresas (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    nombre      VARCHAR(120) NOT NULL,
+    nit         VARCHAR(20)  NOT NULL UNIQUE,
+    telefono    VARCHAR(20),
+    email       VARCHAR(120),
+    direccion   VARCHAR(200),
+    activa      BOOLEAN      NOT NULL DEFAULT TRUE,   -- desactivada: sus usuarios no pueden entrar
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- =====================================================================
 --  ITERACIÓN 1 - Parte 1: Usuarios y roles
 -- =====================================================================
 
@@ -25,10 +46,13 @@ USE stockpot;
 -- ---------------------------------------------------------------------
 CREATE TABLE roles (
     id           INT AUTO_INCREMENT PRIMARY KEY,
-    nombre       VARCHAR(50)  NOT NULL UNIQUE,
+    empresa_id  INT NULL,      -- NULL: súper administrador
+    nombre       VARCHAR(50)  NOT NULL,
     descripcion  VARCHAR(255),
     activo       BOOLEAN      NOT NULL DEFAULT TRUE,
-    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_roles_empresa_nombre (empresa_id, nombre),  -- único en cada restaurante
+    CONSTRAINT fk_roles_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 CREATE TABLE permisos (
@@ -54,17 +78,38 @@ CREATE TABLE rol_permisos (
 -- ---------------------------------------------------------------------
 CREATE TABLE usuarios (
     id             INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NULL,      -- NULL: súper administrador
     nombre         VARCHAR(80)  NOT NULL,
     apellido       VARCHAR(80)  NOT NULL,
     email          VARCHAR(120) NOT NULL UNIQUE,  -- con él se inicia sesión
     password_hash  VARCHAR(255) NOT NULL,         -- contraseña cifrada, nunca en texto plano
+    pin_hash       VARCHAR(255),                -- PIN personal cifrado (cobrar, anular, salidas)
     telefono       VARCHAR(20),
     rol_id         INT          NOT NULL,
     activo         BOOLEAN      NOT NULL DEFAULT TRUE,  -- desactivar en vez de borrar
     ultimo_acceso  DATETIME,
     created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id) REFERENCES roles(id)
+    CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id) REFERENCES roles(id),
+    CONSTRAINT fk_usuarios_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+);
+
+-- ---------------------------------------------------------------------
+-- Sesiones seguras (tercer corte): cada inicio de sesión queda guardado para
+-- poder bloquearla, cerrarla por inactividad o al salir aunque el token no haya vencido.
+-- ---------------------------------------------------------------------
+CREATE TABLE sesiones (
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    jti               VARCHAR(36)  NOT NULL UNIQUE,   -- identificador del token
+    usuario_id        INT          NOT NULL,
+    creada            DATETIME     NOT NULL,
+    ultima_actividad  DATETIME     NOT NULL,          -- a los 30 min sin uso se cierra
+    bloqueada         BOOLEAN      NOT NULL DEFAULT FALSE,
+    intentos_pin      INT          NOT NULL DEFAULT 0, -- al quinto PIN equivocado se cierra
+    cerrada           DATETIME,                       -- NULL = abierta
+    motivo_cierre     ENUM('SALIDA','INACTIVIDAD','PIN','USUARIO'),
+    CONSTRAINT fk_sesion_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    INDEX idx_sesion_usuario (usuario_id)
 );
 
 
@@ -78,7 +123,8 @@ CREATE TABLE usuarios (
 -- ---------------------------------------------------------------------
 CREATE TABLE proveedores (
     id            INT AUTO_INCREMENT PRIMARY KEY,
-    nit           VARCHAR(20)  NOT NULL UNIQUE,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
+    nit           VARCHAR(20)  NOT NULL,
     razon_social  VARCHAR(150) NOT NULL,
     contacto      VARCHAR(100),                   -- persona con quien se habla
     telefono      VARCHAR(20),
@@ -86,7 +132,9 @@ CREATE TABLE proveedores (
     direccion     VARCHAR(200),
     activo        BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_proveedores_empresa_nit (empresa_id, nit),  -- único en cada restaurante
+    CONSTRAINT fk_proveedores_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- ---------------------------------------------------------------------
@@ -96,15 +144,20 @@ CREATE TABLE proveedores (
 -- ---------------------------------------------------------------------
 CREATE TABLE insumos (
     id              INT AUTO_INCREMENT PRIMARY KEY,
-    codigo          VARCHAR(30)    NOT NULL UNIQUE,  -- ej: INS-001
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
+    codigo          VARCHAR(30)    NOT NULL,  -- ej: INS-001
     nombre          VARCHAR(120)   NOT NULL,
+    categoria       ENUM('CARNES','GRANOS','LACTEOS','FRUTAS_VERDURAS','BEBIDAS','ABARROTES','DESECHABLES','LIMPIEZA','MOBILIARIO','OTROS')
+                    NOT NULL DEFAULT 'OTROS',  -- RF-03.10 (y RF-02.9 proveedores)
     unidad_medida   ENUM('KG','G','L','ML','UNIDAD') NOT NULL,
     stock_actual    DECIMAL(12,3)  NOT NULL DEFAULT 0,
     stock_minimo    DECIMAL(12,3)  NOT NULL DEFAULT 0,  -- RF-03.7 nivel de alerta
     costo_unitario  DECIMAL(12,2)  NOT NULL DEFAULT 0,  -- último costo de compra
     activo          BOOLEAN        NOT NULL DEFAULT TRUE,
     created_at      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_insumo_stock CHECK (stock_actual >= 0)  -- nunca stock negativo
+    CONSTRAINT chk_insumo_stock CHECK (stock_actual >= 0),  -- nunca stock negativo
+    UNIQUE KEY uq_insumos_empresa_codigo (empresa_id, codigo),  -- único en cada restaurante
+    CONSTRAINT fk_insumos_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- ---------------------------------------------------------------------
@@ -127,6 +180,7 @@ CREATE TABLE proveedor_insumos (
 -- ---------------------------------------------------------------------
 CREATE TABLE ordenes_compra (
     id                      INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
     codigo                  VARCHAR(20)   NOT NULL UNIQUE,  -- ej: OC-000001
     proveedor_id            INT           NOT NULL,
     usuario_id              INT           NOT NULL,         -- quién la registró
@@ -140,7 +194,8 @@ CREATE TABLE ordenes_compra (
     created_at              DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at              DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_oc_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores(id),
-    CONSTRAINT fk_oc_usuario   FOREIGN KEY (usuario_id)   REFERENCES usuarios(id)
+    CONSTRAINT fk_oc_usuario   FOREIGN KEY (usuario_id)   REFERENCES usuarios(id),
+    CONSTRAINT fk_ordenes_compra_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- Detalle: cada línea de la orden (qué insumo, cuánto y a qué precio).
@@ -167,6 +222,7 @@ CREATE TABLE detalle_orden_compra (
 -- ---------------------------------------------------------------------
 CREATE TABLE movimientos_inventario (
     id                INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
     insumo_id         INT           NOT NULL,
     tipo              ENUM('ENTRADA','SALIDA') NOT NULL,
     motivo            ENUM('COMPRA','AJUSTE','DEVOLUCION','CONSUMO','MERMA') NOT NULL,
@@ -180,7 +236,8 @@ CREATE TABLE movimientos_inventario (
     CONSTRAINT fk_mov_oc      FOREIGN KEY (orden_compra_id) REFERENCES ordenes_compra(id),
     CONSTRAINT fk_mov_usuario FOREIGN KEY (usuario_id)      REFERENCES usuarios(id),
     CONSTRAINT chk_mov_cantidad CHECK (cantidad > 0),
-    INDEX idx_mov_fecha (created_at)
+    INDEX idx_mov_fecha (created_at),
+    CONSTRAINT fk_movimientos_inventario_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 
@@ -194,7 +251,8 @@ CREATE TABLE movimientos_inventario (
 -- ---------------------------------------------------------------------
 CREATE TABLE productos (
     id            INT AUTO_INCREMENT PRIMARY KEY,
-    codigo        VARCHAR(30)   NOT NULL UNIQUE,     -- ej: PRD-001
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
+    codigo        VARCHAR(30)   NOT NULL,     -- ej: PRD-001
     nombre        VARCHAR(120)  NOT NULL,
     descripcion   VARCHAR(255),
     categoria     ENUM('ENTRADA','PLATO_FUERTE','BEBIDA','POSTRE','ADICIONAL') NOT NULL,
@@ -202,7 +260,9 @@ CREATE TABLE productos (
     disponible    BOOLEAN       NOT NULL DEFAULT TRUE,  -- RF-04.6 se puede pedir hoy
     activo        BOOLEAN       NOT NULL DEFAULT TRUE,  -- sigue en la carta
     created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_producto_precio CHECK (precio_venta > 0)
+    CONSTRAINT chk_producto_precio CHECK (precio_venta > 0),
+    UNIQUE KEY uq_productos_empresa_codigo (empresa_id, codigo),  -- único en cada restaurante
+    CONSTRAINT fk_productos_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- ---------------------------------------------------------------------
@@ -231,13 +291,16 @@ CREATE TABLE recetas (
 -- ---------------------------------------------------------------------
 CREATE TABLE clientes (
     id          INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
     nombre      VARCHAR(120) NOT NULL,
-    telefono    VARCHAR(20)  NOT NULL UNIQUE,
+    telefono    VARCHAR(20)  NOT NULL,
     email       VARCHAR(120),
     direccion   VARCHAR(200),                    -- dirección habitual (se propone al pedir)
     barrio      VARCHAR(80),
     referencia  VARCHAR(200),                    -- ej: "casa esquinera, portón negro"
-    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_clientes_empresa_telefono (empresa_id, telefono),  -- único en cada restaurante
+    CONSTRAINT fk_clientes_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- ---------------------------------------------------------------------
@@ -246,6 +309,7 @@ CREATE TABLE clientes (
 -- ---------------------------------------------------------------------
 CREATE TABLE ordenes (
     id             INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
     codigo         VARCHAR(20)   NOT NULL UNIQUE,      -- PED-000001
     tipo           ENUM('MESA','DOMICILIO','LLEVAR') NOT NULL,
     estado         ENUM('ABIERTA','CERRADA','CANCELADA') NOT NULL DEFAULT 'ABIERTA',
@@ -253,10 +317,12 @@ CREATE TABLE ordenes (
     usuario_id     INT           NOT NULL,             -- quién la registró
     subtotal       DECIMAL(14,2) NOT NULL DEFAULT 0,   -- suma de las líneas
     observaciones  VARCHAR(255),
+    incluye_propina BOOLEAN      NOT NULL DEFAULT TRUE,  -- propina sugerida del 10 % en mesa (Ley 1935/2018)
     created_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_orden_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     CONSTRAINT fk_orden_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    INDEX idx_orden_fecha (created_at)
+    INDEX idx_orden_fecha (created_at),
+    CONSTRAINT fk_ordenes_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- ---------------------------------------------------------------------
@@ -282,6 +348,7 @@ CREATE TABLE detalle_ordenes (
 -- ---------------------------------------------------------------------
 CREATE TABLE domicilios (
     id                   INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
     orden_id             INT           NOT NULL UNIQUE,
     cliente_id           INT           NOT NULL,
     direccion            VARCHAR(200)  NOT NULL,       -- RF-08.3 dirección de entrega
@@ -302,7 +369,8 @@ CREATE TABLE domicilios (
     CONSTRAINT fk_domicilio_cliente      FOREIGN KEY (cliente_id)      REFERENCES clientes(id),
     CONSTRAINT fk_domicilio_domiciliario FOREIGN KEY (domiciliario_id) REFERENCES usuarios(id),
     CONSTRAINT chk_domicilio_envio CHECK (costo_envio >= 0),
-    INDEX idx_domicilio_estado (estado)
+    INDEX idx_domicilio_estado (estado),
+    CONSTRAINT fk_domicilios_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 
@@ -311,11 +379,86 @@ CREATE TABLE domicilios (
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
+-- ILF08 Mesas del restaurante (RF-05.2; también las usarán las reservas, RF-07).
+-- Que una mesa esté ocupada no se guarda: se calcula con sus pedidos abiertos.
+-- ---------------------------------------------------------------------
+CREATE TABLE mesas (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
+    numero      INT          NOT NULL,          -- número visible en el salón
+    capacidad   INT          NOT NULL DEFAULT 4,       -- cuántas personas caben
+    ubicacion   VARCHAR(60),                           -- Salón, Terraza, Barra...
+    activa      BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_mesa_numero    CHECK (numero > 0),
+    CONSTRAINT chk_mesa_capacidad CHECK (capacidad > 0),
+    UNIQUE KEY uq_mesas_empresa_numero (empresa_id, numero),  -- único en cada restaurante
+    CONSTRAINT fk_mesas_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF09 Pedidos (complemento de ordenes para los pedidos en mesa, RF-05.1 a RF-05.9). Las líneas y el total viven en
+-- su orden (ordenes, tipo MESA); aquí van la mesa, los comensales y el recorrido:
+-- REGISTRADO -> CONFIRMADO -> EN_COCINA -> EN_PREPARACION -> LISTO -> ENTREGADO
+-- (o CANCELADO antes de ir a cocina). Se cobra en la caja como cualquier orden.
+-- ---------------------------------------------------------------------
+CREATE TABLE pedidos_mesa (
+    id                  INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
+    orden_id            INT      NOT NULL UNIQUE,
+    mesa_id             INT      NOT NULL,             -- RF-05.2
+    comensales          INT      NOT NULL DEFAULT 1,
+    estado              ENUM('REGISTRADO','CONFIRMADO','EN_COCINA','EN_PREPARACION','LISTO',
+                             'ENTREGADO','CANCELADO') NOT NULL DEFAULT 'REGISTRADO',
+    fecha_confirmacion  DATETIME,                      -- RF-05.7
+    fecha_envio_cocina  DATETIME,                      -- RF-05.8
+    fecha_listo         DATETIME,                      -- RF-06 (cocina)
+    fecha_entrega       DATETIME,                      -- RF-06 (cocina)
+    created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_pedido_mesa_orden FOREIGN KEY (orden_id) REFERENCES ordenes(id),
+    CONSTRAINT fk_pedido_mesa_mesa  FOREIGN KEY (mesa_id)  REFERENCES mesas(id),
+    CONSTRAINT chk_pedido_comensales CHECK (comensales > 0),
+    INDEX idx_pedido_mesa_estado (estado),
+    CONSTRAINT fk_pedidos_mesa_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF11 Reservas (RF-07.1 a RF-07.8): una mesa apartada para un cliente.
+-- Las PENDIENTE y CONFIRMADA ocupan la mesa desde fecha_hora durante
+-- duracion_minutos; la aplicación no deja que dos se crucen (RF-07.7).
+-- ---------------------------------------------------------------------
+CREATE TABLE reservas (
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id        INT NOT NULL,                       -- restaurante dueño de la fila
+    codigo            VARCHAR(20)   NOT NULL UNIQUE,      -- RES-000001
+    mesa_id           INT           NOT NULL,             -- RF-07.6
+    cliente           VARCHAR(120)  NOT NULL,
+    telefono          VARCHAR(20)   NOT NULL,
+    personas          INT           NOT NULL,
+    fecha_hora        DATETIME      NOT NULL,             -- RF-07.5
+    duracion_minutos  INT           NOT NULL DEFAULT 120, -- cuánto se aparta la mesa
+    estado            ENUM('PENDIENTE','CONFIRMADA','CUMPLIDA','NO_ASISTIO','CANCELADA')
+                      NOT NULL DEFAULT 'PENDIENTE',       -- RF-07.8
+    observaciones     VARCHAR(255),
+    usuario_id        INT           NOT NULL,             -- quién la registró
+    created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_reserva_personas CHECK (personas > 0),
+    CONSTRAINT chk_reserva_duracion CHECK (duracion_minutos BETWEEN 30 AND 360),
+    CONSTRAINT fk_reserva_mesa    FOREIGN KEY (mesa_id)    REFERENCES mesas(id),
+    CONSTRAINT fk_reserva_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_reservas_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id),
+    INDEX idx_reserva_fecha (fecha_hora),
+    INDEX idx_reserva_mesa_fecha (mesa_id, fecha_hora)
+);
+
+-- ---------------------------------------------------------------------
 -- ILF14 Pagos (RF-09.1 a RF-09.7). Una orden se puede pagar en partes y
 -- con varios métodos; cuando lo pagado completa el total, se registra la venta.
 -- ---------------------------------------------------------------------
 CREATE TABLE pagos (
     id          INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
     orden_id    INT           NOT NULL,                -- RF-09.5 pago asociado al pedido
     metodo      ENUM('EFECTIVO','TARJETA','TRANSFERENCIA') NOT NULL,   -- RF-09.2
     monto       DECIMAL(14,2) NOT NULL,                -- lo que abona a la cuenta
@@ -328,7 +471,8 @@ CREATE TABLE pagos (
     CONSTRAINT fk_pago_orden   FOREIGN KEY (orden_id)   REFERENCES ordenes(id),
     CONSTRAINT fk_pago_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     CONSTRAINT chk_pago_monto CHECK (monto > 0),
-    INDEX idx_pago_fecha (created_at)
+    INDEX idx_pago_fecha (created_at),
+    CONSTRAINT fk_pagos_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- ---------------------------------------------------------------------
@@ -337,17 +481,20 @@ CREATE TABLE pagos (
 -- ---------------------------------------------------------------------
 CREATE TABLE ventas (
     id             INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
     codigo         VARCHAR(20)   NOT NULL UNIQUE,      -- VTA-000001 (n.º del comprobante)
     orden_id       INT           NOT NULL UNIQUE,
     subtotal       DECIMAL(14,2) NOT NULL,             -- productos
     costo_envio    DECIMAL(12,2) NOT NULL DEFAULT 0,
     total          DECIMAL(14,2) NOT NULL,
     costo_insumos  DECIMAL(14,2) NOT NULL DEFAULT 0,   -- lo que costaron los insumos gastados
+    propina        DECIMAL(12,2) NOT NULL DEFAULT 0,   -- del personal: no es venta ni ganancia
     usuario_id     INT           NOT NULL,
     created_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_venta_orden   FOREIGN KEY (orden_id)   REFERENCES ordenes(id),
     CONSTRAINT fk_venta_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    INDEX idx_venta_fecha (created_at)
+    INDEX idx_venta_fecha (created_at),
+    CONSTRAINT fk_ventas_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
 
 -- ---------------------------------------------------------------------
@@ -364,4 +511,49 @@ CREATE TABLE consumos (
     CONSTRAINT fk_consumo_venta      FOREIGN KEY (venta_id)      REFERENCES ventas(id),
     CONSTRAINT fk_consumo_insumo     FOREIGN KEY (insumo_id)     REFERENCES insumos(id),
     CONSTRAINT fk_consumo_movimiento FOREIGN KEY (movimiento_id) REFERENCES movimientos_inventario(id)
+);
+
+-- ---------------------------------------------------------------------
+-- ILF10 Códigos de incidencia (RF-12.1): catálogo de tipos de error.
+-- Sugerencia de la docente en la sustentación del 2.º corte.
+-- ---------------------------------------------------------------------
+CREATE TABLE codigos_incidencia (
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    codigo         VARCHAR(10)  NOT NULL UNIQUE,        -- INV-01, VEN-02...
+    modulo         ENUM('INVENTARIO','VENTAS','COMPRAS','DOMICILIOS','OTRO') NOT NULL,
+    nombre         VARCHAR(120) NOT NULL,
+    corrige_stock  BOOLEAN      NOT NULL DEFAULT FALSE, -- RF-12.3 pide la cantidad real y ajusta
+    causa_externa  BOOLEAN      NOT NULL DEFAULT FALSE, -- RF-12.5 no cuenta contra el personal
+    activo         BOOLEAN      NOT NULL DEFAULT TRUE
+);
+
+-- ---------------------------------------------------------------------
+-- ILF11 Incidencias (RF-12.2 a RF-12.4): un error reportado sobre un registro.
+-- El responsable es quien hizo el registro; quien reporta queda aparte.
+-- ---------------------------------------------------------------------
+CREATE TABLE incidencias (
+    id                    INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id  INT NOT NULL,  -- restaurante dueño de la fila
+    codigo                VARCHAR(20)   NOT NULL UNIQUE, -- INC-000001
+    codigo_incidencia_id  INT           NOT NULL,
+    movimiento_id         INT,                           -- el registro con el error: uno de los tres
+    venta_id              INT,
+    orden_compra_id       INT,
+    domicilio_id          INT,                           -- RF-12.5
+    responsable_id        INT           NOT NULL,
+    reportado_por_id      INT           NOT NULL,
+    observacion           VARCHAR(500)  NOT NULL,
+    cantidad_registrada   DECIMAL(12,3),                 -- RF-12.3 corrección de inventario
+    cantidad_real         DECIMAL(12,3),
+    ajuste_id             INT,                           -- movimiento de ajuste que lo corrigió
+    created_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_inc_codigo      FOREIGN KEY (codigo_incidencia_id) REFERENCES codigos_incidencia(id),
+    CONSTRAINT fk_inc_movimiento  FOREIGN KEY (movimiento_id)        REFERENCES movimientos_inventario(id),
+    CONSTRAINT fk_inc_venta       FOREIGN KEY (venta_id)             REFERENCES ventas(id),
+    CONSTRAINT fk_inc_orden       FOREIGN KEY (orden_compra_id)      REFERENCES ordenes_compra(id),
+    CONSTRAINT fk_inc_domicilio   FOREIGN KEY (domicilio_id)         REFERENCES domicilios(id),
+    CONSTRAINT fk_inc_responsable FOREIGN KEY (responsable_id)       REFERENCES usuarios(id),
+    CONSTRAINT fk_inc_reporta     FOREIGN KEY (reportado_por_id)     REFERENCES usuarios(id),
+    CONSTRAINT fk_inc_ajuste      FOREIGN KEY (ajuste_id)            REFERENCES movimientos_inventario(id),
+    CONSTRAINT fk_incidencias_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );

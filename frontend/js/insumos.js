@@ -1,11 +1,17 @@
 // Módulo de inventario (RF-03.1 a RF-03.8): insumos, existencias, movimientos y alertas.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { reportarIncidencia } from './reportar.js';
+import { CATEGORIAS_INSUMO, contarHasta, crear, formato, mostrarAviso, mostrarEstado, normalizar, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('inventario.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('inventario.gestionar');
+const puedeReportar = yo.permisos.includes('incidencias.reportar'); // RF-12.2
 
 const $ = (id) => document.getElementById(id);
+
+// RF-03.10 Opciones de categoría del formulario (OTROS queda al final y es la de un insumo nuevo)
+$('f-categoria').replaceChildren(...Object.entries(CATEGORIAS_INSUMO).map(([valor, texto]) => crear('option', { value: valor, texto })));
+$('f-categoria').value = 'OTROS';
 
 function textoStock(insumo) {
   return `${formato.cantidad(insumo.stock_actual)} ${insumo.unidad_medida}`;
@@ -22,12 +28,27 @@ function fechaHora(iso) {
 //  RF-03.6 Existencias (resumen) y RF-03.8 Alertas de stock
 // =====================================================================
 
-function tarjetaResumen(icono, titulo, valor, clase = '') {
-  return crear('div', { className: `tarjeta-resumen ${clase}` }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
+const TARJETAS = [ // [dato del resumen, ícono, título, formato, clase cuando el dato no es cero]
+  ['total_insumos', 'inventory_2', 'Insumos activos', String, ''],
+  ['bajos', 'trending_down', 'En el mínimo', String, 'aviso-bajo'],
+  ['agotados', 'block', 'Agotados', String, 'aviso-agotado'],
+  ['valor_total', 'payments', 'Valor del inventario', formato.dinero, ''],
+];
+
+/** Las tarjetas se crean una vez; al recargar solo cambian sus números (con un conteo corto). */
+function pintarResumen(resumen) {
+  if ($('resumen').children.length !== TARJETAS.length) {
+    $('resumen').replaceChildren(...TARJETAS.map(([, icono, titulo]) => crear('div', { className: 'tarjeta-resumen' }, [
+      crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
+      crear('div', { className: 'valor' }),
+      crear('div', { texto: titulo }),
+    ])));
+  }
+  TARJETAS.forEach(([dato, , , formatear, clase], posicion) => {
+    const tarjeta = $('resumen').children[posicion];
+    if (clase) tarjeta.classList.toggle(clase, Boolean(resumen[dato]));
+    contarHasta(tarjeta.querySelector('.valor'), Number(resumen[dato]), formatear);
+  });
 }
 
 async function cargarResumen() {
@@ -36,16 +57,10 @@ async function cargarResumen() {
       api('GET', '/inventario/existencias'),
       api('GET', '/inventario/alertas'),
     ]);
-    const r = existencias.resumen;
-    $('resumen').replaceChildren(
-      tarjetaResumen('inventory_2', 'Insumos activos', String(r.total_insumos)),
-      tarjetaResumen('trending_down', 'En el mínimo', String(r.bajos), r.bajos ? 'aviso-bajo' : ''),
-      tarjetaResumen('block', 'Agotados', String(r.agotados), r.agotados ? 'aviso-agotado' : ''),
-      tarjetaResumen('payments', 'Valor del inventario', formato.dinero(r.valor_total)),
-    );
+    pintarResumen(existencias.resumen);
 
     $('alertas').hidden = alertas.length === 0;
-    $('lista-alertas').replaceChildren(...alertas.map(filaDeAlerta));
+    pintarSuave($('lista-alertas'), alertas.map(filaDeAlerta));
   } catch (error) {
     $('resumen').replaceChildren(crear('p', { className: 'nota', texto: error.message }));
   }
@@ -58,6 +73,8 @@ function filaDeAlerta(alerta) {
     crear('span', { className: `chip estado-${alerta.estado_stock}`,
                     texto: alerta.estado_stock === 'AGOTADO' ? 'Agotado' : `Faltan ${formato.cantidad(alerta.faltante)}` }),
   ]);
+  fila.dataset.clave = alerta.id;
+  fila.dataset.version = alerta.stock_actual;
   fila.addEventListener('click', () => abrirFormulario(alerta));
   fila.addEventListener('keydown', (evento) => {
     if (evento.key === 'Enter') abrirFormulario(alerta); // también con teclado
@@ -70,45 +87,83 @@ function filaDeAlerta(alerta) {
 // =====================================================================
 
 let insumos = []; // todos los insumos, ya ordenados por nombre desde la API
+let categoriaElegida = ''; // RF-03.10 '' = todas
+
+const ICONOS_CATEGORIA = {
+  CARNES: 'set_meal', GRANOS: 'grain', LACTEOS: 'egg', FRUTAS_VERDURAS: 'nutrition', BEBIDAS: 'local_drink',
+  ABARROTES: 'shopping_basket', DESECHABLES: 'takeout_dining', LIMPIEZA: 'cleaning_services', MOBILIARIO: 'chair', OTROS: 'category',
+};
+
+/** RF-03.10 Una tarjeta por categoría con cuántos insumos tiene y cuántos hay que reponer. */
+function pintarCategorias() {
+  const conteo = {};
+  for (const insumo of insumos) {
+    const grupo = (conteo[insumo.categoria] ??= { total: 0, reponer: 0 });
+    grupo.total += 1;
+    if (insumo.estado_stock !== 'OK') grupo.reponer += 1;
+  }
+  const reponer = Object.values(conteo).reduce((suma, g) => suma + g.reponer, 0);
+  const tarjetas = [['', 'Todas', 'apps', insumos.length, reponer],
+    ...Object.entries(CATEGORIAS_INSUMO).filter(([clave]) => conteo[clave])
+      .map(([clave, nombre]) => [clave, nombre, ICONOS_CATEGORIA[clave], conteo[clave].total, conteo[clave].reponer])];
+  $('categorias-inventario').hidden = insumos.length === 0;
+  $('categorias-inventario').replaceChildren(...tarjetas.map(([clave, nombre, icono, total, porReponer]) => {
+    const tarjeta = crear('button', {
+      type: 'button', className: 'categoria-inventario', 'aria-pressed': String(clave === categoriaElegida),
+      title: clave ? `Ver solo ${nombre.toLowerCase()}` : 'Ver todos los insumos',
+    }, [
+      crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
+      crear('strong', { texto: nombre }),
+      crear('small', { texto: `${total} ${total === 1 ? 'insumo' : 'insumos'}` }),
+      ...(porReponer ? [crear('span', { className: 'por-reponer', texto: `${porReponer} por reponer` })] : []),
+    ]);
+    tarjeta.addEventListener('click', () => {
+      categoriaElegida = clave === categoriaElegida ? '' : clave; // tocarla otra vez vuelve a todas
+      pintarCategorias();
+      pintarLista();
+    });
+    return tarjeta;
+  }));
+}
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  // Solo la primera vez se ve "Cargando…"; al recargar, la lista actual se queda hasta que llegan los datos
+  if (insumos.length === 0) mostrarEstado('Cargando…', { cargando: true });
   try {
     insumos = await api('GET', '/insumos');
+    if (categoriaElegida && !insumos.some((i) => i.categoria === categoriaElegida)) categoriaElegida = '';
+    pintarCategorias();
     pintarLista();
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
 }
 
-/** Quita tildes y mayúsculas: así "limon" encuentra "Limón". */
-function normalizar(texto) {
-  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-/** Muestra solo los insumos cuyo código o nombre contiene lo escrito en el buscador. */
+/** Muestra los insumos de la categoría elegida cuyo código o nombre contiene lo escrito en el buscador. */
 function pintarLista() {
   const texto = normalizar($('buscar').value.trim());
-  const visibles = insumos.filter((i) => normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
-  if (visibles.length === 0) {
-    mostrarEstado(insumos.length ? 'No se encontraron insumos' : 'Todavía no hay insumos');
+  const visibles = insumos.filter((i) => (!categoriaElegida || i.categoria === categoriaElegida)
+    && normalizar(`${i.codigo} ${i.nombre}`).includes(texto));
+  if (visibles.length > 0) $('estado').hidden = true;
+  else if (insumos.length) {
+    mostrarEstado('No se encontraron insumos', {
+      icono: 'search_off',
+      detalle: categoriaElegida ? `Prueba con otro nombre o código, o elige «Todas» arriba.` : 'Prueba con otro nombre o código.',
+      accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
+    });
   } else {
-    $('estado').hidden = true;
-    $('lista').replaceChildren(...visibles.map(filaDeInsumo));
+    mostrarEstado('Todavía no hay insumos', {
+      icono: 'inventory_2', detalle: 'Registra los insumos de la cocina para controlar el stock y recibir alertas.',
+      accion: puedeGestionar ? { texto: 'Crear el primer insumo', alHacer: () => abrirFormulario(null) } : null,
+    });
   }
+  pintarSuave($('lista'), visibles.map(filaDeInsumo)); // las filas que siguen visibles no se mueven
 }
 
 /** Recarga todo: resumen, alertas y lista (después de cualquier cambio). */
 function recargar() {
   cargarResumen();
   cargar();
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 /** Una fila: código, nombre y el stock con color según su estado (OK, BAJO, AGOTADO). */
@@ -122,10 +177,12 @@ function filaDeInsumo(insumo) {
     ]),
     crear('div', { className: 'datos' }, [
       crear('div', { className: 'nombre', texto: insumo.nombre }),
-      crear('div', { className: 'correo', texto: insumo.codigo }),
+      crear('div', { className: 'correo', texto: `${insumo.codigo} · ${CATEGORIAS_INSUMO[insumo.categoria] ?? 'Otros'}` }),
     ]),
     crear('div', { className: 'chips' }, chips),
   ]);
+  fila.dataset.clave = insumo.id;
+  fila.dataset.version = [insumo.nombre, insumo.codigo, insumo.stock_actual, insumo.activo].join('|');
   fila.addEventListener('click', () => abrirFormulario(insumo));
   return fila;
 }
@@ -153,7 +210,7 @@ if (puedeGestionar) {
 
 /** Quien solo puede ver (por ejemplo el COCINERO) abre la ficha sin poder editarla. */
 function soloLectura(activar) {
-  for (const id of ['f-codigo', 'f-nombre', 'f-unidad', 'f-minimo', 'f-costo', 'f-activo']) {
+  for (const id of ['f-codigo', 'f-nombre', 'f-categoria', 'f-unidad', 'f-minimo', 'f-costo', 'f-activo']) {
     $(id).disabled = activar;
   }
   $('guardar').hidden = activar;
@@ -165,6 +222,7 @@ function abrirFormulario(insumo) {
   const esEdicion = insumo !== null;
 
   $('form-insumo').reset();
+  $('f-categoria').value = 'OTROS'; // el reset dejaría la primera categoría
   for (const campo of ['codigo', 'nombre', 'unidad', 'minimo', 'costo']) marcarCampo(campo, '');
   $('error-formulario').hidden = true;
   soloLectura(!puedeGestionar);
@@ -176,6 +234,7 @@ function abrirFormulario(insumo) {
   if (esEdicion) {
     $('f-codigo').value = insumo.codigo;
     $('f-nombre').value = insumo.nombre;
+    $('f-categoria').value = insumo.categoria;
     $('f-unidad').value = insumo.unidad_medida;
     $('f-minimo').value = insumo.stock_minimo;
     $('f-costo').value = insumo.costo_unitario;
@@ -216,6 +275,7 @@ $('form-insumo').addEventListener('submit', async (evento) => {
   const datos = {
     codigo: $('f-codigo').value.trim(),
     nombre: $('f-nombre').value.trim(),
+    categoria: $('f-categoria').value, // RF-03.10
     unidad_medida: $('f-unidad').value,
     stock_minimo: Number($('f-minimo').value || 0), // RF-03.7
     costo_unitario: Number($('f-costo').value || 0),
@@ -230,7 +290,7 @@ $('form-insumo').addEventListener('submit', async (evento) => {
       await api('POST', '/insumos', datos); // RF-03.1
     }
     dialogo.close();
-    mostrarAviso(insumoEditado ? 'Insumo actualizado' : 'Insumo registrado');
+    mostrarAviso(insumoEditado ? 'Insumo actualizado' : 'Insumo registrado', 'exito');
     recargar();
   } catch (error) {
     $('error-formulario').textContent = error.message; // por ejemplo "Ya existe un insumo con ese código"
@@ -252,19 +312,44 @@ const NOMBRES_MOTIVO = {
 // Los mismos motivos que acepta la API para un movimiento manual
 const MOTIVOS = { ENTRADA: ['COMPRA', 'AJUSTE', 'DEVOLUCION'], SALIDA: ['CONSUMO', 'MERMA', 'AJUSTE'] };
 
+/** RF-12.2 Botón para reportar un error en un movimiento; si se corrige la cantidad, la ficha se actualiza. */
+function botonReportar(m) {
+  const boton = crear('button', { type: 'button', className: 'boton-icono reportar', title: 'Reportar un error en este movimiento' }, [
+    crear('span', { className: 'icono', texto: 'report', 'aria-hidden': 'true' }),
+  ]);
+  boton.addEventListener('click', () => reportarIncidencia({
+    modulo: 'INVENTARIO',
+    referencia: { movimiento_id: m.id },
+    descripcion: `${m.tipo === 'ENTRADA' ? 'Entrada' : 'Salida'} de ${formato.cantidad(m.cantidad)} ${m.unidad_medida} de ${m.insumo} · ${fechaHora(m.fecha)} · ${m.usuario}`,
+    cantidad: m.motivo === 'CONSUMO' ? null : m.cantidad, // un consumo de venta se reporta sobre la venta
+    unidad: m.unidad_medida,
+    tipo: m.tipo,
+    alGuardar: async (incidencia) => {
+      if (!incidencia.ajuste) return;
+      abrirFormulario(await api('GET', `/insumos/${m.insumo_id}`)); // nuevo stock e historial con el ajuste
+      recargar();
+    },
+  }));
+  return boton;
+}
+
 async function cargarHistorial(insumo) {
   const lista = $('historial');
-  lista.replaceChildren(crear('li', { className: 'nota', texto: 'Cargando movimientos…' }));
+  // Si ya se ve el historial de este insumo (por ejemplo después de un movimiento), se deja mientras carga
+  if (lista.dataset.insumo !== String(insumo.id)) {
+    lista.dataset.insumo = insumo.id;
+    lista.replaceChildren(crear('li', { className: 'nota', texto: 'Cargando movimientos…' }));
+  }
   try {
     const movimientos = await api('GET', `/insumos/${insumo.id}/movimientos`);
     if (movimientos.length === 0) {
       lista.replaceChildren(crear('li', { className: 'nota', texto: 'Todavía no hay movimientos' }));
       return;
     }
-    lista.replaceChildren(...movimientos.map((m) => {
+    pintarSuave(lista, movimientos.map((m) => {
       const signo = m.tipo === 'ENTRADA' ? '+' : '−';
       const detalle = [NOMBRES_MOTIVO[m.motivo], m.orden_compra, m.observacion].filter(Boolean).join(' · ');
-      return crear('li', {}, [
+      return crear('li', { 'data-clave': m.id }, [
         crear('div', {}, [
           crear('div', { texto: detalle }),
           crear('small', { className: 'nota', texto: `${fechaHora(m.fecha)} · ${m.usuario}` }),
@@ -273,6 +358,7 @@ async function cargarHistorial(insumo) {
           crear('div', { className: `movimiento-${m.tipo}`, texto: `${signo}${formato.cantidad(m.cantidad)}` }),
           crear('small', { className: 'nota', texto: `Queda ${formato.cantidad(m.stock_resultante)}` }),
         ]),
+        ...(puedeReportar ? [botonReportar(m)] : []),
       ]);
     }));
   } catch (error) {
@@ -321,7 +407,7 @@ $('form-movimiento').addEventListener('submit', async (evento) => {
       observacion: $('m-observacion').value.trim(),
     });
     dialogoMovimiento.close();
-    mostrarAviso(tipoMovimiento === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada');
+    mostrarAviso(tipoMovimiento === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada', 'exito');
     abrirFormulario(respuesta.insumo); // la ficha muestra el nuevo stock y el historial
     recargar();
   } catch (error) {

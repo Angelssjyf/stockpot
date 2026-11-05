@@ -11,6 +11,9 @@
   <header class="barra">
     <h1>StockPot</h1>
     <span class="usuario-actual" id="usuario-actual"></span>
+    <button type="button" class="boton-icono" id="mi-pin" title="Mi PIN">
+      <span class="icono" aria-hidden="true">pin</span>
+    </button>
     <button type="button" class="boton-icono" id="cerrar-sesion" title="Cerrar sesión">
       <span class="icono" aria-hidden="true">logout</span>
     </button>
@@ -18,6 +21,15 @@
 
   <!-- Menú principal: solo los módulos que el rol del usuario puede ver -->
   <main class="contenido">
+    <!-- Saludo y resumen del día: cada tarjeta y panel aparece solo si el rol tiene el permiso -->
+    <section class="saludo" id="saludo"></section>
+    <section id="resumen-hoy" aria-label="Resumen de hoy" hidden>
+      <h2 class="titulo-seccion">Hoy</h2>
+      <div class="hoy" id="hoy"></div>
+      <div class="paneles" id="paneles"></div>
+    </section>
+
+    <h2 class="titulo-seccion">Módulos</h2>
     <nav class="modulos" id="modulos" aria-label="Módulos"></nav>
   </main>
 

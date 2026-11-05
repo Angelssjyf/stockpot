@@ -1,8 +1,10 @@
-// Módulo de reportes y estadísticas (RF-11.1 a RF-11.6).
+// Módulo de reportes y estadísticas (RF-11.1 a RF-11.7).
 import { api, exigirSesion } from './api.js';
-import { crear, formato } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
-await exigirSesion('reportes.ver'); // solo el ADMINISTRADOR
+const yo = await exigirSesion('reportes.ver'); // solo el ADMINISTRADOR
+const puedeVerIncidencias = yo.permisos.includes('incidencias.ver'); // RF-12.4
+const puedeGestionarCodigos = yo.permisos.includes('incidencias.gestionar'); // RF-12.1
 
 const $ = (id) => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
@@ -45,16 +47,35 @@ function tabla(nombre, columnas, filas) {
 
 /** Gráfica de barras en SVG: datos [{etiqueta, valor}]. */
 function graficaBarras(datos, formatoValor = formato.dinero) {
-  const ancho = 640;
-  const alto = 220;
-  const margen = { arriba: 16, abajo: 40, izquierda: 28 }; // a los lados caben las etiquetas
+  if (!datos.some((d) => d.valor > 0)) return crear('p', { className: 'nota', texto: 'No hay ventas en este periodo.' });
+  // En el celular el lienzo es más angosto para que las letras no se encojan al escalar
+  const celular = window.innerWidth < 600;
+  const ancho = celular ? 360 : 640;
+  const alto = celular ? 240 : 220;
+  const margen = { arriba: 28, abajo: 40, izquierda: 20 }; // a los lados caben las etiquetas
   const maximo = Math.max(...datos.map((d) => d.valor), 1);
   const paso = (ancho - margen.izquierda * 2) / datos.length;
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
-  svg.setAttribute('class', 'grafica');
+  svg.setAttribute('class', celular ? 'grafica movil' : 'grafica');
   svg.setAttribute('role', 'img');
-  const cada = Math.ceil(datos.length / 12); // no más de 12 etiquetas abajo
+  svg.setAttribute('aria-label', `Máximo del periodo: ${formatoValor(maximo)}`);
+  const cada = Math.ceil(datos.length / (celular ? 4 : 10)); // pocas etiquetas abajo para que se lean
+
+  // Línea base y valor máximo como referencia
+  const base = document.createElementNS(NS, 'line');
+  base.setAttribute('x1', margen.izquierda);
+  base.setAttribute('x2', ancho - margen.izquierda);
+  base.setAttribute('y1', alto - margen.abajo);
+  base.setAttribute('y2', alto - margen.abajo);
+  base.setAttribute('class', 'base');
+  svg.appendChild(base);
+  const tope = document.createElementNS(NS, 'text');
+  tope.setAttribute('x', margen.izquierda);
+  tope.setAttribute('y', 16);
+  tope.setAttribute('class', 'tope');
+  tope.textContent = `Máx. ${formatoValor(maximo)}`;
+  svg.appendChild(tope);
 
   datos.forEach((d, i) => {
     const altura = ((alto - margen.arriba - margen.abajo) * d.valor) / maximo;
@@ -69,7 +90,7 @@ function graficaBarras(datos, formatoValor = formato.dinero) {
     titulo.textContent = `${d.etiqueta}: ${formatoValor(d.valor)}`; // se ve al pasar el mouse
     rect.appendChild(titulo);
     svg.appendChild(rect);
-    if (i % cada === 0) {
+    if ((i - Math.floor(cada / 2)) % cada === 0) { // etiquetas centradas, ninguna pegada al borde
       const texto = document.createElementNS(NS, 'text');
       texto.setAttribute('x', x + paso * 0.35);
       texto.setAttribute('y', alto - margen.abajo + 16);
@@ -86,7 +107,7 @@ function barrasHorizontales(pares) {
   const maximo = Math.max(...pares.map(([, v]) => v), 1);
   return crear('ul', { className: 'barras' }, pares.map(([texto, valor]) => {
     const barra = crear('div', { className: 'barra-progreso' });
-    barra.style.width = `${Math.max(2, (valor / maximo) * 100)}%`;
+    barra.style.width = valor > 0 ? `${Math.max(2, (valor / maximo) * 100)}%` : '0'; // en $0 no se dibuja
     return crear('li', {}, [
       crear('div', { className: 'barra-texto' }, [crear('span', { texto }), crear('span', { texto: formato.dinero(valor) })]),
       barra,
@@ -117,11 +138,11 @@ const REPORTES = {
       return [
         crear('div', { className: 'resumen' }, [
           tarjeta('payments', 'Total vendido', formato.dinero(i.total), `${porcentaje(i.variacion_total)} vs. periodo anterior`),
-          tarjeta('receipt_long', 'Ventas por día', String(i.ventas_por_dia), `${i.ventas} ventas`),
+          tarjeta('receipt_long', 'Ventas por día', formato.cantidad(i.ventas_por_dia), `${i.ventas} ${i.ventas === 1 ? 'venta' : 'ventas'}`),
           tarjeta('shopping_bag', 'Ticket promedio', formato.dinero(i.ticket_promedio)),
           tarjeta('star', 'Producto estrella', i.producto_estrella ?? '—'),
           tarjeta('event', 'Día de más ventas', i.dia_mas_ventas ?? '—'),
-          tarjeta('schedule', 'Hora pico', i.hora_pico ?? '—'),
+          tarjeta('schedule', 'Hora pico', i.hora_pico?.replace(' - ', '–') ?? '—'),
         ]),
         panel('Recomendaciones', recomendaciones),
         panel('Cobertura del inventario (días que alcanza al ritmo actual)', tabla('cobertura', [
@@ -146,18 +167,19 @@ const REPORTES = {
           tarjeta('payments', 'Total vendido', formato.dinero(s.total)),
           tarjeta('trending_up', 'Ganancia', formato.dinero(s.ganancia), `Margen ${s.margen} %`),
           tarjeta('shopping_bag', 'Ticket promedio', formato.dinero(s.ticket_promedio)),
+          tarjeta('volunteer_activism', 'Propinas', formato.dinero(s.propinas), 'Del personal: no suman a la venta'),
         ]),
         panel('Ventas por día', graficaBarras(r.por_dia.map((d) => ({ etiqueta: diaCorto(d.fecha), valor: d.total })))),
         crear('div', { className: 'dos-columnas paneles' }, [
           panel('Por método de pago', barrasHorizontales(Object.entries(r.por_metodo).map(([m, v]) => [METODOS[m], v]))),
           panel('Por tipo de pedido', barrasHorizontales(Object.entries(r.por_tipo).map(([t, d]) => [`${TIPOS[t]} (${d.ventas})`, d.total]))),
         ]),
-        panel('Detalle por día', tabla('ventas-por-dia', [
+        panel('Detalle por día', crear('p', { className: 'nota', texto: 'Solo los días con ventas.' }), tabla('ventas-por-dia', [
           { titulo: 'Fecha', valor: (f) => f.fecha },
           { titulo: 'Ventas', valor: (f) => f.ventas, numero: true },
           { titulo: 'Total', valor: (f) => formato.dinero(f.total), numero: true },
           { titulo: 'Ganancia', valor: (f) => formato.dinero(f.ganancia), numero: true },
-        ], r.por_dia)),
+        ], r.por_dia.filter((d) => d.ventas > 0))),
       ];
     },
   },
@@ -253,12 +275,220 @@ const REPORTES = {
       ];
     },
   },
+
+  // RF-11.7 Domicilios por domiciliario: cuántos hizo cada uno y cuáles fueron
+  domicilios: {
+    titulo: 'Domicilios por domiciliario',
+    async pintar(p) {
+      if (filtroDomiciliario.id !== '') p.set('domiciliario_id', filtroDomiciliario.id);
+      const { resumen: r, por_domiciliario: personas, domicilios } = await api('GET', `/reportes/domicilios?${p}`);
+      const lider = personas.find((f) => f.domiciliario_id !== 0 && f.entregados > 0);
+      const quitar = filtroDomiciliario.id === '' ? [] : [(() => {
+        const boton = crear('button', { type: 'button', className: 'chip filtro', 'aria-pressed': 'true', title: 'Quitar este filtro' }, [
+          crear('span', { texto: filtroDomiciliario.nombre }), crear('span', { className: 'icono', texto: 'close', 'aria-hidden': 'true' }),
+        ]);
+        boton.addEventListener('click', () => { Object.assign(filtroDomiciliario, { id: '', nombre: '' }); generar(); });
+        return crear('div', { className: 'categorias' }, [boton]);
+      })()];
+      const barras = personas.length === 0 ? crear('p', { className: 'nota', texto: 'Sin domicilios en este periodo.' })
+        : crear('ul', { className: 'barras' }, personas.map((f) => {
+          const maximo = Math.max(...personas.map((x) => x.total), 1);
+          const barra = crear('div', { className: 'barra-progreso' });
+          barra.style.width = `${Math.max(4, (f.total / maximo) * 100)}%`;
+          const plural = (n, palabra) => `${n} ${palabra}${n === 1 ? '' : 's'}`;
+          const detalle = `${plural(f.entregados, 'entregado')} · ${f.en_curso} en curso` + (f.cancelados ? ` · ${plural(f.cancelados, 'cancelado')}` : '');
+          const fila = crear('li', { className: 'barra-filtrable', tabindex: '0', title: 'Ver solo sus domicilios' }, [
+            crear('div', { className: 'barra-texto' }, [crear('span', { texto: f.nombre }), crear('span', { texto: detalle })]),
+            barra,
+          ]);
+          const elegir = () => { Object.assign(filtroDomiciliario, { id: String(f.domiciliario_id), nombre: f.nombre }); generar(); };
+          fila.addEventListener('click', elegir);
+          fila.addEventListener('keydown', (e) => { if (e.key === 'Enter') elegir(); });
+          return fila;
+        }));
+      return [
+        ...quitar,
+        crear('div', { className: 'resumen' }, [
+          tarjeta('delivery_dining', 'Domicilios', String(r.total), `${r.en_curso} en curso · ${r.cancelados} cancelados`),
+          tarjeta('task_alt', 'Entregados', String(r.entregados), formato.dinero(r.valor_entregado)),
+          tarjeta('timer', 'Tiempo promedio de entrega', r.minutos_promedio === null ? '—' : r.minutos_promedio < 1 ? 'menos de 1 min' : `${r.minutos_promedio} min`, 'De la salida a la entrega'),
+          tarjeta('emoji_events', 'Más entregas', lider ? lider.nombre : '—', lider ? `${lider.entregados} ${lider.entregados === 1 ? 'entregado' : 'entregados'}` : ''),
+        ]),
+        panel('Domicilios por domiciliario', barras),
+        panel('Cuáles fueron', tabla('domicilios', [
+          { titulo: 'Fecha', valor: (f) => fechaHora(f.fecha) },
+          { titulo: 'Pedido', valor: (f) => f.codigo },
+          { titulo: 'Domiciliario', valor: (f) => f.domiciliario ?? 'Sin asignar' },
+          { titulo: 'Cliente', valor: (f) => f.cliente.nombre },
+          { titulo: 'Dirección', valor: (f) => [f.direccion, f.barrio].filter(Boolean).join(' · ') },
+          { titulo: 'Estado', valor: (f) => ESTADOS_DOMICILIO[f.estado] ?? f.estado },
+          { titulo: 'Total', valor: (f) => formato.dinero(f.total), numero: true },
+          { titulo: 'Recibió', valor: (f) => f.recibido_por ?? '—' },
+        ], domicilios)),
+      ];
+    },
+  },
+
+  // RF-12.4 Bitácora de incidencias: errores reportados desde inventario, ventas y compras
+  incidencias: {
+    titulo: 'Incidencias: errores registrados',
+    async pintar(p) {
+      if (filtroIncidencias.modulo) p.set('modulo', filtroIncidencias.modulo);
+      if (filtroIncidencias.campo) p.set(filtroIncidencias.campo, filtroIncidencias.valor);
+      const [{ incidencias, resumen: r }, codigos] = await Promise.all([
+        api('GET', `/incidencias?${p}`),
+        api('GET', '/codigos-incidencia?todos=true'),
+      ]);
+      const tipo = r.por_tipo[0];
+      const quien = r.por_usuario[0];
+      return [
+        filtrosIncidencias(),
+        crear('div', { className: 'resumen' }, [
+          tarjeta('report', 'Incidencias', String(r.total), r.causa_externa ? `${r.causa_externa} por causa externa` : ''),
+          tarjeta('build', 'Corregidas en inventario', String(r.corregidas)),
+          tarjeta('category', 'Error más común', tipo ? tipo.codigo : '—', tipo ? `${tipo.nombre} · ${tipo.total}` : ''),
+          tarjeta('person', 'Comete más errores', quien ? quien.nombre : '—',
+            quien ? `${quien.total} ${quien.total === 1 ? 'incidencia' : 'incidencias'}` : ''),
+        ]),
+        crear('div', { className: 'dos-columnas paneles' }, [
+          panel('Quién comete más errores', ...(r.causa_externa ? [crear('p', { className: 'nota', texto: 'No incluye las de causa externa (por ejemplo, el cliente no salió).' })] : []), barrasFiltrables(r.por_usuario, 'responsable_id', (u) => u.usuario_id, (u) => u.nombre)),
+          panel('Errores más comunes', barrasFiltrables(r.por_tipo, 'codigo_id',
+            (t) => codigos.find((c) => c.codigo === t.codigo)?.id ?? '', (t) => `${t.codigo} · ${t.nombre}`)),
+        ]),
+        panel('Todas las incidencias',
+          crear('p', { className: 'nota', texto: 'Se reportan desde el historial de cada insumo y el detalle de una venta, una orden de compra o un domicilio.' }),
+          tabla('incidencias', [
+            { titulo: 'Fecha', valor: (f) => fechaHora(f.fecha) },
+            { titulo: 'Error', valor: (f) => `${f.tipo.codigo} · ${f.tipo.nombre}${f.tipo.causa_externa ? ' (causa externa)' : ''}` },
+            { titulo: 'Observación', valor: (f) => f.observacion },
+            { titulo: 'Registro', valor: (f) => f.registro },
+            { titulo: 'Responsable', valor: (f) => f.responsable },
+            { titulo: 'Reportó', valor: (f) => f.reportado_por },
+            { titulo: 'Ajuste', valor: (f) => (f.ajuste ? `${f.ajuste.tipo === 'ENTRADA' ? '+' : '−'}${formato.cantidad(f.ajuste.cantidad)}` : '—'), numero: true },
+            { titulo: 'Incidencia', valor: (f) => f.codigo },
+          ], incidencias)),
+        ...(puedeGestionarCodigos ? [catalogoCodigos(codigos)] : []),
+      ];
+    },
+  },
 };
 
 const NOMBRES_PESTANA = {
   estadisticas: 'Estadísticas', ventas: 'Ventas', inventario: 'Inventario',
-  consumo: 'Consumo', productos: 'Más vendidos', historico: 'Histórico',
+  consumo: 'Consumo', productos: 'Más vendidos', domicilios: 'Domicilios', historico: 'Histórico',
+  ...(puedeVerIncidencias ? { incidencias: 'Incidencias' } : {}),
 };
+
+// =====================================================================
+//  RF-12.4 Incidencias: filtros, barras que filtran y RF-12.1 catálogo de códigos
+// =====================================================================
+
+// RF-11.7 Filtro por domiciliario y nombres de los estados del domicilio
+const filtroDomiciliario = { id: '', nombre: '' };
+const ESTADOS_DOMICILIO = {
+  RECIBIDO: 'Recibido', EN_PREPARACION: 'En preparación', LISTO: 'Listo',
+  EN_CAMINO: 'En camino', ENTREGADO: 'Entregado', CANCELADO: 'Cancelado',
+};
+
+const MODULOS_INCIDENCIA = { INVENTARIO: 'Inventario', VENTAS: 'Ventas', COMPRAS: 'Compras', DOMICILIOS: 'Domicilios', OTRO: 'Otro' };
+const filtroIncidencias = { modulo: '', campo: '', valor: '', texto: '' };
+let catalogoAbierto = false;
+const fechaHora = (texto) => new Date(texto).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+
+/** Chips por módulo y, si se tocó una barra, el filtro activo con su X para quitarlo. */
+function filtrosIncidencias() {
+  const chips = [['', 'Todos'], ...Object.entries(MODULOS_INCIDENCIA)].map(([valor, texto]) => {
+    const boton = crear('button', { type: 'button', className: 'chip filtro', texto, 'aria-pressed': String(valor === filtroIncidencias.modulo) });
+    boton.addEventListener('click', () => { filtroIncidencias.modulo = valor; generar(); });
+    return boton;
+  });
+  if (filtroIncidencias.campo) {
+    const quitar = crear('button', { type: 'button', className: 'chip filtro', 'aria-pressed': 'true', title: 'Quitar este filtro' }, [
+      crear('span', { texto: filtroIncidencias.texto }), crear('span', { className: 'icono', texto: 'close', 'aria-hidden': 'true' }),
+    ]);
+    quitar.addEventListener('click', () => { Object.assign(filtroIncidencias, { campo: '', valor: '', texto: '' }); generar(); });
+    chips.push(quitar);
+  }
+  return crear('div', { className: 'categorias', role: 'group', 'aria-label': 'Filtrar incidencias' }, chips);
+}
+
+/** Barras proporcionales; tocar una deja la bitácora solo con ese responsable o ese tipo de error. */
+function barrasFiltrables(lista, campo, valor, texto) {
+  if (lista.length === 0) return crear('p', { className: 'nota', texto: 'Sin incidencias en este periodo.' });
+  const maximo = lista[0].total;
+  return crear('ul', { className: 'barras' }, lista.map((item) => {
+    const barra = crear('div', { className: 'barra-progreso' });
+    barra.style.width = `${Math.max(4, (item.total / maximo) * 100)}%`;
+    const fila = crear('li', { className: 'barra-filtrable', tabindex: '0', title: 'Ver solo estas incidencias' }, [
+      crear('div', { className: 'barra-texto' }, [crear('span', { texto: texto(item) }), crear('span', { texto: String(item.total) })]),
+      barra,
+    ]);
+    const elegir = () => { Object.assign(filtroIncidencias, { campo, valor: valor(item), texto: texto(item) }); generar(); };
+    fila.addEventListener('click', elegir);
+    fila.addEventListener('keydown', (e) => { if (e.key === 'Enter') elegir(); });
+    return fila;
+  }));
+}
+
+/** RF-12.1 Catálogo de códigos: activar o desactivar y agregar nuevos (plegable, al final de la pestaña). */
+function catalogoCodigos(codigos) {
+  const lista = crear('ul', { className: 'mini-lista' }, codigos.map((c) => {
+    const interruptor = crear('input', { type: 'checkbox', 'aria-label': `Código ${c.codigo} activo` });
+    interruptor.checked = c.activo;
+    interruptor.addEventListener('change', async () => {
+      try {
+        await api('PUT', `/codigos-incidencia/${c.id}`, { activo: interruptor.checked });
+        mostrarAviso(`${c.codigo} ${interruptor.checked ? 'activado' : 'desactivado'}`, 'exito');
+      } catch (error) {
+        interruptor.checked = !interruptor.checked;
+        mostrarAviso(error.message, 'error');
+      }
+    });
+    return crear('li', {}, [
+      crear('span', { texto: `${c.codigo} · ${c.nombre}${c.causa_externa ? ' · causa externa' : ''}` }),
+      crear('label', { className: 'interruptor compacto' }, [crear('span', { className: 'nota', texto: MODULOS_INCIDENCIA[c.modulo] }), interruptor]),
+    ]);
+  }));
+  const codigo = crear('input', { id: 'c-codigo', placeholder: 'INV-05', maxlength: '6', 'aria-label': 'Código', autocomplete: 'off' });
+  const nombre = crear('input', { id: 'c-nombre', placeholder: 'Nombre del error', maxlength: '120', 'aria-label': 'Nombre del error', autocomplete: 'off' });
+  const modulo = crear('select', { id: 'c-modulo', 'aria-label': 'Módulo' },
+    Object.entries(MODULOS_INCIDENCIA).map(([valor, texto]) => crear('option', { value: valor, texto })));
+  const externa = crear('input', { type: 'checkbox', id: 'c-externa' });
+  const error = crear('div', { className: 'alerta-error', role: 'alert', hidden: '' });
+  const formulario = crear('form', { className: 'nuevo-codigo', novalidate: '' }, [
+    crear('div', { className: 'campo' }, [codigo]),
+    crear('div', { className: 'campo' }, [nombre]),
+    crear('div', { className: 'campo' }, [modulo]),
+    crear('button', { type: 'submit', className: 'boton-principal' }, [
+      crear('span', { className: 'icono', texto: 'add', 'aria-hidden': 'true' }), document.createTextNode(' Agregar'),
+    ]),
+  ]);
+  formulario.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    error.hidden = true;
+    try {
+      const nuevo = await api('POST', '/codigos-incidencia', {
+        codigo: codigo.value.trim(), nombre: nombre.value.trim(), modulo: modulo.value, causa_externa: externa.checked,
+      });
+      mostrarAviso(`Código ${nuevo.codigo} agregado`, 'exito');
+      generar();
+    } catch (excepcion) {
+      error.textContent = excepcion.message;
+      error.hidden = false;
+    }
+  });
+  const plegable = crear('details', { className: 'panel catalogo' }, [
+    crear('summary', {}, [crear('span', { className: 'icono', texto: 'tune', 'aria-hidden': 'true' }), document.createTextNode(' Catálogo de códigos de error')]),
+    lista, formulario,
+    crear('label', { className: 'interruptor compacto causa-externa', for: 'c-externa' }, [
+      crear('span', { texto: 'Causa externa: lo causa el cliente y no cuenta como error del personal' }), externa,
+    ]),
+    error,
+  ]);
+  plegable.open = catalogoAbierto;
+  plegable.addEventListener('toggle', () => { catalogoAbierto = plegable.open; });
+  return plegable;
+}
 
 // =====================================================================
 //  Periodo, pestañas, descarga e impresión
@@ -282,14 +512,29 @@ const ATAJOS = {
   },
 };
 
+/** Marca el atajo que coincide con las fechas elegidas (recomendación de la docente: que se vea cuál está activo). */
+function marcarAtajo() {
+  const actual = `${$('desde').value}|${$('hasta').value}`;
+  for (const boton of $('atajos').children) {
+    const desde = $('desde').value;
+    const hasta = $('hasta').value;
+    ATAJOS[boton.textContent]();
+    boton.setAttribute('aria-pressed', String(`${$('desde').value}|${$('hasta').value}` === actual));
+    $('desde').value = desde;
+    $('hasta').value = hasta;
+  }
+}
+
 $('atajos').replaceChildren(...Object.entries(ATAJOS).map(([texto, aplicar]) => {
-  const boton = crear('button', { type: 'button', className: 'chip filtro', texto });
+  const boton = crear('button', { type: 'button', className: 'chip filtro', texto, 'aria-pressed': 'false' });
   boton.addEventListener('click', () => {
     aplicar();
     generar();
   });
   return boton;
 }));
+$('desde').addEventListener('change', marcarAtajo);
+$('hasta').addEventListener('change', marcarAtajo);
 
 let reporteActual = 'estadisticas';
 
@@ -305,17 +550,20 @@ $('pestanas').replaceChildren(...Object.entries(NOMBRES_PESTANA).map(([clave, te
 
 async function generar() {
   const reporte = REPORTES[reporteActual];
+  marcarAtajo();
   const parametros = new URLSearchParams({ desde: $('desde').value, hasta: $('hasta').value });
   $('titulo-reporte').textContent = reporte.titulo;
   $('periodo').textContent = reporte.sinFechas ? ''
     : `Del ${formato.fecha($('desde').value)} al ${formato.fecha($('hasta').value)}`;
   $('error').hidden = true;
-  $('contenido-reporte').replaceChildren(crear('p', { className: 'nota', texto: 'Generando…' }));
+  if (empezarCarga($('contenido-reporte'))) {
+    pintarSuave($('contenido-reporte'), crear('p', { className: 'nota', texto: 'Generando…' }));
+  }
   tablaActual = { nombre: reporteActual, columnas: [], filas: [] };
   try {
-    $('contenido-reporte').replaceChildren(...await reporte.pintar(parametros));
+    pintarSuave($('contenido-reporte'), ...await reporte.pintar(parametros));
   } catch (error) {
-    $('contenido-reporte').replaceChildren();
+    pintarSuave($('contenido-reporte'));
     $('error').textContent = error.message;
     $('error').hidden = false;
   }

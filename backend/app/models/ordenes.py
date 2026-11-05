@@ -1,20 +1,26 @@
 """Modelos de ILF12 Clientes, ILF09 Órdenes, ILF10 Detalle de órdenes e ILF13 Domicilios."""
 
+from decimal import Decimal
+
 from ..extensions import db
+from .empresas import DeEmpresa
+
+PROPINA_SUGERIDA = Decimal("0.10")  # Ley 1935 de 2018: sugerida y voluntaria, solo en mesa
 
 
 def _fecha(valor):
     return valor.isoformat() if valor else None
 
 
-class Cliente(db.Model):
+class Cliente(DeEmpresa, db.Model):
     """ILF12 Cliente que pide a domicilio (RF-08.2)."""
 
     __tablename__ = "clientes"
+    __table_args__ = (db.UniqueConstraint("empresa_id", "telefono", name="uq_cliente_empresa_telefono"),)
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(120), nullable=False)
-    telefono = db.Column(db.String(20), nullable=False, unique=True)
+    telefono = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120))
     direccion = db.Column(db.String(200))
     barrio = db.Column(db.String(80))
@@ -33,7 +39,7 @@ class Cliente(db.Model):
         }
 
 
-class Orden(db.Model):
+class Orden(DeEmpresa, db.Model):
     """ILF09 Encabezado de un pedido (a domicilio, en mesa o para llevar)."""
 
     __tablename__ = "ordenes"
@@ -50,6 +56,7 @@ class Orden(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
     subtotal = db.Column(db.Numeric(14, 2), nullable=False, default=0, server_default="0")
     observaciones = db.Column(db.String(255))
+    incluye_propina = db.Column(db.Boolean, nullable=False, default=True, server_default="1")
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
     cliente = db.relationship("Cliente")
@@ -64,6 +71,23 @@ class Orden(db.Model):
         envio = self.domicilio.costo_envio if self.domicilio else 0
         return self.subtotal + envio
 
+    @property
+    def propina_sugerida(self):
+        """El 10 % de los productos, en pesos redondos. Solo se sugiere en los pedidos en mesa."""
+        if self.tipo != "MESA":
+            return Decimal("0")
+        return (Decimal(self.subtotal) * PROPINA_SUGERIDA).quantize(Decimal("1"))
+
+    @property
+    def propina(self):
+        """La propina que se cobra: la sugerida, salvo que el cliente no la quiera."""
+        return self.propina_sugerida if self.incluye_propina else Decimal("0")
+
+    @property
+    def a_pagar(self):
+        """Lo que paga el cliente: el total de la venta más la propina (que no es venta)."""
+        return self.total + self.propina
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -74,6 +98,7 @@ class Orden(db.Model):
             "usuario": f"{self.usuario.nombre} {self.usuario.apellido}",
             "subtotal": float(self.subtotal),
             "total": float(self.total),
+            "propina": float(self.propina),
             "observaciones": self.observaciones,
             "detalles": [d.to_dict() for d in self.detalles],
         }
@@ -106,7 +131,7 @@ class DetalleOrden(db.Model):
         }
 
 
-class Domicilio(db.Model):
+class Domicilio(DeEmpresa, db.Model):
     """ILF13 Entrega a domicilio de una orden (RF-08.1 a RF-08.8)."""
 
     __tablename__ = "domicilios"

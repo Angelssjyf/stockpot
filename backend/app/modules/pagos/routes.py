@@ -8,8 +8,8 @@ from flask import Blueprint, jsonify, request
 from ...extensions import db
 from ...models import Orden, Pago
 from ...services.inventario import StockInsuficiente
-from ...services.ventas import PagoRechazado, cuenta, pagado, registrar_pago
-from ...utils.auth import permiso_requerido, usuario_actual
+from ...services.ventas import PagoRechazado, cambiar_propina, cuenta, pagado, registrar_pago
+from ...utils.auth import permiso_requerido, usuario_actual, verificar_pin
 from ...utils.fechas import filtrar_por_fechas
 
 bp = Blueprint("pagos", __name__)
@@ -50,8 +50,10 @@ def leer_pago(data):
 @bp.get("/ordenes/por-cobrar")
 @permiso_requerido("pagos.ver")
 def ordenes_por_cobrar():
-    """RF-09.4 Órdenes abiertas con su saldo pendiente, de la más antigua a la más reciente."""
+    """RF-09.4 Órdenes abiertas con su saldo pendiente, de la más antigua a la más reciente.
+    Los pedidos en mesa aparecen cuando ya están confirmados (RF-05.7)."""
     ordenes = Orden.query.filter_by(estado="ABIERTA").order_by(Orden.created_at, Orden.id).all()
+    ordenes = [o for o in ordenes if not (o.pedido_mesa and o.pedido_mesa.estado == "REGISTRADO")]
     return jsonify([{
         "orden_id": o.id,
         "codigo": o.codigo,
@@ -59,9 +61,12 @@ def ordenes_por_cobrar():
         "fecha": o.created_at.isoformat() if o.created_at else None,
         "cliente": o.cliente.nombre if o.cliente else None,
         "estado_domicilio": o.domicilio.estado if o.domicilio else None,
+        "mesa": o.pedido_mesa.mesa.numero if o.pedido_mesa else None,
+        "estado_pedido": o.pedido_mesa.estado if o.pedido_mesa else None,
         "total": float(o.total),
+        "propina": float(o.propina),
         "pagado": float(pagado(o)),
-        "saldo": float(o.total - pagado(o)),
+        "saldo": float(o.a_pagar - pagado(o)),
     } for o in ordenes])
 
 
@@ -72,6 +77,28 @@ def ver_cuenta(orden_id):
     orden = db.session.get(Orden, orden_id)
     if orden is None:
         return jsonify(error="La orden no existe"), 404
+    return jsonify(cuenta(orden))
+
+
+@bp.patch("/ordenes/<int:orden_id>/propina")
+@permiso_requerido("pagos.gestionar")
+def propina_de_la_orden(orden_id):
+    """Propina sugerida del 10 % en mesa: el cliente decide si la paga (Ley 1935 de 2018).
+
+    Body: {"incluir": false}
+    """
+    orden = db.session.get(Orden, orden_id)
+    if orden is None:
+        return jsonify(error="La orden no existe"), 404
+    incluir = (request.get_json(silent=True) or {}).get("incluir")
+    if not isinstance(incluir, bool):
+        return jsonify(error="'incluir' debe ser true o false"), 422
+    try:
+        cambiar_propina(orden, incluir)
+    except PagoRechazado as rechazo:
+        db.session.rollback()
+        return jsonify(error=str(rechazo)), rechazo.codigo
+    db.session.commit()
     return jsonify(cuenta(orden))
 
 
@@ -89,7 +116,11 @@ def pagar_orden(orden_id):
     if orden is None:
         return jsonify(error="La orden no existe"), 404
 
-    datos, error = leer_pago(request.get_json(silent=True) or {})
+    data = request.get_json(silent=True) or {}
+    error = verificar_pin(data)  # cobrar pide el PIN de quien tiene la sesión
+    if error:
+        return error
+    datos, error = leer_pago(data)
     if error:
         return jsonify(error=error), 422
     try:
@@ -116,6 +147,9 @@ def anular_pago(pago_id):
         return jsonify(error="El pago ya está anulado"), 409
     if pago.orden.estado != "ABIERTA":
         return jsonify(error="La venta ya se cerró: no se pueden anular sus pagos"), 409
+    error = verificar_pin(request.get_json(silent=True) or {})
+    if error:
+        return error
     pago.estado = "ANULADO"
     db.session.commit()
     return jsonify(pago=pago.to_dict(), cuenta=cuenta(pago.orden))

@@ -1,6 +1,6 @@
 // Módulo de caja y pagos (RF-09.1 a RF-09.7) y venta de mostrador (RF-10.1).
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('pagos.ver'); // sin el permiso vuelve al menú
 const puedeCobrar = yo.permisos.includes('pagos.gestionar');
@@ -132,10 +132,12 @@ async function cargarPorCobrar() {
     const ordenes = await api('GET', '/ordenes/por-cobrar');
     $('estado-cobrar').hidden = ordenes.length > 0;
     $('estado-cobrar').textContent = 'No hay órdenes pendientes de pago';
-    $('lista-cobrar').replaceChildren(...ordenes.map((orden) => {
+    pintarSuave($('lista-cobrar'), ...ordenes.map((orden) => {
       const chips = [crear('span', { className: 'chip', texto: `Saldo ${formato.dinero(orden.saldo)}` })];
       if (orden.pagado > 0) chips.unshift(crear('span', { className: 'chip estado-PARCIAL', texto: 'Pago parcial' }));
-      const detalle = [TIPOS[orden.tipo], orden.cliente, fechaHora(orden.fecha)].filter(Boolean).join(' · ');
+      const tipo = orden.mesa ? `Mesa ${orden.mesa}` : TIPOS[orden.tipo];
+      const detalle = [tipo, orden.cliente, fechaHora(orden.fecha),
+        orden.propina ? `+ propina ${formato.dinero(orden.propina)}` : null].filter(Boolean).join(' · ');
       const fila = crear('li', { className: 'fila editable' }, [
         crear('div', { className: 'avatar' }, [crear('span', { className: 'icono', texto: 'receipt_long', 'aria-hidden': 'true' })]),
         crear('div', { className: 'datos' }, [
@@ -166,7 +168,7 @@ async function abrirCuenta(ordenId) {
     pintarCuenta(await api('GET', `/ordenes/${ordenId}/cuenta`));
     if (!dialogoCuenta.open) dialogoCuenta.showModal();
   } catch (error) {
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   }
 }
 
@@ -178,7 +180,7 @@ function pintarCuenta(cuenta) {
     crear('span', { className: `chip estado-${cuenta.estado_pago}`, texto: ESTADOS_PAGO[cuenta.estado_pago] }),
   );
   $('cuenta-cliente').textContent = [TIPOS[cuenta.tipo], cuenta.cliente?.nombre].filter(Boolean).join(' · ');
-  $('cuenta-lineas').replaceChildren(...cuenta.productos.map((d) => crear('li', {}, [
+  pintarSuave($('cuenta-lineas'), ...cuenta.productos.map((d) => crear('li', {}, [
     crear('span', { texto: `${d.cantidad} × ${d.producto}` }),
     crear('span', { texto: formato.dinero(d.subtotal) }),
   ])));
@@ -188,16 +190,20 @@ function pintarCuenta(cuenta) {
   filas.push(
     ['Total', formato.dinero(cuenta.total)],
     ['Impoconsumo incluido (8 %)', formato.dinero(cuenta.impoconsumo_incluido)],
+  );
+  if (cuenta.propina) filas.push(['Propina (voluntaria)', formato.dinero(cuenta.propina)], ['A pagar', formato.dinero(cuenta.a_pagar)]);
+  filas.push(
     ['Pagado', formato.dinero(cuenta.pagado)],
     ['Saldo', formato.dinero(cuenta.saldo)],
   );
-  $('cuenta-totales').replaceChildren(...filas.flatMap(([titulo, valor]) => [
+  pintarSuave($('cuenta-totales'), ...filas.flatMap(([titulo, valor]) => [
     crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
   ]));
+  pintarPropina(cuenta);
 
   // Pagos ya hechos, con opción de anular mientras la orden siga abierta
   $('bloque-pagos-hechos').hidden = cuenta.pagos.length === 0;
-  $('cuenta-pagos').replaceChildren(...cuenta.pagos.map((pago) => {
+  pintarSuave($('cuenta-pagos'), ...cuenta.pagos.map((pago) => {
     const texto = `${METODOS[pago.metodo]} · ${formato.dinero(pago.monto)}`
       + (pago.cambio ? ` (cambio ${formato.dinero(pago.cambio)})` : '')
       + (pago.referencia ? ` · ref. ${pago.referencia}` : '');
@@ -235,6 +241,32 @@ function pintarCuenta(cuenta) {
   $('cuenta-acciones').replaceChildren(...botones);
 }
 
+// Propina sugerida del 10 % en mesa: el cliente decide si la paga (Ley 1935 de 2018)
+function pintarPropina(cuenta) {
+  const bloque = $('bloque-propina');
+  bloque.hidden = !cuenta.propina_sugerida;
+  if (bloque.hidden) return;
+  const casilla = $('c-propina');
+  casilla.checked = cuenta.incluye_propina;
+  casilla.disabled = !puedeCobrar || cuenta.estado_orden !== 'ABIERTA';
+  $('c-propina-valor').textContent = `Propina sugerida (10 %): ${formato.dinero(cuenta.propina_sugerida)}`;
+}
+
+$('c-propina').addEventListener('change', async (evento) => {
+  const casilla = evento.target;
+  casilla.disabled = true;
+  try {
+    const cuenta = await api('PATCH', `/ordenes/${cuentaAbierta.orden_id}/propina`, { incluir: casilla.checked });
+    mostrarAviso(casilla.checked ? 'Propina incluida' : 'Propina quitada: el cliente no la quiso', 'exito');
+    pintarCuenta(cuenta);
+    cargarPorCobrar();
+  } catch (error) {
+    casilla.checked = !casilla.checked;
+    casilla.disabled = false;
+    mostrarErrorCuenta(error.message); // por ejemplo "Ya se pagó parte de la propina"
+  }
+});
+
 function mostrarErrorCuenta(mensaje) {
   $('error-cuenta').textContent = mensaje;
   $('error-cuenta').hidden = false;
@@ -249,7 +281,7 @@ async function registrarPago(boton) {
   boton.disabled = true;
   try {
     const { cuenta } = await api('POST', `/ordenes/${cuentaAbierta.orden_id}/pagos`, datos); // RF-09.1
-    mostrarAviso(cuenta.venta ? `Pagado. Venta ${cuenta.venta} registrada` : 'Abono registrado');
+    mostrarAviso(cuenta.venta ? `Pagado. Venta ${cuenta.venta} registrada` : 'Abono registrado', 'exito');
     pintarCuenta(cuenta);
     cargarPorCobrar();
   } catch (error) {
@@ -262,7 +294,7 @@ async function anularPago(pago) {
   if (!confirm(`¿Anular el pago de ${formato.dinero(pago.monto)}?`)) return;
   try {
     const { cuenta } = await api('PATCH', `/pagos/${pago.id}/anular`);
-    mostrarAviso('Pago anulado');
+    mostrarAviso('Pago anulado', 'exito');
     pintarCuenta(cuenta);
     cargarPorCobrar();
   } catch (error) {
@@ -310,7 +342,7 @@ function pintarLineas() {
     ]);
   });
   if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Agrega lo que lleva el cliente.' }));
-  $('m-lineas').replaceChildren(...filas);
+  pintarSuave($('m-lineas'), ...filas);
   $('m-total').textContent = `Total: ${formato.dinero(totalMostrador())}`;
   pagoMostrador?.actualizar();
 }
@@ -358,7 +390,7 @@ $('m-cobrar').addEventListener('click', async () => {
       items: lineas.map((l) => ({ producto_id: l.producto_id, cantidad: l.cantidad })),
       metodo: pago.metodo, recibido: pago.recibido, referencia: pago.referencia,
     });
-    mostrarAviso(`Venta ${venta.codigo}` + (registrado.cambio ? ` · cambio ${formato.dinero(registrado.cambio)}` : ''));
+    mostrarAviso(`Venta ${venta.codigo}` + (registrado.cambio ? ` · cambio ${formato.dinero(registrado.cambio)}` : ''), 'exito');
     lineas = [];
     pagoMostrador = formularioDePago($('m-pago'), { montoFijo: totalMostrador });
     pintarLineas();
@@ -379,12 +411,14 @@ $('p-desde').value = hoy;
 $('p-hasta').value = hoy;
 
 async function cargarPagos() {
-  $('estado-pagos').hidden = false;
-  $('estado-pagos').textContent = 'Cargando…';
+  if (empezarCarga($('lista-pagos'))) {
+    $('estado-pagos').hidden = false;
+    $('estado-pagos').textContent = 'Cargando…';
+  }
   try {
     const parametros = new URLSearchParams({ desde: $('p-desde').value, hasta: $('p-hasta').value });
     const { resumen, pagos } = await api('GET', `/pagos?${parametros}`);
-    $('resumen-pagos').replaceChildren(
+    pintarSuave($('resumen-pagos'),
       tarjetaResumen('payments', 'Total recibido', formato.dinero(resumen.total)),
       tarjetaResumen('money', 'Efectivo', formato.dinero(resumen.por_metodo.EFECTIVO)),
       tarjetaResumen('credit_card', 'Tarjeta', formato.dinero(resumen.por_metodo.TARJETA)),
@@ -392,7 +426,7 @@ async function cargarPagos() {
     );
     $('estado-pagos').hidden = pagos.length > 0;
     $('estado-pagos').textContent = 'No hay pagos en esas fechas';
-    $('lista-pagos').replaceChildren(...pagos.map((pago) => {
+    pintarSuave($('lista-pagos'), ...pagos.map((pago) => {
       const chips = [crear('span', { className: 'chip', texto: formato.dinero(pago.monto) })];
       if (pago.estado === 'ANULADO') chips.unshift(crear('span', { className: 'chip estado-CANCELADO', texto: 'Anulado' }));
       const fila = crear('li', { className: 'fila editable' }, [

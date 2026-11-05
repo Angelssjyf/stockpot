@@ -1,10 +1,13 @@
 """Módulo 1 - Gestión de usuarios y roles (RF-01)."""
 
+from datetime import datetime
+
 from flask import Blueprint, jsonify, request
 from sqlalchemy import or_
 
 from ...extensions import db
-from ...models import Permiso, Rol, Usuario
+from ...models import Permiso, Rol, Sesion, Usuario
+from ...services.empresas import MODULO_SUPERADMIN  # sus permisos no son para un restaurante
 from ...utils.auth import permiso_requerido, usuario_actual
 
 bp = Blueprint("usuarios", __name__)
@@ -26,6 +29,19 @@ def listar_usuarios():
 
     usuarios = consulta.order_by(Usuario.nombre, Usuario.apellido).all()
     return jsonify([u.to_dict() for u in usuarios])
+
+
+def cerrar_sesiones(usuario, motivo):
+    """Cierra las sesiones abiertas del usuario (por ejemplo, al desactivarlo o cambiarle la clave)."""
+    for sesion in Sesion.query.filter_by(usuario_id=usuario.id, cerrada=None):
+        sesion.cerrada = datetime.now()
+        sesion.motivo_cierre = motivo
+
+
+def correo_ocupado(email, salvo_id=None):
+    """El correo inicia sesión, así que es único en todo StockPot (no solo en este restaurante)."""
+    otro = Usuario.query.execution_options(todas_las_empresas=True).filter_by(email=email).first()
+    return otro is not None and otro.id != salvo_id
 
 
 @bp.post("/usuarios")
@@ -51,7 +67,7 @@ def crear_usuario():
     if rol is None or not rol.activo:
         return jsonify(error="El rol indicado no existe"), 422
 
-    if Usuario.query.filter_by(email=email).first():
+    if correo_ocupado(email):
         return jsonify(error="Ya existe un usuario con ese correo"), 409
 
     # 3. Guardar
@@ -113,8 +129,7 @@ def modificar_usuario(usuario_id):
         email = (data["email"] or "").strip().lower()
         if "@" not in email:
             return rechazar("El correo no es válido", 422)
-        otro = Usuario.query.filter_by(email=email).first()
-        if otro and otro.id != usuario.id:
+        if correo_ocupado(email, usuario.id):
             return rechazar("Ya existe un usuario con ese correo", 409)
         usuario.email = email
 
@@ -122,6 +137,12 @@ def modificar_usuario(usuario_id):
         if len(data["password"]) < 8:
             return rechazar("La contraseña debe tener al menos 8 caracteres", 422)
         usuario.set_password(data["password"])
+        if usuario.id != usuario_actual().id:  # con la clave cambiada, sus sesiones abiertas se cierran
+            cerrar_sesiones(usuario, "USUARIO")
+
+    # Si olvidó el PIN, el administrador se lo quita y el usuario crea uno nuevo con su contraseña
+    if data.get("quitar_pin"):
+        usuario.pin_hash = None
 
     if "activo" in data:
         if not isinstance(data["activo"], bool):
@@ -130,6 +151,8 @@ def modificar_usuario(usuario_id):
         if data["activo"] is False and usuario.id == usuario_actual().id:
             return rechazar("No puedes desactivar tu propio usuario", 409)
         usuario.activo = data["activo"]
+        if not usuario.activo:
+            cerrar_sesiones(usuario, "USUARIO")
 
     db.session.commit()
     return jsonify(usuario.to_dict())
@@ -188,7 +211,8 @@ def listar_roles():
 @permiso_requerido("roles.gestionar")
 def listar_permisos():
     """RF-01.6 Consultar todos los permisos disponibles, agrupables por módulo."""
-    permisos = Permiso.query.order_by(Permiso.modulo, Permiso.codigo).all()
+    permisos = Permiso.query.filter(Permiso.modulo != MODULO_SUPERADMIN) \
+        .order_by(Permiso.modulo, Permiso.codigo).all()
     return jsonify([p.to_dict() for p in permisos])
 
 
@@ -211,7 +235,7 @@ def asignar_permisos(rol_id):
     if not isinstance(codigos, list):
         return jsonify(error="'permisos' debe ser una lista de códigos"), 422
 
-    permisos = Permiso.query.filter(Permiso.codigo.in_(codigos)).all()
+    permisos = Permiso.query.filter(Permiso.codigo.in_(codigos), Permiso.modulo != MODULO_SUPERADMIN).all()
     desconocidos = sorted(set(codigos) - {p.codigo for p in permisos})
     if desconocidos:
         return jsonify(error="Hay permisos que no existen", desconocidos=desconocidos), 422

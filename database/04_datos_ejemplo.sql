@@ -1,7 +1,7 @@
 -- =====================================================================
 --  StockPot - Script 04: datos de ejemplo (insumos y proveedores)
 --  Opcional: sirve para probar el sistema y para la demostración.
---  Ejecutar DESPUÉS de 01, 02 y 03. Se puede ejecutar más de una vez:
+--  Ejecutar DESPUÉS de 01, 02 y 03. Todo queda en el restaurante 1 (empresa_id = 1). Se puede ejecutar más de una vez:
 --  INSERT IGNORE salta los registros que ya existen (mismo código o NIT).
 -- =====================================================================
 USE stockpot;
@@ -11,27 +11,27 @@ USE stockpot;
 -- restaurante). Desde aquí, el stock solo cambia con compras recibidas
 -- y con las entradas y salidas de inventario.
 -- ---------------------------------------------------------------------
-INSERT IGNORE INTO insumos (codigo, nombre, unidad_medida, stock_actual) VALUES
- ('INS-001', 'Arroz blanco',        'KG',     25.000),
- ('INS-002', 'Pechuga de pollo',    'KG',     12.500),
- ('INS-003', 'Carne de res',        'KG',      8.000),
- ('INS-004', 'Papa pastusa',        'KG',     30.000),
- ('INS-005', 'Tomate chonto',       'KG',      6.000),
- ('INS-006', 'Cebolla cabezona',    'KG',      5.000),
- ('INS-007', 'Aceite vegetal',      'L',      10.000),
- ('INS-008', 'Sal',                 'KG',      3.000),
- ('INS-009', 'Huevo',               'UNIDAD', 90.000),
- ('INS-010', 'Leche entera',        'L',       8.000),
- ('INS-011', 'Gaseosa 400 ml',      'UNIDAD', 48.000),
- ('INS-012', 'Limón',               'KG',      2.000);
+INSERT IGNORE INTO insumos (empresa_id, codigo, nombre, unidad_medida, stock_actual) VALUES
+ (1, 'INS-001', 'Arroz blanco',        'KG',     25.000),
+ (1, 'INS-002', 'Pechuga de pollo',    'KG',     12.500),
+ (1, 'INS-003', 'Carne de res',        'KG',      8.000),
+ (1, 'INS-004', 'Papa pastusa',        'KG',     30.000),
+ (1, 'INS-005', 'Tomate chonto',       'KG',      6.000),
+ (1, 'INS-006', 'Cebolla cabezona',    'KG',      5.000),
+ (1, 'INS-007', 'Aceite vegetal',      'L',      10.000),
+ (1, 'INS-008', 'Sal',                 'KG',      3.000),
+ (1, 'INS-009', 'Huevo',               'UNIDAD', 90.000),
+ (1, 'INS-010', 'Leche entera',        'L',       8.000),
+ (1, 'INS-011', 'Gaseosa 400 ml',      'UNIDAD', 48.000),
+ (1, 'INS-012', 'Limón',               'KG',      2.000);
 
 -- ---------------------------------------------------------------------
 -- Proveedores
 -- ---------------------------------------------------------------------
-INSERT IGNORE INTO proveedores (nit, razon_social, contacto, telefono, email, direccion) VALUES
- ('900123456-7', 'Distribuidora La Cosecha',  'Carlos Ruiz',   '6075551234', 'ventas@lacosecha.co',   'Cl. 10 #5-20, Cúcuta'),
- ('900765432-1', 'Avícola El Gallo de Oro',   'Marta Gómez',   '3109998877', 'pedidos@gallodeoro.co', 'Av. 4 #12-45, Cúcuta'),
- ('901112233-4', 'Bebidas y Lácteos del Norte', 'Jorge Pérez', '3155556677', 'jorge@lacteosnorte.co', 'Zona Industrial, Cúcuta');
+INSERT IGNORE INTO proveedores (empresa_id, nit, razon_social, contacto, telefono, email, direccion) VALUES
+ (1, '900123456-7', 'Distribuidora La Cosecha',  'Carlos Ruiz',   '6075551234', 'ventas@lacosecha.co',   'Cl. 10 #5-20, Cúcuta'),
+ (1, '900765432-1', 'Avícola El Gallo de Oro',   'Marta Gómez',   '3109998877', 'pedidos@gallodeoro.co', 'Av. 4 #12-45, Cúcuta'),
+ (1, '901112233-4', 'Bebidas y Lácteos del Norte', 'Jorge Pérez', '3155556677', 'jorge@lacteosnorte.co', 'Zona Industrial, Cúcuta');
 
 -- ---------------------------------------------------------------------
 -- Insumos que vende cada proveedor (RF-02.4), con su precio habitual.
@@ -74,19 +74,36 @@ UPDATE insumos SET stock_minimo = 24,  costo_unitario = 2200  WHERE codigo = 'IN
 UPDATE insumos SET stock_minimo = 3,   costo_unitario = 4000  WHERE codigo = 'INS-012';
 
 -- ---------------------------------------------------------------------
+-- Categoría de cada insumo de ejemplo (RF-03.10). Requiere la columna categoria
+-- (01_schema.sql actual o 10).
+-- ---------------------------------------------------------------------
+UPDATE insumos SET categoria = 'GRANOS' WHERE codigo = 'INS-001';
+UPDATE insumos SET categoria = 'CARNES' WHERE codigo = 'INS-002';
+UPDATE insumos SET categoria = 'CARNES' WHERE codigo = 'INS-003';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-004';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-005';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-006';
+UPDATE insumos SET categoria = 'ABARROTES' WHERE codigo = 'INS-007';
+UPDATE insumos SET categoria = 'ABARROTES' WHERE codigo = 'INS-008';
+UPDATE insumos SET categoria = 'LACTEOS' WHERE codigo = 'INS-009';
+UPDATE insumos SET categoria = 'LACTEOS' WHERE codigo = 'INS-010';
+UPDATE insumos SET categoria = 'BEBIDAS' WHERE codigo = 'INS-011';
+UPDATE insumos SET categoria = 'FRUTAS_VERDURAS' WHERE codigo = 'INS-012';
+
+-- ---------------------------------------------------------------------
 -- Productos de la carta (RF-04.1) y sus recetas (RF-04.4).
 -- Requiere las tablas de productos (01_schema.sql actual o script 06).
 -- Cantidades por UNA porción, en la unidad de cada insumo.
 -- ---------------------------------------------------------------------
-INSERT IGNORE INTO productos (codigo, nombre, descripcion, categoria, precio_venta) VALUES
- ('PRD-001', 'Bandeja de pollo',      'Pechuga a la plancha con arroz y papa',  'PLATO_FUERTE', 22000),
- ('PRD-002', 'Carne asada',           'Carne de res con papa y ensalada',       'PLATO_FUERTE', 26000),
- ('PRD-003', 'Huevos pericos',        'Huevos con tomate y cebolla',            'ENTRADA',       9000),
- ('PRD-004', 'Papas a la francesa',   'Porción de papas fritas',                'ADICIONAL',     7000),
- ('PRD-005', 'Porción de arroz',      'Arroz blanco',                           'ADICIONAL',     4000),
- ('PRD-006', 'Gaseosa 400 ml',        NULL,                                     'BEBIDA',        4500),
- ('PRD-007', 'Limonada natural',      'Vaso de 400 ml',                         'BEBIDA',        6000),
- ('PRD-008', 'Arroz con leche',       'Postre de la casa',                      'POSTRE',        7000);
+INSERT IGNORE INTO productos (empresa_id, codigo, nombre, descripcion, categoria, precio_venta) VALUES
+ (1, 'PRD-001', 'Bandeja de pollo',      'Pechuga a la plancha con arroz y papa',  'PLATO_FUERTE', 22000),
+ (1, 'PRD-002', 'Carne asada',           'Carne de res con papa y ensalada',       'PLATO_FUERTE', 26000),
+ (1, 'PRD-003', 'Huevos pericos',        'Huevos con tomate y cebolla',            'ENTRADA',       9000),
+ (1, 'PRD-004', 'Papas a la francesa',   'Porción de papas fritas',                'ADICIONAL',     7000),
+ (1, 'PRD-005', 'Porción de arroz',      'Arroz blanco',                           'ADICIONAL',     4000),
+ (1, 'PRD-006', 'Gaseosa 400 ml',        NULL,                                     'BEBIDA',        4500),
+ (1, 'PRD-007', 'Limonada natural',      'Vaso de 400 ml',                         'BEBIDA',        6000),
+ (1, 'PRD-008', 'Arroz con leche',       'Postre de la casa',                      'POSTRE',        7000);
 
 INSERT IGNORE INTO recetas (producto_id, insumo_id, cantidad)
 SELECT p.id, i.id, r.cantidad
@@ -126,7 +143,15 @@ JOIN insumos   i ON i.codigo = r.insumo;
 -- Clientes de ejemplo para domicilios (RF-08.2).
 -- Requiere la tabla clientes (01_schema.sql actual o script 07).
 -- ---------------------------------------------------------------------
-INSERT IGNORE INTO clientes (nombre, telefono, direccion, barrio, referencia) VALUES
- ('María Gómez',     '3001234567', 'Calle 45 # 27-30',     'Cabecera',     'Edificio Torres del Parque, apto 502'),
- ('Carlos Pérez',    '3109876543', 'Carrera 33 # 52-14',   'La Aurora',    'Casa esquinera de portón negro'),
- ('Laura Martínez',  '3157654321', 'Avenida Quebradaseca # 18-40', 'San Francisco', NULL);
+INSERT IGNORE INTO clientes (empresa_id, nombre, telefono, direccion, barrio, referencia) VALUES
+ (1, 'María Gómez',     '3001234567', 'Calle 45 # 27-30',     'Cabecera',     'Edificio Torres del Parque, apto 502'),
+ (1, 'Carlos Pérez',    '3109876543', 'Carrera 33 # 52-14',   'La Aurora',    'Casa esquinera de portón negro'),
+ (1, 'Laura Martínez',  '3157654321', 'Avenida Quebradaseca # 18-40', 'San Francisco', NULL);
+
+-- ---------------------------------------------------------------------
+-- Mesas del salón para los pedidos en mesa (RF-05.2).
+-- Requiere la tabla mesas (01_schema.sql actual o script 09).
+-- ---------------------------------------------------------------------
+INSERT IGNORE INTO mesas (empresa_id, numero, capacidad, ubicacion) VALUES
+ (1, 1, 4, 'Salón'), (2, 4, 'Salón'), (3, 2, 'Salón'), (4, 6, 'Salón'),
+ (1, 5, 4, 'Terraza'), (6, 2, 'Terraza'), (7, 8, 'Terraza'), (8, 2, 'Barra');

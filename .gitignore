@@ -22,3 +22,11 @@ ngrok-dominio.txt
 # Reportes de cobertura de pruebas (pytest-cov)
 .coverage
 htmlcov/
+
+# Respaldos de la base (traen usuarios y datos reales: nunca se suben)
+database/respaldos/
+
+# Comprimidos y material personal de las sustentaciones (pesan mucho; no van al repositorio)
+*.zip
+docs/2 PARCIAL*/
+docs/sustentacion/

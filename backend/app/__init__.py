@@ -30,13 +30,18 @@ def create_app(config_class=Config):
 
     # Módulos (blueprints): cada uno con su prefijo de URL
     from .modules.auth.routes import bp as auth_bp
+    from .modules.cocina.routes import bp as cocina_bp
     from .modules.compras.routes import bp as compras_bp
     from .modules.domicilios.routes import bp as domicilios_bp
+    from .modules.empresas.routes import bp as empresas_bp
+    from .modules.incidencias.routes import bp as incidencias_bp
     from .modules.inventario.routes import bp as inventario_bp
     from .modules.pagos.routes import bp as pagos_bp
+    from .modules.pedidos.routes import bp as pedidos_bp
     from .modules.productos.routes import bp as productos_bp
     from .modules.proveedores.routes import bp as proveedores_bp
     from .modules.reportes.routes import bp as reportes_bp
+    from .modules.reservas.routes import bp as reservas_bp
     from .modules.usuarios.routes import bp as usuarios_bp
     from .modules.ventas.routes import bp as ventas_bp
 
@@ -46,10 +51,15 @@ def create_app(config_class=Config):
     app.register_blueprint(compras_bp, url_prefix="/api")
     app.register_blueprint(inventario_bp, url_prefix="/api")
     app.register_blueprint(productos_bp, url_prefix="/api")
+    app.register_blueprint(pedidos_bp, url_prefix="/api")
     app.register_blueprint(domicilios_bp, url_prefix="/api")
     app.register_blueprint(pagos_bp, url_prefix="/api")
     app.register_blueprint(ventas_bp, url_prefix="/api")
     app.register_blueprint(reportes_bp, url_prefix="/api")
+    app.register_blueprint(incidencias_bp, url_prefix="/api")
+    app.register_blueprint(empresas_bp, url_prefix="/api")
+    app.register_blueprint(cocina_bp, url_prefix="/api")
+    app.register_blueprint(reservas_bp, url_prefix="/api")
 
     from .cli import register_cli
 

@@ -1,7 +1,7 @@
 // Módulo de proveedores: RF-02.1 Registrar, RF-02.2 Consultar, RF-02.3 Modificar,
 // RF-02.4 Productos suministrados y RF-02.5 Historial de compras.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { CATEGORIAS_INSUMO, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('proveedores.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('proveedores.gestionar');
@@ -11,34 +11,61 @@ document.getElementById('ir-compras').hidden = !yo.permisos.includes('compras.ve
 
 const $ = (id) => document.getElementById(id);
 
+let categoriaElegida = ''; // RF-02.9 '' = todas
+
+/** Chips para filtrar por la categoría de lo que vende el proveedor. */
+function pintarCategorias() {
+  const opciones = [['', 'Todos'], ...Object.entries(CATEGORIAS_INSUMO)];
+  $('categorias').replaceChildren(...opciones.map(([valor, texto]) => {
+    const boton = crear('button', { type: 'button', className: 'chip filtro', texto, 'aria-pressed': String(valor === categoriaElegida) });
+    boton.addEventListener('click', () => {
+      categoriaElegida = valor;
+      pintarCategorias();
+      cargar();
+    });
+    return boton;
+  }));
+}
+
 // =====================================================================
 //  RF-02.2 Consultar proveedores: lista con buscador
 // =====================================================================
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     const texto = encodeURIComponent($('buscar').value.trim());
-    const proveedores = await api('GET', `/proveedores?q=${texto}`);
+    const proveedores = await api('GET', `/proveedores?q=${texto}&categoria=${categoriaElegida}`);
     if (proveedores.length === 0) {
-      mostrarEstado('No se encontraron proveedores');
+      if (categoriaElegida && !texto) {
+        mostrarEstado(`Ningún proveedor vende ${CATEGORIAS_INSUMO[categoriaElegida].toLowerCase()}`, {
+          icono: 'filter_alt_off', detalle: 'Asigna insumos de esa categoría a un proveedor o elige otra categoría.',
+        });
+      } else if (texto) {
+        mostrarEstado('No se encontraron proveedores', {
+          icono: 'search_off', detalle: 'Prueba con otro nombre, NIT o insumo.',
+          accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
+        });
+      } else {
+        mostrarEstado('Todavía no hay proveedores', {
+          icono: 'local_shipping', detalle: 'Registra a quienes te venden los insumos para hacerles órdenes de compra.',
+          accion: puedeGestionar ? { texto: 'Crear el primer proveedor', alHacer: () => abrirFormulario(null) } : null,
+        });
+      }
+      pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
-      $('lista').replaceChildren(...proveedores.map(filaDeProveedor));
+      pintarSuave($('lista'), ...proveedores.map(filaDeProveedor));
     }
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
 }
 
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
-}
-
 function filaDeProveedor(proveedor) {
+  const vende = proveedor.coincidencias?.length
+    ? `Vende: ${proveedor.coincidencias.join(', ')}`
+    : (proveedor.categorias ?? []).map((c) => CATEGORIAS_INSUMO[c] ?? c).join(' · ');
   const chips = [];
   if (!proveedor.activo) chips.push(crear('span', { className: 'chip', texto: 'Inactivo' }));
   if (proveedor.telefono) chips.push(crear('span', { className: 'chip', texto: proveedor.telefono }));
@@ -50,6 +77,8 @@ function filaDeProveedor(proveedor) {
     crear('div', { className: 'datos' }, [
       crear('div', { className: 'nombre', texto: proveedor.razon_social }),
       crear('div', { className: 'correo', texto: `NIT ${proveedor.nit}` + (proveedor.contacto ? ` · ${proveedor.contacto}` : '') }),
+      // RF-02.9 Qué vende: lo que coincidió con la búsqueda o, si no se buscó, sus categorías
+      ...(vende.length ? [crear('div', { className: 'vende', texto: vende })] : []),
     ]),
     crear('div', { className: 'chips' }, chips),
   ]);
@@ -142,7 +171,7 @@ function pintarInsumos() {
     ]);
   });
   if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Todavía no tiene insumos.' }));
-  $('lineas-insumos').replaceChildren(...filas);
+  pintarSuave($('lineas-insumos'), ...filas);
 
   // En el selector solo aparecen los insumos que todavía no vende
   const yaVende = new Set(insumosDelProveedor.map((item) => item.insumo_id));
@@ -172,10 +201,10 @@ $('agregar-insumo').addEventListener('click', () => {
 
 function pintarHistorial(compras) {
   if (compras.length === 0) {
-    $('historial').replaceChildren(crear('li', { texto: 'Sin compras registradas.' }));
+    pintarSuave($('historial'), crear('li', { texto: 'Sin compras registradas.' }));
     return;
   }
-  $('historial').replaceChildren(...compras.map((orden) => crear('li', {}, [
+  pintarSuave($('historial'), ...compras.map((orden) => crear('li', {}, [
     crear('span', { texto: `${orden.codigo} · ${formato.fecha(orden.fecha_orden)}` }),
     crear('span', { className: `chip estado-${orden.estado}`, texto: orden.estado }),
     crear('strong', { texto: formato.dinero(orden.total) }),
@@ -235,10 +264,10 @@ $('form-proveedor').addEventListener('submit', async (evento) => {
         })),
       });
       dialogo.close();
-      mostrarAviso('Proveedor actualizado');
+      mostrarAviso('Proveedor actualizado', 'exito');
     } else {
       const nuevo = await api('POST', '/proveedores', datos); // RF-02.1
-      mostrarAviso('Proveedor registrado. Ahora puedes agregar los insumos que vende.');
+      mostrarAviso('Proveedor registrado. Ahora puedes agregar los insumos que vende.', 'exito');
       await abrirFormulario(nuevo.id); // se abre en modo edición para agregar insumos
     }
     cargar();
@@ -251,4 +280,5 @@ $('form-proveedor').addEventListener('submit', async (evento) => {
 
 $('cancelar').addEventListener('click', () => dialogo.close());
 
+pintarCategorias();
 cargar();

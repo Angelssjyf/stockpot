@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Pedidos en mesa</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Pedidos en mesa</h1>
+  </header>
+
+  <main class="contenido">
+    <div class="pestanas" role="tablist">
+      <button type="button" role="tab" id="tab-mesas" aria-selected="true">Mesas</button>
+      <button type="button" role="tab" id="tab-activos" aria-selected="false">Pedidos activos</button>
+      <button type="button" role="tab" id="tab-historial" aria-selected="false">Historial</button>
+    </div>
+
+    <!-- RF-05.2 Mesas del salón: libres u ocupadas con su pedido -->
+    <section id="vista-mesas">
+      <section class="resumen" id="resumen-mesas"></section>
+      <div class="barra-acciones">
+        <p class="nota">Toca una mesa libre para tomar el pedido, o una ocupada para verlo.</p>
+        <button type="button" class="boton-texto" id="boton-admin-mesas" hidden>
+          <span class="icono" aria-hidden="true">table_restaurant</span> Administrar mesas
+        </button>
+      </div>
+      <p class="nota" id="estado-mesas" hidden></p>
+      <div class="mesas" id="mesas"></div>
+    </section>
+
+    <!-- RF-05.5 Consultar pedidos activos -->
+    <section id="vista-activos" hidden>
+      <div class="categorias" id="filtro-estados" role="group" aria-label="Filtrar por estado"></div>
+      <p class="nota" id="estado-activos" hidden></p>
+      <ul class="lista" id="lista-activos"></ul>
+    </section>
+
+    <!-- RF-05.5 Historial de pedidos -->
+    <section id="vista-historial" hidden>
+      <form class="filtros" id="form-historial">
+        <div class="campo"><input type="date" id="h-desde" aria-label="Desde"></div>
+        <div class="campo"><input type="date" id="h-hasta" aria-label="Hasta"></div>
+        <div class="campo"><input type="search" id="h-codigo" placeholder="Código (PED-…)" aria-label="Código"></div>
+        <button type="submit" class="boton-icono" title="Consultar">
+          <span class="icono" aria-hidden="true">search</span>
+        </button>
+      </form>
+      <p class="nota" id="estado-historial" hidden></p>
+      <ul class="lista" id="lista-historial"></ul>
+    </section>
+  </main>
+
+  <button type="button" class="boton-principal boton-flotante" id="boton-nuevo" hidden>
+    <span class="icono" aria-hidden="true">add</span> Nuevo pedido
+  </button>
+
+  <!-- RF-05.1 Registrar, RF-05.2 Mesa, RF-05.3 Productos, RF-05.4 Modificar y RF-05.6 Disponibilidad -->
+  <dialog id="dialogo-pedido" class="ancho extra-ancho">
+    <form id="form-pedido" novalidate>
+      <h2 id="titulo-pedido">Nuevo pedido</h2>
+
+      <div class="dos-columnas">
+        <div>
+          <label class="etiqueta" for="p-mesa">Mesa *</label>
+          <div class="campo" id="campo-mesa"><select id="p-mesa"></select></div>
+          <small class="error-campo" id="error-mesa"></small>
+        </div>
+        <div>
+          <label class="etiqueta" for="p-comensales">Comensales *</label>
+          <div class="campo" id="campo-comensales"><input id="p-comensales" type="number" min="1" step="1" value="2"></div>
+          <small class="error-campo" id="error-comensales"></small>
+        </div>
+      </div>
+
+      <div class="pedido-columnas">
+        <!-- La carta: se busca o se filtra por categoría y se toca el plato -->
+        <section class="seccion">
+          <h3>Carta</h3>
+          <div class="campo" id="campo-carta">
+            <span class="icono" aria-hidden="true">search</span>
+            <input id="p-buscar" type="search" placeholder="Buscar plato o bebida…" autocomplete="off"
+                   aria-label="Buscar en la carta">
+          </div>
+          <div class="categorias" id="p-categorias" role="group" aria-label="Filtrar por categoría"></div>
+          <ul class="carta" id="p-carta" aria-label="Platos de la carta"></ul>
+        </section>
+
+        <!-- Lo que lleva el pedido -->
+        <section class="seccion">
+          <h3>Pedido de la mesa</h3>
+          <div class="lineas" id="lineas-pedido"></div>
+          <small class="error-campo" id="error-productos"></small>
+
+          <label class="etiqueta" for="p-observaciones">Observaciones generales del pedido</label>
+          <div class="campo"><input id="p-observaciones" autocomplete="off" maxlength="255"
+            placeholder="Ej: traer todo junto, cumpleaños"></div>
+          <p class="disponibilidad" id="disponibilidad" hidden></p>
+          <p class="total" id="total-pedido">Total: $ 0</p>
+        </section>
+      </div>
+
+      <div class="alerta-error" id="error-pedido" role="alert" hidden></div>
+
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="cancelar-pedido">Cancelar</button>
+        <button type="submit" class="boton-principal" id="guardar-pedido">
+          <span class="icono" aria-hidden="true">save</span> <span id="texto-guardar">Registrar pedido</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- RF-05.5 Detalle, RF-05.3 Agregar productos, RF-05.7 Confirmar, RF-05.8 Cocina y RF-05.9 Estado -->
+  <dialog id="dialogo-detalle" class="ancho">
+    <h2 id="detalle-titulo" tabindex="-1" autofocus></h2> <!-- autofocus: al abrir no salta el teclado -->
+    <dl class="datos-orden" id="detalle-datos"></dl>
+    <ol class="linea-tiempo" id="detalle-tiempo" aria-label="Recorrido del pedido"></ol>
+
+    <section class="seccion">
+      <h3>Productos</h3>
+      <ul class="mini-lista" id="detalle-lineas"></ul>
+      <p class="total" id="detalle-total"></p>
+    </section>
+
+    <section class="seccion" id="bloque-agregar" hidden>
+      <h3>Agregar productos</h3>
+      <div class="agregar-fila">
+        <div class="buscador-carta">
+          <div class="campo" id="campo-agregar">
+            <span class="icono" aria-hidden="true">search</span>
+            <input id="a-buscar" type="search" placeholder="Buscar y tocar para agregar…" autocomplete="off"
+                   role="combobox" aria-expanded="false" aria-controls="a-resultados" aria-label="Buscar producto para agregar">
+          </div>
+          <ul class="resultados-carta" id="a-resultados" role="listbox" hidden></ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="alerta-error" id="error-detalle" role="alert" hidden></div>
+    <div class="acciones" id="detalle-acciones"></div>
+  </dialog>
+
+  <!-- Al elegir un plato: cantidad y observaciones del cliente (sin cebolla, término medio…) -->
+  <dialog id="dialogo-plato">
+    <form id="form-plato" novalidate>
+      <div class="cabecera-plato">
+        <span class="icono icono-plato" id="plato-icono" aria-hidden="true">restaurant</span>
+        <div>
+          <h2 id="plato-nombre"></h2>
+          <p class="nota" id="plato-detalle"></p>
+        </div>
+      </div>
+      <p class="nota" id="plato-descripcion"></p>
+
+      <label class="etiqueta" id="etiqueta-cantidad">Cantidad</label>
+      <div class="contador" role="group" aria-labelledby="etiqueta-cantidad">
+        <button type="button" class="boton-icono" id="plato-menos" aria-label="Uno menos">
+          <span class="icono" aria-hidden="true">remove</span>
+        </button>
+        <output id="plato-cantidad" aria-live="polite">1</output>
+        <button type="button" class="boton-icono" id="plato-mas" aria-label="Uno más">
+          <span class="icono" aria-hidden="true">add</span>
+        </button>
+      </div>
+
+      <label class="etiqueta" for="plato-observacion">Observaciones del cliente</label>
+      <div class="categorias" id="plato-sugerencias" role="group" aria-label="Observaciones frecuentes"></div>
+      <div class="campo campo-texto">
+        <textarea id="plato-observacion" rows="2" maxlength="150"
+                  placeholder="Ej: sin cebolla, término medio, salsa aparte"></textarea>
+      </div>
+      <small class="ayuda-campo" id="plato-caracteres">0 / 150</small>
+
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="plato-quitar" hidden>Quitar del pedido</button>
+        <button type="button" class="boton-texto" id="plato-cancelar">Cancelar</button>
+        <button type="submit" class="boton-principal" id="plato-guardar">
+          <span class="icono" aria-hidden="true">add_shopping_cart</span> <span id="plato-texto-guardar">Agregar</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Administrar mesas -->
+  <dialog id="dialogo-mesas" class="ancho">
+    <h2>Mesas del salón</h2>
+    <ul class="mini-lista" id="lista-admin-mesas"></ul>
+    <form id="form-mesa" class="seccion" novalidate>
+      <h3 id="titulo-mesa">Nueva mesa</h3>
+      <div class="dos-columnas">
+        <div>
+          <label class="etiqueta" for="m-numero">Número *</label>
+          <div class="campo"><input id="m-numero" type="number" min="1" step="1"></div>
+        </div>
+        <div>
+          <label class="etiqueta" for="m-capacidad">Capacidad *</label>
+          <div class="campo"><input id="m-capacidad" type="number" min="1" step="1" value="4"></div>
+        </div>
+      </div>
+      <label class="etiqueta" for="m-ubicacion">Ubicación</label>
+      <div class="campo"><input id="m-ubicacion" maxlength="60" placeholder="Salón, Terraza, Barra…" autocomplete="off"></div>
+      <label class="casilla"><input type="checkbox" id="m-activa" checked> Mesa activa</label>
+      <div class="alerta-error" id="error-mesas" role="alert" hidden></div>
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="cerrar-mesas">Cerrar</button>
+        <button type="button" class="boton-texto" id="nueva-mesa" hidden>Nueva mesa</button>
+        <button type="submit" class="boton-principal" id="guardar-mesa">
+          <span class="icono" aria-hidden="true">save</span> Guardar mesa
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/pedidos.js"></script>
+</body>
+</html>

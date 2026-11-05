@@ -1,6 +1,6 @@
 // Módulo de productos y menú (RF-04.1 a RF-04.6): carta, recetas, precios y disponibilidad.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('productos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('productos.gestionar');
@@ -43,13 +43,12 @@ function pintarCategorias() {
 }
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     productos = await api('GET', '/productos');
     pintarLista();
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
 }
 
@@ -59,17 +58,22 @@ function pintarLista() {
     (!categoriaElegida || p.categoria === categoriaElegida)
     && normalizar(`${p.codigo} ${p.nombre}`).includes(texto));
   if (visibles.length === 0) {
-    mostrarEstado(productos.length ? 'No se encontraron productos' : 'Todavía no hay productos');
+    if (productos.length) {
+      mostrarEstado('No se encontraron productos', {
+        icono: 'search_off', detalle: 'Prueba con otro nombre o código, o elige otra categoría.',
+        accion: $('buscar').value.trim() ? { texto: 'Limpiar búsqueda', icono: 'close', alHacer: () => $('limpiar').click() } : null,
+      });
+    } else {
+      mostrarEstado('Todavía no hay productos', {
+        icono: 'restaurant_menu', detalle: 'Crea los platos de la carta con su receta para calcular el costo.',
+        accion: puedeGestionar ? { texto: 'Crear el primer producto', alHacer: () => abrirFormulario(null) } : null,
+      });
+    }
+    pintarSuave($('lista'));
   } else {
     $('estado').hidden = true;
-    $('lista').replaceChildren(...visibles.map(filaDeProducto));
+    pintarSuave($('lista'), ...visibles.map(filaDeProducto));
   }
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 /** Una fila: nombre, categoría, precio, avisos y el interruptor de disponibilidad. */
@@ -116,11 +120,11 @@ async function cambiarDisponibilidad(producto, interruptor) {
     const actualizado = await api('PATCH', `/productos/${producto.id}/disponibilidad`,
       { disponible: interruptor.checked });
     Object.assign(producto, actualizado);
-    mostrarAviso(actualizado.disponible ? `${producto.nombre} disponible` : `${producto.nombre} agotado por hoy`);
+    mostrarAviso(actualizado.disponible ? `${producto.nombre} disponible` : `${producto.nombre} agotado por hoy`, 'exito');
     pintarLista();
   } catch (error) {
     interruptor.checked = !interruptor.checked; // vuelve a como estaba
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   } finally {
     interruptor.disabled = false;
   }
@@ -238,7 +242,7 @@ function pintarReceta() {
     ]);
   });
   if (filas.length === 0) filas.push(crear('p', { className: 'nota', texto: 'Todavía no tiene insumos.' }));
-  $('lineas-receta').replaceChildren(...filas);
+  pintarSuave($('lineas-receta'), ...filas);
 
   // En el selector solo aparecen los insumos que todavía no están en la receta
   const yaEstan = new Set(receta.map((linea) => linea.insumo_id));
@@ -254,19 +258,23 @@ function pintarReceta() {
 /** Costo de la porción y ganancia, recalculados mientras se edita. */
 function pintarCostos() {
   if (!puedeGestionar) {
-    $('costos').replaceChildren(); // el costo y la ganancia son información del administrador
+    pintarSuave($('costos')); // el costo y la ganancia son información del administrador
     return;
   }
   const costo = receta.reduce((total, linea) => total + (linea.cantidad || 0) * linea.costo_unitario, 0);
   const precio = Number($('f-precio').value) || 0;
-  const filas = [['Costo por porción', formato.dinero(costo)]];
-  if (precio > 0) {
-    const margen = precio - costo;
-    filas.push(['Ganancia por porción', `${formato.dinero(margen)} (${Math.round((margen / precio) * 100)} %)`]);
-  }
-  $('costos').replaceChildren(...filas.flatMap(([titulo, valor]) => [
-    crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
-  ]));
+  const margen = precio - costo;
+  const ganancia = precio > 0 ? `${Math.round((margen / precio) * 100)} % del precio` : 'Escribe el precio';
+  // Tres tarjetas: precio, costo y ganancia (en rojo si el plato se vende a pérdida)
+  const tarjeta = (titulo, valor, detalle, clase = '') => crear('div', { className: `costo ${clase}` }, [
+    crear('small', { texto: titulo }),
+    crear('strong', { texto: valor }),
+    crear('small', { texto: detalle }),
+  ]);
+  pintarSuave($('costos'),
+    tarjeta('Precio', formato.dinero(precio), 'por porción'),
+    tarjeta('Costo', formato.dinero(costo), `${receta.length} ${receta.length === 1 ? 'insumo' : 'insumos'}`),
+    tarjeta('Ganancia', precio > 0 ? formato.dinero(margen) : '—', ganancia, precio > 0 && margen < 0 ? 'perdida' : 'ganancia'));
 }
 
 $('f-precio').addEventListener('input', pintarCostos);
@@ -344,7 +352,7 @@ $('form-producto').addEventListener('submit', async (evento) => {
       await api('POST', '/productos', datos); // RF-04.1
     }
     dialogo.close();
-    mostrarAviso(productoId ? 'Producto actualizado' : 'Producto registrado');
+    mostrarAviso(productoId ? 'Producto actualizado' : 'Producto registrado', 'exito');
     cargar();
   } catch (error) {
     $('error-formulario').textContent = error.message; // por ejemplo "Ya existe un producto con ese código"

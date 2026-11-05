@@ -64,7 +64,7 @@ def test_cp_01_4_7_me_con_token(client, admin_headers):
     r = client.get("/api/auth/me", headers=admin_headers)
     assert r.status_code == 200
     assert r.get_json()["email"] == "admin@stockpot.test"
-    assert len(r.get_json()["permisos"]) == 23
+    assert len(r.get_json()["permisos"]) == 26
 
 
 def test_cp_seg_1_sin_token(client):

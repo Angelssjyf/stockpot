@@ -6,6 +6,7 @@ Cada clase corresponde a una tabla creada en database/01_schema.sql.
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 # Tabla intermedia rol_permisos (muchos a muchos). No necesita clase propia
 # porque solo guarda las dos llaves foráneas.
@@ -33,11 +34,13 @@ class Permiso(db.Model):
         }
 
 
-class Rol(db.Model):
+class Rol(DeEmpresa, db.Model):
     __tablename__ = "roles"
+    __table_args__ = (db.UniqueConstraint("empresa_id", "nombre", name="uq_rol_empresa_nombre"),)
 
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50), nullable=False, unique=True)
+    empresa_id = db.Column(db.Integer, db.ForeignKey("empresas.id"), index=True)  # sin empresa: súper administrador
+    nombre = db.Column(db.String(50), nullable=False)
     descripcion = db.Column(db.String(255))
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
     created_at = db.Column(db.DateTime, server_default=db.func.now())
@@ -55,14 +58,16 @@ class Rol(db.Model):
         }
 
 
-class Usuario(db.Model):
+class Usuario(DeEmpresa, db.Model):
     __tablename__ = "usuarios"
 
     id = db.Column(db.Integer, primary_key=True)
+    empresa_id = db.Column(db.Integer, db.ForeignKey("empresas.id"), index=True)  # sin empresa: súper administrador
     nombre = db.Column(db.String(80), nullable=False)
     apellido = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    pin_hash = db.Column(db.String(255))  # PIN personal para cobrar, anular y sacar inventario
     telefono = db.Column(db.String(20))
     rol_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
@@ -72,6 +77,7 @@ class Usuario(db.Model):
 
     # usuario.rol devuelve el objeto Rol del usuario
     rol = db.relationship("Rol")
+    empresa = db.relationship("Empresa")
 
     def set_password(self, password):
         """Guarda la contraseña cifrada (hash). Nunca se guarda el texto original."""
@@ -80,6 +86,13 @@ class Usuario(db.Model):
     def check_password(self, password):
         """Compara una contraseña escrita con el hash guardado."""
         return check_password_hash(self.password_hash, password)
+
+    def set_pin(self, pin):
+        """El PIN también se guarda cifrado."""
+        self.pin_hash = generate_password_hash(pin)
+
+    def check_pin(self, pin):
+        return bool(self.pin_hash) and check_password_hash(self.pin_hash, pin)
 
     def to_dict(self):
         # password_hash NO se incluye: nunca se envía al cliente
@@ -91,4 +104,6 @@ class Usuario(db.Model):
             "telefono": self.telefono,
             "rol": self.rol.nombre if self.rol else None,
             "activo": self.activo,
+            "empresa": self.empresa.nombre if self.empresa else None,
+            "tiene_pin": bool(self.pin_hash),
         }

@@ -5,13 +5,12 @@ from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import get_jwt
 from sqlalchemy import or_
 
 from ...extensions import db
 from ...models import Cliente, Domicilio, Orden, Rol, Usuario
 from ...services.ordenes import armar_detalles
-from ...utils.auth import permiso_requerido, usuario_actual
+from ...utils.auth import permiso_requerido, tiene_permiso, usuario_actual
 
 bp = Blueprint("domicilios", __name__)
 
@@ -35,7 +34,7 @@ def _texto(valor):
 def _puede_gestionar():
     """True si el usuario gestiona domicilios (CAJERO, ADMINISTRADOR). El DOMICILIARIO
     solo ve y mueve los domicilios que tiene asignados."""
-    return "domicilios.gestionar" in get_jwt().get("permisos", [])
+    return tiene_permiso("domicilios.gestionar")
 
 
 def _buscar_domicilio(domicilio_id):

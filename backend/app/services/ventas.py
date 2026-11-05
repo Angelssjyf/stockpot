@@ -32,7 +32,7 @@ def estado_pago(orden):
     abonado = pagado(orden)
     if abonado <= 0:
         return "PENDIENTE"
-    return "PAGADO" if abonado >= orden.total else "PARCIAL"
+    return "PAGADO" if abonado >= orden.a_pagar else "PARCIAL"
 
 
 def cuenta(orden):
@@ -52,8 +52,12 @@ def cuenta(orden):
         "impoconsumo_incluido": float(round(impoconsumo, 2)),
         "costo_envio": float(orden.domicilio.costo_envio) if orden.domicilio else 0.0,
         "total": float(orden.total),
+        "propina_sugerida": float(orden.propina_sugerida),
+        "incluye_propina": orden.incluye_propina,
+        "propina": float(orden.propina),
+        "a_pagar": float(orden.a_pagar),
         "pagado": float(abonado),
-        "saldo": float(max(orden.total - abonado, Decimal("0"))),
+        "saldo": float(max(orden.a_pagar - abonado, Decimal("0"))),
         "estado_pago": estado_pago(orden),
         "pagos": [p.to_dict() for p in orden.pagos],
         "venta": orden.venta.codigo if orden.venta else None,
@@ -68,10 +72,13 @@ def registrar_pago(orden, metodo, monto, usuario, recibido=None, referencia=None
     """
     if orden.estado != "ABIERTA":
         raise PagoRechazado(f"La orden {orden.codigo} está {orden.estado}", 409)
+    pedido_mesa = getattr(orden, "pedido_mesa", None)
+    if pedido_mesa is not None and pedido_mesa.estado == "REGISTRADO":
+        raise PagoRechazado(f"Confirma el pedido {orden.codigo} antes de cobrarlo", 409)
     if metodo not in Pago.METODOS:
         raise PagoRechazado(f"Método de pago inválido. Opciones: {', '.join(Pago.METODOS)}")
 
-    saldo = orden.total - pagado(orden)
+    saldo = orden.a_pagar - pagado(orden)
     if monto <= 0:
         raise PagoRechazado("El monto debe ser mayor que cero")
     if monto > saldo:
@@ -95,6 +102,17 @@ def registrar_pago(orden, metodo, monto, usuario, recibido=None, referencia=None
     return pago
 
 
+def cambiar_propina(orden, incluir):
+    """Incluye o quita la propina sugerida (Ley 1935 de 2018: el cliente decide). No hace commit."""
+    if orden.estado != "ABIERTA":
+        raise PagoRechazado(f"La orden {orden.codigo} está {orden.estado}", 409)
+    if orden.tipo != "MESA":
+        raise PagoRechazado("La propina sugerida solo aplica a los pedidos en mesa", 409)
+    if not incluir and pagado(orden) > orden.total:
+        raise PagoRechazado("Ya se pagó parte de la propina: anula ese pago antes de quitarla", 409)
+    orden.incluye_propina = incluir
+
+
 def cerrar_venta(orden, usuario):
     """RF-10.1 Registrar la venta y RF-10.3 el consumo de insumos según las recetas."""
     venta = Venta(
@@ -103,6 +121,7 @@ def cerrar_venta(orden, usuario):
         subtotal=orden.subtotal,
         costo_envio=orden.domicilio.costo_envio if orden.domicilio else 0,
         total=orden.total,
+        propina=orden.propina,
         usuario=usuario,
     )
     db.session.add(venta)

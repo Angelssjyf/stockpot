@@ -11,7 +11,7 @@ from ...models import Consumo, DetalleOrden, Insumo, Orden, Producto, Venta
 from ...services.inventario import StockInsuficiente
 from ...services.ordenes import armar_detalles
 from ...services.ventas import PagoRechazado, cuenta, registrar_pago
-from ...utils.auth import permiso_requerido, usuario_actual
+from ...utils.auth import permiso_requerido, usuario_actual, verificar_pin
 from ...utils.fechas import filtrar_por_fechas
 from ..pagos.routes import leer_pago
 
@@ -30,6 +30,9 @@ def venta_de_mostrador():
     Se cobra el total completo, así que la venta queda registrada y el inventario descontado.
     """
     data = request.get_json(silent=True) or {}
+    error = verificar_pin(data)
+    if error:
+        return error
     usuario = usuario_actual()
     orden = Orden(codigo=uuid4().hex[:20], tipo="LLEVAR", usuario=usuario,
                   observaciones=str(data.get("observaciones") or "").strip() or None)
@@ -79,6 +82,7 @@ def consultar_ventas():
         "ticket_promedio": float(round(total / len(ventas), 2)) if ventas else 0.0,
         "costo_insumos": float(costo),
         "ganancia": float(subtotal - costo),
+        "propinas": float(sum((v.propina for v in ventas), Decimal("0"))),  # del personal, aparte
     }
     return jsonify(resumen=resumen, ventas=[v.to_dict() for v in ventas])
 

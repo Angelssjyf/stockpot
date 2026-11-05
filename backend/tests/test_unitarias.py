@@ -139,7 +139,7 @@ def test_cpu_04_4_3_sin_receta():
 
 def _orden(total, pagos=(), estado="ABIERTA"):
     """Stub de una orden: solo los atributos que leen las funciones de pago."""
-    return SimpleNamespace(codigo="VTA-0001", estado=estado, total=Decimal(str(total)),
+    return SimpleNamespace(codigo="VTA-0001", estado=estado, total=Decimal(str(total)), a_pagar=Decimal(str(total)),
                            pagos=[SimpleNamespace(monto=Decimal(str(m)), estado=e) for m, e in pagos])
 
 

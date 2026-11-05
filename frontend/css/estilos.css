@@ -184,33 +184,138 @@ a.boton-texto {
 }
 
 /* ------------------------------------------------------------ Login */
-.pantalla-centrada {
+/* Pantalla de ingreso: panel de marca + formulario (en el celular, la marca va arriba) */
+.ingreso {
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.ingreso-marca {
+  background: linear-gradient(150deg, var(--primario) 0%, #5a2e19 100%);
+  color: #fff8f6;
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Logo con vapor encima de «Bienvenido» */
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 28px; /* deja lugar al vapor que sube */
+  color: var(--primario);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.login-logo .logo-olla {
+  font-size: 60px;
+}
+
+.marca-mensaje h2 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.marca-mensaje p {
+  margin: 6px 0 0;
+  color: #f5ded5;
+  line-height: 1.5;
+}
+
+.marca-puntos,
+.marca-pie {
+  display: none; /* solo en pantallas grandes */
+}
+
+.ingreso .login {
+  margin: 0 auto;
+  padding: 32px 24px 40px;
 }
 
 .login {
   width: 100%;
-  max-width: 380px;
-  text-align: center;
-}
-
-.login .icono-logo {
-  font-size: 80px;
-  color: var(--primario);
+  max-width: 400px;
 }
 
 .login h1 {
-  font-size: 32px;
-  margin-top: 8px;
+  font-size: 28px;
 }
 
 .login .subtitulo {
   color: var(--texto-suave);
-  margin: 4px 0 32px;
+  margin: 4px 0 28px;
+}
+
+@media (min-width: 900px) {
+  .ingreso {
+    flex-direction: row;
+  }
+
+  .ingreso-marca {
+    flex: 0 0 44%;
+    padding: 48px 56px;
+  }
+
+  .marca-mensaje {
+    margin: auto 0; /* centrado en vertical; el pie queda abajo */
+  }
+
+  .marca-mensaje h2 {
+    font-size: 40px;
+    line-height: 1.15;
+  }
+
+  .marca-mensaje p {
+    font-size: 18px;
+    max-width: 420px;
+  }
+
+  .marca-puntos {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    list-style: none;
+    margin: 32px 0 0;
+    padding: 0;
+    font-size: 17px;
+  }
+
+  .marca-puntos li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .marca-puntos .icono {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .marca-pie {
+    display: block;
+    margin: 0;
+    color: #f5ded5;
+    font-size: 14px;
+  }
+
+  .ingreso .login {
+    align-self: center;
+    padding: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ingreso .login {
+    animation: fundido 0.35s ease-out both;
+  }
 }
 
 .login form {
@@ -297,6 +402,44 @@ a.boton-texto {
   text-align: center;
   color: var(--texto-suave);
   padding: 48px 16px;
+}
+
+/* Estado vacío: ícono en un círculo, mensaje, explicación y botón para crear el primero */
+.estado.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 56px 16px;
+}
+
+.estado-icono {
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+.estado.vacio #estado-texto {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.estado-detalle {
+  margin: 0;
+  max-width: 340px;
+  line-height: 1.5;
+}
+
+.estado-accion {
+  margin-top: 16px;
 }
 
 .lista {
@@ -623,12 +766,13 @@ dialog.ancho {
 
 .filtros {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
 }
 
 .filtros .campo {
-  flex: 1;
+  flex: 1 1 150px;
 }
 
 .datos-orden {
@@ -824,6 +968,260 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .costos {
   margin-top: 12px;
+}
+
+/* RF-12 Incidencias: botón en el historial y, en Reportes, barras que filtran y catálogo */
+.mini-lista .reportar {
+  color: var(--texto-suave);
+  flex: 0 0 auto;
+}
+
+.mini-lista .reportar:hover {
+  color: var(--error);
+}
+
+.barra-filtrable {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 4px;
+  margin-inline: -4px;
+}
+
+.barra-filtrable:hover,
+.barra-filtrable:focus-visible {
+  background: var(--fondo);
+}
+
+.catalogo {
+  margin-top: 16px;
+}
+
+.catalogo summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--primario);
+}
+
+.catalogo .mini-lista {
+  margin-top: 12px;
+}
+
+.interruptor.compacto {
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.nuevo-codigo {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 150px auto;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .nuevo-codigo {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nuevo-codigo .campo:nth-child(2) {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
+
+/* RF-03.10 Inventario por categorías: una tarjeta por categoría («como módulos») */
+.categorias-inventario {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.categoria-inventario {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px;
+  border: 2px solid transparent;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s var(--curva-suave), border-color 0.2s, background 0.2s;
+}
+
+.categoria-inventario:hover {
+  transform: translateY(-2px);
+}
+
+.categoria-inventario .icono {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  margin-bottom: 6px;
+}
+
+.categoria-inventario strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.categoria-inventario small {
+  color: var(--texto-suave);
+}
+
+.categoria-inventario .por-reponer {
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #fff3d6;
+  color: #7a5200;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.categoria-inventario[aria-pressed="true"] {
+  border-color: var(--primario);
+  background: var(--contenedor-primario);
+}
+
+.categoria-inventario[aria-pressed="true"] .icono {
+  background: var(--primario);
+  color: var(--sobre-primario);
+}
+
+/* En el celular las tarjetas se deslizan de lado en una sola fila */
+@media (max-width: 600px) {
+  .categorias-inventario {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 136px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+  }
+
+  .categoria-inventario {
+    scroll-snap-align: start;
+  }
+}
+
+/* Reportes: el atajo de fechas elegido (Hoy, 7 días...) se ve relleno para que se note cuál está activo */
+#atajos .chip[aria-pressed="true"] {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--sobre-primario);
+  font-weight: 600;
+}
+
+/* RF-02.9 Lo que vende un proveedor, debajo de su NIT */
+.fila .vende {
+  font-size: 13px;
+  color: var(--primario);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ventana de producto: títulos de sección, tarjetas de costo y botones siempre visibles */
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primario);
+  margin: 16px 0 8px;
+}
+
+.seccion > .titulo-seccion {
+  margin-top: 0;
+}
+
+.titulo-seccion .icono {
+  font-size: 20px;
+}
+
+.costos-plato {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.costos-plato:empty {
+  display: none; /* el costo y la ganancia solo los ve el administrador */
+}
+
+.costo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: var(--radio);
+  background: var(--fondo);
+  border: 1px solid var(--superficie-variante);
+  min-width: 0;
+}
+
+.costo strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.costo small {
+  color: var(--texto-suave);
+  font-size: 12px;
+}
+
+.costo.ganancia {
+  background: #e6f4ea;
+  border-color: #b7dfc2;
+}
+
+.costo.ganancia strong {
+  color: #1f5130;
+}
+
+.costo.perdida {
+  background: var(--contenedor-error);
+  border-color: #f2b8b5;
+}
+
+.costo.perdida strong {
+  color: var(--error);
+}
+
+.acciones.fijas {
+  position: sticky;
+  bottom: -24px; /* cubre el relleno inferior de la ventana */
+  margin: 24px -24px -24px;
+  padding: 12px 24px;
+  background: var(--superficie);
+  border-top: 1px solid var(--superficie-variante);
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  .acciones.fijas {
+    bottom: calc(-16px - env(safe-area-inset-bottom));
+    margin: 24px -16px calc(-16px - env(safe-area-inset-bottom));
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
 }
 
 /* ------------------------------------------------------------ Domicilios (RF-08) */
@@ -1060,8 +1458,22 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .grafica text {
-  font-size: 11px;
+  font-size: 12px;
   fill: var(--texto-suave);
+}
+
+.grafica.movil text {
+  font-size: 15px;
+}
+
+.grafica .base {
+  stroke: var(--superficie-variante);
+  stroke-width: 1;
+}
+
+.grafica .tope {
+  font-weight: 600;
+  fill: var(--texto);
 }
 
 .recomendaciones {
@@ -1095,4 +1507,1890 @@ input[type="search"]::-webkit-search-cancel-button {
 .filtros .campo input {
   min-width: 0;
   width: 100%;
+}
+
+/* ------------------------------------------------------------ Pedidos en mesa (RF-05) */
+.barra-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Mapa del salón: una tarjeta por mesa, verde si está libre y naranja si está ocupada */
+.mesas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 12px 0 96px;
+}
+
+.mesa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: var(--radio);
+  border: 2px solid #86c995;
+  background: #f1fbf3;
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--sombra);
+}
+
+.mesa:hover,
+.mesa:focus-visible {
+  outline: 3px solid var(--contenedor-primario);
+}
+
+.mesa.ocupada {
+  border-color: #f0a878;
+  background: #fff4ec;
+}
+
+.mesa .numero-mesa {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.mesa .detalle-mesa {
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.mesa .estado-mesa {
+  font-size: 13px;
+  font-weight: 600;
+  color: #14532d;
+}
+
+.mesa.ocupada .estado-mesa {
+  color: #6b2e00;
+}
+
+.chip.estado-REGISTRADO { background: #fff3cd; border-color: #e6c870; color: #5c4400; }
+.chip.estado-CONFIRMADO { background: #d7e8ff; border-color: #8fb4e8; color: #0b3a75; }
+.chip.estado-EN_COCINA  { background: #ffe0cc; border-color: #f0a878; color: #6b2e00; }
+
+/* RF-05.9 Recorrido del pedido */
+.linea-tiempo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.linea-tiempo li::before {
+  content: "●";
+  color: var(--primario);
+  margin-right: 6px;
+}
+
+/* RF-05.6 Resultado de revisar el inventario mientras se arma el pedido */
+.disponibilidad {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.disponibilidad.ok {
+  background: #d7f5dd;
+  color: #14532d;
+}
+
+.disponibilidad.falta {
+  background: var(--contenedor-error);
+  color: var(--sobre-contenedor-error);
+}
+
+.campo-buscar {
+  margin-bottom: 8px;
+}
+
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.mini-lista .mesa-inactiva {
+  color: var(--texto-suave);
+  text-decoration: line-through;
+}
+
+/* Comanda para la cocina (RF-05.8) */
+.comanda .producto-comanda {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* =====================================================================
+   Diseño fresco: animaciones suaves y ventanas adaptadas al celular
+   ===================================================================== */
+:root {
+  --curva-suave: cubic-bezier(0.2, 0.8, 0.2, 1);     /* entra rápido y frena suave */
+  --curva-rebote: cubic-bezier(0.34, 1.56, 0.64, 1); /* pasa un poquito y vuelve */
+  --sombra-elevada: 0 6px 18px rgba(64, 30, 10, 0.16), 0 2px 6px rgba(64, 30, 10, 0.08);
+}
+
+@keyframes aparecer-arriba {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes aparecer-escala {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes subir-hoja {
+  from { transform: translateY(100%); }
+  to   { transform: none; }
+}
+
+@keyframes fundido {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Ventanas: aparecen con un deslizamiento corto y el fondo se difumina */
+dialog[open] {
+  animation: aparecer-escala 0.24s var(--curva-suave);
+}
+
+dialog[open]::backdrop {
+  background: rgba(35, 20, 12, 0.45);
+  backdrop-filter: blur(2px);
+  animation: fundido 0.2s ease-out;
+}
+
+/* Los botones de una ventana bajan de línea cuando no caben (antes se salían en el celular) */
+.acciones {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Botones: responden al toque */
+.boton-principal,
+.boton-texto,
+.boton-icono,
+.chip.filtro {
+  transition: background 0.2s, transform 0.12s var(--curva-suave), box-shadow 0.2s;
+}
+
+.boton-principal:active,
+.boton-texto:active,
+.boton-icono:active,
+.chip.filtro:active {
+  transform: scale(0.96);
+}
+
+.boton-principal:hover {
+  box-shadow: var(--sombra-elevada);
+}
+
+.boton-principal:focus-visible,
+.boton-texto:focus-visible,
+.boton-icono:focus-visible,
+.tarjeta-modulo:focus-visible,
+.mesa:focus-visible {
+  outline: 3px solid var(--contenedor-primario);
+  outline-offset: 2px;
+}
+
+.boton-flotante {
+  transition: transform 0.2s var(--curva-rebote), box-shadow 0.2s;
+  animation: aparecer-escala 0.4s var(--curva-rebote) 0.2s both;
+}
+
+.boton-flotante:hover {
+  transform: translateY(-2px);
+}
+
+/* Tarjetas: se elevan un poco al pasar el mouse */
+.tarjeta-modulo,
+.mesa,
+.tarjeta-resumen {
+  transition: transform 0.2s var(--curva-suave), box-shadow 0.2s;
+}
+
+.tarjeta-modulo:hover,
+.mesa:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-elevada);
+}
+
+.tarjeta-modulo .icono {
+  transition: transform 0.25s var(--curva-rebote);
+}
+
+.tarjeta-modulo:hover .icono {
+  transform: scale(1.15);
+}
+
+.fila.editable {
+  transition: background 0.15s;
+}
+
+.chip {
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Aviso inferior: entra con un pequeño rebote */
+.aviso {
+  border-radius: 12px;
+  opacity: 0;
+  transition: transform 0.35s var(--curva-rebote), opacity 0.2s;
+}
+
+.aviso.visible {
+  opacity: 1;
+}
+
+/* Al abrir una pantalla, su contenido entra en cascada (solo esa vez: ui.js quita la clase,
+   así las listas que se refrescan solas no vuelven a parpadear) */
+.entrando .contenido > * {
+  animation: aparecer-arriba 0.35s var(--curva-suave) both;
+}
+
+.entrando .modulos > *,
+.entrando .mesas > *,
+.entrando .resumen > *,
+.entrando .lista > * {
+  animation: aparecer-escala 0.35s var(--curva-suave) both;
+}
+
+.entrando .modulos > :nth-child(2), .entrando .mesas > :nth-child(2),
+.entrando .resumen > :nth-child(2), .entrando .lista > :nth-child(2) { animation-delay: 0.04s; }
+.entrando .modulos > :nth-child(3), .entrando .mesas > :nth-child(3),
+.entrando .resumen > :nth-child(3), .entrando .lista > :nth-child(3) { animation-delay: 0.08s; }
+.entrando .modulos > :nth-child(4), .entrando .mesas > :nth-child(4),
+.entrando .resumen > :nth-child(4), .entrando .lista > :nth-child(4) { animation-delay: 0.12s; }
+.entrando .modulos > :nth-child(5), .entrando .mesas > :nth-child(5),
+.entrando .lista > :nth-child(5) { animation-delay: 0.16s; }
+.entrando .modulos > :nth-child(6), .entrando .mesas > :nth-child(6),
+.entrando .lista > :nth-child(6) { animation-delay: 0.2s; }
+.entrando .modulos > :nth-child(n+7), .entrando .mesas > :nth-child(n+7),
+.entrando .lista > :nth-child(n+7) { animation-delay: 0.24s; }
+
+/* Reportes: un degradado al borde indica que las pestañas se deslizan de lado */
+.pestanas-desplazables {
+  -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+  mask-image: linear-gradient(90deg, #000 85%, transparent);
+  padding-right: 32px;
+}
+
+/* ------------------------------------------------------------ Celular: ventanas como hoja inferior */
+@media (max-width: 600px) {
+  dialog,
+  dialog.ancho {
+    width: 100%;
+    max-width: 100%;
+    margin: auto 0 0;
+    border-radius: 24px 24px 0 0;
+    max-height: 92dvh;
+    padding: 28px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  dialog[open] {
+    animation: subir-hoja 0.3s var(--curva-suave);
+  }
+
+  /* Barrita de arriba, como en las hojas de las apps */
+  dialog::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: var(--borde);
+  }
+
+  /* Los botones quedan siempre a la vista al final de la hoja, aunque se haga scroll */
+  dialog .acciones {
+    position: sticky;
+    bottom: calc(-16px - env(safe-area-inset-bottom));
+    margin: 20px -16px calc(-16px - env(safe-area-inset-bottom));
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--superficie);
+    border-top: 1px solid var(--superficie-variante);
+    justify-content: stretch;
+    z-index: 1;
+  }
+
+  /* La acción principal ocupa todo el ancho arriba; las demás se reparten debajo */
+  dialog .acciones > * {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  dialog .acciones > .boton-principal {
+    order: -1;
+    flex-basis: 100%;
+  }
+
+  .boton-flotante {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Quien pidió menos movimiento en su celular o computador no ve animaciones */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  dialog[open],
+  dialog[open]::backdrop {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------------ Cierre de ventanas y deslizar para cerrar */
+@keyframes cerrar-escala {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(8px) scale(0.97); }
+}
+
+@keyframes bajar-hoja {
+  from { transform: translateY(var(--desde, 0px)); }
+  to   { transform: translateY(100%); }
+}
+
+@keyframes desvanecer {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+dialog[open].cerrando {
+  animation: cerrar-escala 0.18s ease-in forwards;
+}
+
+dialog[open].cerrando::backdrop {
+  animation: desvanecer 0.18s ease-in forwards;
+}
+
+dialog {
+  overscroll-behavior: contain; /* el scroll de la ventana no arrastra la página ni la recarga */
+  transition: transform 0.25s var(--curva-suave);
+}
+
+dialog.arrastrando {
+  transition: none; /* mientras el dedo arrastra, la hoja lo sigue sin retraso */
+}
+
+@media (max-width: 600px) {
+  dialog[open].cerrando {
+    animation: bajar-hoja 0.24s ease-in forwards;
+  }
+
+  /* Zona de la barrita más fácil de agarrar */
+  dialog::before {
+    width: 48px;
+    height: 5px;
+    margin-left: -24px;
+  }
+}
+
+/* Efecto de onda al tocar */
+.boton-principal:not(.boton-flotante),
+.boton-texto,
+.tarjeta-modulo,
+.mesa,
+.fila.editable,
+.chip.filtro {
+  position: relative;
+}
+
+.boton-principal,
+.boton-texto,
+.tarjeta-modulo,
+.mesa,
+.fila.editable,
+.chip.filtro {
+  overflow: hidden;
+}
+
+@keyframes onda {
+  from { transform: scale(0); opacity: 0.35; }
+  to   { transform: scale(1); opacity: 0; }
+}
+
+.onda {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  animation: onda 0.55s ease-out forwards;
+}
+
+/* ------------------------------------------------------------ Listas que cambian sin saltos (ui.js pintarSuave) */
+@keyframes fila-nueva {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fila-cambiada {
+  from { background-color: var(--contenedor-primario); }
+}
+
+.nueva {
+  animation: fila-nueva 0.28s var(--curva-suave) both;
+  animation-delay: calc(var(--i, 0) * 25ms);
+}
+
+.cambiada {
+  animation: fila-cambiada 1.2s ease-out;
+}
+
+/* Lo que aparece o desaparece en la pantalla lo hace con un fundido, no de golpe */
+.estado:not([hidden]),
+.alertas:not([hidden]),
+.disponibilidad:not([hidden]),
+.alerta-error:not([hidden]) {
+  animation: aparecer-arriba 0.25s var(--curva-suave);
+}
+
+.chip,
+.tarjeta-resumen .icono {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ------------------------------------------------------------ Buscador de la carta (pedidos) */
+.buscador-carta {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.agregar-fila {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.agregar-fila > .campo {
+  width: 90px;
+  flex: none;
+}
+
+.resultados-carta {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 4px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra-elevada);
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: aparecer-escala 0.18s var(--curva-suave);
+}
+
+.resultados-carta li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.resultados-carta li.marcado,
+.resultados-carta li:hover {
+  background: var(--superficie-variante);
+}
+
+.resultados-carta .nombre-producto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resultados-carta small {
+  display: block;
+  color: var(--texto-suave);
+}
+
+.resultados-carta mark {
+  background: var(--contenedor-primario);
+  color: inherit;
+  border-radius: 3px;
+}
+
+.resultados-carta .precio {
+  font-weight: 500;
+}
+
+.resultados-carta .icono {
+  color: var(--primario);
+}
+
+.resultados-carta .sin-resultados {
+  display: block;
+  color: var(--texto-suave);
+  cursor: default;
+  text-align: center;
+}
+
+.resultados-carta .sin-resultados:hover {
+  background: none;
+}
+
+/* Al agregar un producto, el buscador da un pulso corto para confirmar */
+@keyframes agregado {
+  0%   { box-shadow: 0 0 0 0 rgba(143, 76, 44, 0.45); }
+  100% { box-shadow: 0 0 0 10px rgba(143, 76, 44, 0); }
+}
+
+.campo.agregado {
+  animation: agregado 0.5s ease-out;
+}
+
+h2[tabindex="-1"]:focus {
+  outline: none; /* recibe el foco al abrir la ventana solo para que no salte el teclado */
+}
+
+/* ------------------------------------------------------------ Transiciones en todo el sistema */
+/* Al pasar de una pantalla a otra (menú -> módulo) la página cambia con un fundido, no de golpe */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root) {
+    animation: desvanecer 0.16s ease-in both;
+  }
+
+  ::view-transition-new(root) {
+    animation: fundido 0.22s ease-out both;
+  }
+}
+
+/* Mientras una lista se recarga queda atenuada (sin vaciarse); si carga rápido ni se nota */
+.actualizando {
+  opacity: 0.55;
+  transition: opacity 0.2s ease 0.15s;
+}
+
+.lista,
+.mesas,
+.resumen,
+.mini-lista,
+#contenido-reporte {
+  transition: opacity 0.2s ease;
+}
+
+/* Las pestañas: el contenido nuevo entra con un fundido y la línea se desliza (ui.js) */
+[id^="vista-"]:not([hidden]),
+.seccion[id^="bloque-"]:not([hidden]) {
+  animation: aparecer-arriba 0.28s var(--curva-suave);
+}
+
+.pestanas {
+  position: relative;
+}
+
+.pestanas button {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.pestanas button[aria-selected="true"] {
+  border-bottom-color: transparent; /* la línea la dibuja el indicador que se desliza */
+}
+
+.indicador-pestana {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--primario);
+  pointer-events: none;
+  transition: transform 0.3s var(--curva-suave), width 0.3s var(--curva-suave);
+}
+
+/* Los campos y botones cambian de color suavemente (foco, error, deshabilitado) */
+.campo {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.error-campo {
+  transition: color 0.2s ease;
+}
+
+/* ------------------------------------------------------------ Mesas como tarjetas con ícono (igual que el menú) */
+.mesa {
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  gap: 6px;
+  min-height: 196px;
+  padding: 14px 12px 16px;
+  border: 2px solid transparent;
+  background: var(--superficie);
+}
+
+.mesa .marco-mesa {
+  padding: 4px 14px;
+  border: 2px solid #86c995;
+  border-radius: 10px;
+  background: #f1fbf3;
+  color: #14532d;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.mesa .icono-mesa {
+  font-size: 52px;
+  color: var(--primario);
+  margin: 6px 0 2px;
+  transition: transform 0.25s var(--curva-rebote);
+}
+
+.mesa:hover .icono-mesa {
+  transform: scale(1.12);
+}
+
+.mesa .estado-mesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mesa:not(.ocupada) .estado-mesa::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2e9e4f;
+}
+
+.mesa .detalle-mesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mesa .detalle-mesa .icono {
+  font-size: 16px;
+}
+
+.mesa.ocupada {
+  border-color: #f0a878;
+  background: #fff4ec;
+}
+
+.mesa.ocupada .marco-mesa {
+  border-color: #f0a878;
+  background: #ffe0cc;
+  color: #6b2e00;
+}
+
+.mesa.ocupada .icono-mesa {
+  color: #c25a1c;
+}
+
+/* ------------------------------------------------------------ Ventana del pedido: carta + pedido */
+dialog.extra-ancho {
+  width: min(1040px, calc(100vw - 32px));
+}
+
+.pedido-columnas {
+  display: grid;
+  gap: 0 24px;
+}
+
+@media (min-width: 900px) {
+  .pedido-columnas {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .pedido-columnas .carta {
+    max-height: 46vh;
+  }
+}
+
+.carta {
+  list-style: none;
+  margin: 0;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 38vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.carta .sin-resultados {
+  text-align: center;
+  padding: 16px;
+}
+
+.plato {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.15s ease, border-color 0.2s ease, transform 0.12s var(--curva-suave);
+}
+
+.plato:hover {
+  background: var(--fondo);
+  border-color: var(--primario);
+}
+
+.plato:active {
+  transform: scale(0.985);
+}
+
+.plato.en-pedido {
+  border-color: var(--primario);
+  background: #fff6f2;
+}
+
+.plato .icono-categoria {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  font-size: 22px;
+}
+
+.plato .datos-plato {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.plato .nombre-producto {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plato small {
+  color: var(--texto-suave);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plato mark {
+  background: var(--contenedor-primario);
+  color: inherit;
+  border-radius: 3px;
+}
+
+.plato .precio-plato {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.plato .precio-plato .icono {
+  color: var(--primario);
+}
+
+.chip.contador-plato {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--sobre-primario);
+  font-weight: 600;
+}
+
+/* Líneas del pedido: el nombre se toca para cambiar cantidad u observaciones */
+.nombre-linea {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 4px 6px;
+  margin-left: -6px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.nombre-linea:hover {
+  background: var(--superficie-variante);
+}
+
+.observacion-linea {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8a4a00;
+  font-size: 12px;
+}
+
+.observacion-linea .icono {
+  font-size: 15px;
+}
+
+.observacion-linea.vacia {
+  color: var(--texto-suave);
+  opacity: 0.8;
+}
+
+/* ------------------------------------------------------------ Ventana del plato */
+.cabecera-plato {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cabecera-plato h2 {
+  margin: 0;
+}
+
+.cabecera-plato .nota {
+  margin: 2px 0 0;
+}
+
+.icono-plato {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+  font-size: 30px;
+}
+
+.contador {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+}
+
+.contador output {
+  min-width: 40px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.contador .boton-icono:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#plato-sugerencias {
+  margin: 4px 0 8px;
+}
+
+.campo-texto textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: vertical;
+  min-height: 56px;
+  padding: 12px 0;
+  font: inherit;
+  font-size: 16px;
+  background: transparent;
+  color: var(--texto);
+}
+
+#plato-caracteres {
+  display: block;
+  text-align: right;
+}
+
+/* ------------------------------------------------------------ Menú principal: resumen de hoy */
+.saludo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 16px;
+}
+
+.saludo h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.saludo .nota {
+  margin: 2px 0 0;
+}
+
+.titulo-seccion {
+  margin: 24px 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.hoy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.tarjeta-hoy {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s var(--curva-suave), box-shadow 0.2s;
+}
+
+.tarjeta-hoy:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-elevada);
+}
+
+.tarjeta-hoy > .icono {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--contenedor-primario);
+  color: var(--primario);
+}
+
+.tarjeta-hoy.alerta > .icono {
+  background: var(--contenedor-error);
+  color: var(--error);
+}
+
+.tarjeta-hoy .valor {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tarjeta-hoy small {
+  display: block;
+  color: var(--texto-suave);
+}
+
+.paneles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.panel {
+  padding: 16px;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  min-width: 0;
+}
+
+.panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.panel h3 .icono {
+  color: var(--primario);
+}
+
+.panel .nota {
+  margin: 0;
+}
+
+/* Barras de ventas de la semana (menú) */
+.barras-semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: 6px;
+  height: 160px;
+}
+
+.barra-dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+  min-width: 0;
+}
+
+.barra-dia .relleno {
+  width: 100%;
+  max-width: 36px;
+  min-height: 3px;
+  height: var(--alto, 0%);
+  border-radius: 6px 6px 2px 2px;
+  background: var(--contenedor-primario);
+  transform-origin: bottom;
+  animation: crecer 0.6s var(--curva-suave) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+.barra-dia.hoy-dia .relleno {
+  background: var(--primario);
+}
+
+.barra-dia small {
+  font-size: 11px;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+.barra-dia .monto {
+  font-weight: 600;
+  color: var(--texto);
+}
+
+@keyframes crecer {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* Listas cortas del panel (más vendidos, por reponer) */
+.ranking {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ranking li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.ranking .puesto {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--superficie-variante);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ranking li:first-child .puesto {
+  background: var(--primario);
+  color: var(--sobre-primario);
+}
+
+.ranking .nombre-ranking {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranking .medidor {
+  grid-column: 2 / 4;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--superficie-variante);
+  overflow: hidden;
+}
+
+.ranking .medidor span {
+  display: block;
+  height: 100%;
+  width: var(--ancho, 0%);
+  background: var(--primario);
+  border-radius: 3px;
+  transform-origin: left;
+  animation: llenar 0.7s var(--curva-suave) both;
+}
+
+.ranking .medidor.peligro span {
+  background: var(--error);
+}
+
+@keyframes llenar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.entrando .hoy > *,
+.entrando .paneles > * {
+  animation: aparecer-escala 0.35s var(--curva-suave) both;
+}
+
+/* ------------------------------------------------------------ Ajustes en el celular (carta y menú) */
+@media (max-width: 600px) {
+  /* La ventana del pedido ocupa todo el ancho, como las demás hojas */
+  dialog.extra-ancho {
+    width: 100%;
+  }
+
+  /* Línea del pedido: el nombre y su observación arriba, la cantidad y el precio debajo */
+  .linea.con-cantidad:has(.nombre-linea) {
+    grid-template-columns: 80px minmax(0, 1fr) 36px;
+    row-gap: 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--superficie-variante);
+  }
+
+  .linea.con-cantidad .nombre-linea {
+    grid-column: 1 / -1;
+  }
+
+  .linea.con-cantidad:has(.nombre-linea) > .texto-linea {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  /* Tarjetas del día: ícono arriba y el texto debajo, así no se parte en muchas líneas */
+  .hoy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tarjeta-hoy {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .tarjeta-hoy > .icono {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  /* Módulos en tres columnas: el menú no queda tan largo */
+  .modulos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .tarjeta-modulo {
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .tarjeta-modulo .icono {
+    font-size: 34px;
+  }
+}
+
+.barras-vacias {
+  margin-top: 8px !important;
+  text-align: center;
+}
+
+/* =====================================================================
+   Animaciones que dan vida a la interfaz (todas se apagan con "reducir movimiento")
+   ===================================================================== */
+
+/* ---------- Pantalla de ingreso: fondo que se mueve, luces flotando y vapor en la olla */
+.ingreso-marca {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ingreso-marca::before,
+.ingreso-marca::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.ingreso-marca::before {
+  width: 360px;
+  height: 360px;
+  top: -120px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(224, 137, 58, 0.55), transparent 70%);
+}
+
+.ingreso-marca::after {
+  width: 420px;
+  height: 420px;
+  bottom: -160px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(255, 219, 204, 0.28), transparent 70%);
+}
+
+/* Olla con vapor: el tamaño sale de font-size y el vapor toma el color del logo */
+.logo-olla {
+  position: relative;
+  display: inline-grid;
+  line-height: 1;
+}
+
+.logo-olla .icono {
+  font-size: 1em;
+}
+
+.vapor {
+  position: absolute;
+  left: 40%; /* sobre la olla, no sobre el mango */
+  bottom: 74%;
+  width: 0.66em;
+  height: 0.6em;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.vapor i {
+  position: absolute;
+  bottom: 0;
+  width: 0.07em;
+  height: 0.3em;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+}
+
+.vapor i:nth-child(1) { left: 0.08em; }
+.vapor i:nth-child(2) { left: 0.28em; }
+.vapor i:nth-child(3) { left: 0.47em; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ingreso-marca {
+    background-size: 160% 160%;
+    animation: fondo-marca 16s ease-in-out infinite alternate;
+  }
+
+  .ingreso-marca::before { animation: flotar 14s ease-in-out infinite alternate; }
+  .ingreso-marca::after { animation: flotar 18s ease-in-out -6s infinite alternate-reverse; }
+
+  .vapor i { animation: vapor 2.4s ease-out infinite; }
+  .vapor i:nth-child(2) { animation-delay: 0.8s; }
+  .vapor i:nth-child(3) { animation-delay: 1.6s; }
+
+  .marca-mensaje h2,
+  .marca-mensaje p,
+  .marca-puntos li {
+    animation: aparecer-arriba 0.6s var(--curva-suave) both;
+  }
+
+  .marca-mensaje p { animation-delay: 0.1s; }
+  .marca-puntos li:nth-child(1) { animation-delay: 0.25s; }
+  .marca-puntos li:nth-child(2) { animation-delay: 0.38s; }
+  .marca-puntos li:nth-child(3) { animation-delay: 0.51s; }
+
+  .marca-puntos .icono {
+    transition: transform 0.3s var(--curva-rebote), background 0.3s;
+  }
+
+  .marca-puntos li:hover .icono {
+    transform: rotate(-8deg) scale(1.12);
+    background: rgba(255, 255, 255, 0.24);
+  }
+}
+
+@keyframes fondo-marca {
+  from { background-position: 0% 0%; }
+  to   { background-position: 100% 100%; }
+}
+
+@keyframes flotar {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-60px, 50px) scale(1.15); }
+}
+
+@keyframes vapor {
+  0%   { opacity: 0; transform: translate(0, 0) scaleY(0.6); }
+  25%  { opacity: 0.75; }
+  50%  { transform: translate(0.05em, -0.22em) scaleY(1); }
+  100% { opacity: 0; transform: translate(-0.03em, -0.45em) scaleY(1.2); }
+}
+
+/* ---------- Tarjetas con relieve: se inclinan hacia el mouse y un brillo lo sigue (ui.js) */
+.tarjeta-modulo,
+.mesa,
+.tarjeta-resumen {
+  position: relative;
+  isolation: isolate; /* el brillo queda detrás del texto, sobre el fondo */
+}
+
+.tarjeta-modulo::after,
+.mesa::after,
+.tarjeta-resumen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 219, 204, 0.85), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.tarjeta-modulo.relieve,
+.mesa.relieve,
+.tarjeta-resumen.relieve {
+  transform: perspective(800px) rotateX(var(--rx, 0)) rotateY(var(--ry, 0)) translateY(-3px);
+  transition: transform 0.12s ease-out, box-shadow 0.2s;
+  box-shadow: var(--sombra-elevada);
+  z-index: 1;
+}
+
+.relieve::after {
+  opacity: 1;
+}
+
+/* ---------- Cargando: filas esqueleto con un brillo que pasa */
+.estado.cargando {
+  padding: 0;
+}
+
+.estado.cargando #estado-texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%); /* solo para lectores de pantalla */
+}
+
+.esqueleto {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  text-align: left;
+}
+
+.esqueleto-fila {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--superficie-variante);
+}
+
+.esqueleto-fila:last-child {
+  border-bottom: none;
+}
+
+.esqueleto-circulo,
+.esqueleto-lineas i {
+  background: linear-gradient(90deg, var(--superficie-variante) 25%, #fbeee8 45%, var(--superficie-variante) 65%);
+  background-size: 300% 100%;
+}
+
+.esqueleto-circulo {
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.esqueleto-lineas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.esqueleto-lineas i {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  width: 55%;
+}
+
+.esqueleto-lineas i + i {
+  width: 35%;
+  height: 10px;
+}
+
+.esqueleto-fila:nth-child(2) .esqueleto-lineas i:first-child { width: 68%; }
+.esqueleto-fila:nth-child(3) .esqueleto-lineas i:first-child { width: 48%; }
+.esqueleto-fila:nth-child(4) .esqueleto-lineas i:first-child { width: 60%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .esqueleto-circulo,
+  .esqueleto-lineas i {
+    animation: brillo 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes brillo {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+/* ---------- Aviso: palomita que se dibuja (éxito) o ícono que tiembla (error) */
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aviso-palomita {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.aviso-palomita circle {
+  stroke: #8fcb9b;
+  stroke-width: 2;
+  stroke-dasharray: 63;
+  stroke-dashoffset: 0;
+}
+
+.aviso-palomita path {
+  stroke: #ffffff;
+  stroke-width: 2.4;
+  stroke-dasharray: 16;
+  stroke-dashoffset: 0;
+}
+
+.aviso.error .aviso-icono {
+  color: #ffb4ab;
+  font-size: 22px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aviso.visible .aviso-palomita circle {
+    animation: trazar-circulo 0.45s ease-out both;
+  }
+
+  .aviso.visible .aviso-palomita path {
+    animation: trazar-palomita 0.3s ease-out 0.35s both;
+  }
+
+  .aviso.visible.error .aviso-icono {
+    animation: temblar 0.4s ease-in-out 0.15s;
+  }
+}
+
+@keyframes trazar-circulo {
+  from { stroke-dashoffset: 63; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes trazar-palomita {
+  from { stroke-dashoffset: 16; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes temblar {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px); }
+  75%      { transform: translateX(3px); }
+}
+
+/* ---------- Paneles que entran al llegar a la vista (ui.js) */
+@media (prefers-reduced-motion: no-preference) {
+  .por-revelar {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  .por-revelar.revelado {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.5s ease-out, transform 0.6s var(--curva-suave);
+  }
+
+  /* El ícono de una lista vacía flota suavemente */
+  .estado-icono {
+    animation: flotar-icono 3.2s ease-in-out infinite;
+  }
+}
+
+@keyframes flotar-icono {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+/* ---------- Pantalla de carga al entrar (login.js): la olla echa vapor mientras abre el menú */
+.pantalla-carga {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(150deg, var(--primario) 0%, #5a2e19 100%);
+  color: #fff8f6;
+  text-align: center;
+}
+
+.pantalla-carga .logo-olla {
+  font-size: 120px;
+  margin-bottom: 8px;
+}
+
+.carga-marca {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.carga-texto {
+  margin: 0;
+  color: #f5ded5;
+}
+
+.carga-barra {
+  width: 180px;
+  height: 4px;
+  margin-top: 20px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.carga-barra span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #ffdbcc;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pantalla-carga:not([hidden]) {
+    animation: fundido 0.3s ease-out both;
+  }
+
+  .pantalla-carga .logo-olla {
+    animation: aparecer-escala 0.5s var(--curva-rebote) both;
+  }
+
+  .carga-barra span {
+    animation: llenar-carga 1.3s var(--curva-suave) both;
+  }
+}
+
+@keyframes llenar-carga {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Propina sugerida en la cuenta y el comprobante */
+.interruptor.propina {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--superficie-variante);
+}
+
+.centrado.pequena {
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+/* Restaurantes del súper administrador: el desactivado se ve apagado */
+.fila.inactiva {
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------------ Cocina (RF-06): tablero de comandas */
+.contenido.contenido-ancho {
+  max-width: 1400px;
+}
+
+.tablero-cocina {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.columna-cocina {
+  background: var(--superficie-variante);
+  border-radius: var(--radio);
+  padding: 12px;
+  min-height: 200px;
+}
+
+.columna-cocina h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.columna-cocina h2 .chip {
+  margin-left: auto;
+}
+
+.tarjetas-cocina {
+  display: grid;
+  gap: 12px;
+}
+
+.vacia-cocina {
+  text-align: center;
+  padding: 24px 8px;
+}
+
+.comanda {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  border-left: 6px solid var(--borde);
+  box-shadow: var(--sombra);
+  padding: 12px 14px;
+}
+
+.comanda.demorada { border-left-color: #e0a100; }
+.comanda.urgente  { border-left-color: var(--error); }
+.comanda.urgente .espera { background: var(--contenedor-error); color: var(--sobre-contenedor-error); }
+.comanda.demorada .espera { background: #fff0c2; color: #5c4300; }
+
+.cabeza-comanda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cabeza-comanda > .icono {
+  color: var(--primario);
+  font-size: 28px;
+}
+
+.cabeza-comanda .origen {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.cabeza-comanda .espera {
+  margin-left: auto;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--superficie-variante);
+}
+
+.productos-comanda {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.nota-producto {
+  margin: 2px 0 0 1.6em;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--sobre-contenedor-primario);
+}
+
+p.nota-producto {
+  margin-left: 0;
+}
+
+.comanda .acciones {
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .tablero-cocina {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ------------------------------------------------------------ Reservas (RF-07) */
+.avatar.hora-reserva {
+  width: auto;
+  min-width: 64px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.opciones-mesa {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+
+.opcion-mesa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 2px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.opcion-mesa[aria-checked="true"] {
+  border-color: var(--primario);
+  background: var(--contenedor-primario);
+}
+
+.chip.chip-reserva {
+  background: #e3dcff;
+  border-color: #a99be6;
+  color: #2f1f75;
+  font-size: 0.75rem;
+}
+
+.mesa .chip-reserva .icono {
+  font-size: 14px;
+  vertical-align: -2px;
+}
+
+.mesa .chip-reserva {
+  align-self: center;
+  padding: 2px 8px;
+  max-width: calc(100% - 12px);
+  margin: 4px 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------ Sesiones seguras: bloqueo y PIN */
+.capa-bloqueo {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(35, 26, 22, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: fundido 0.25s ease-out;
+}
+
+.tarjeta-bloqueo {
+  width: min(360px, 100%);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+  padding: 28px 24px;
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-elevada);
+}
+
+.tarjeta-bloqueo h2 {
+  margin: 0;
+}
+
+.tarjeta-bloqueo .campo,
+.tarjeta-bloqueo .boton-principal,
+.tarjeta-bloqueo .alerta-error {
+  width: 100%;
+}
+
+.tarjeta-bloqueo .boton-principal {
+  justify-content: center;
+}
+
+.icono-bloqueo {
+  font-size: 44px;
+  color: var(--primario);
+}
+
+.acciones-bloqueo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+#clave-bloqueo,
+.campo-pin input {
+  text-align: center;
+  font-size: 1.4rem;
+  letter-spacing: 0.4em;
+}
+
+.dialogo-pin {
+  width: min(380px, calc(100% - 32px));
+}
+
+#clave-bloqueo::placeholder,
+.campo-pin input::placeholder {
+  letter-spacing: normal;
+  font-size: 1rem;
 }

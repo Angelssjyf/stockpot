@@ -164,3 +164,33 @@ def test_cp_seg_15_bodeguero_registra_insumos(client):
 def test_cp_seg_16_mesero_no_ve_insumos(client, mesero_headers):
     """CP-SEG-16 | Seguridad | Un MESERO (sin permisos de inventario) no consulta insumos → 403."""
     assert client.get("/api/insumos", headers=mesero_headers).status_code == 403
+
+
+# ------------------------------------------------------- RF-03.10 Categorías
+
+
+def test_cp_03_10_1_categoria_por_defecto_y_elegida(client, admin_headers, arroz):
+    """CP-03.10-1 | RF-03.10 | Sin categoría el insumo queda en OTROS; se puede elegir otra al crear o editar."""
+    assert arroz["categoria"] == "OTROS"
+    r = client.post("/api/insumos", headers=admin_headers, json={
+        "codigo": "INS-002", "nombre": "Carne de cerdo", "unidad_medida": "KG", "categoria": "carnes"})
+    assert r.status_code == 201
+    assert r.get_json()["categoria"] == "CARNES"
+    r = client.put(f"/api/insumos/{arroz['id']}", headers=admin_headers, json={"categoria": "GRANOS"})
+    assert r.get_json()["categoria"] == "GRANOS"
+
+
+def test_cp_03_10_2_categoria_invalida(client, admin_headers):
+    """CP-03.10-2 | RF-03.10 | Una categoría que no existe → 422 con las opciones."""
+    r = client.post("/api/insumos", headers=admin_headers, json={
+        "codigo": "INS-009", "nombre": "Silla", "unidad_medida": "UNIDAD", "categoria": "MUEBLES"})
+    assert r.status_code == 422
+    assert "MOBILIARIO" in r.get_json()["error"]
+
+
+def test_cp_03_10_3_filtrar_por_categoria(client, admin_headers, arroz):
+    """CP-03.10-3 | RF-03.10 | ?categoria= devuelve solo los insumos de esa categoría."""
+    client.post("/api/insumos", headers=admin_headers, json={
+        "codigo": "INS-002", "nombre": "Silla plástica", "unidad_medida": "UNIDAD", "categoria": "MOBILIARIO"})
+    r = client.get("/api/insumos?categoria=mobiliario", headers=admin_headers)
+    assert [i["nombre"] for i in r.get_json()] == ["Silla plástica"]

@@ -1,16 +1,26 @@
 """Modelos de ILF04 Insumos e ILF05 Movimientos de inventario (Iteración 2)."""
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 UNIDADES_MEDIDA = ("KG", "G", "L", "ML", "UNIDAD")
 
+# RF-03.10 Categorías de insumos: agrupan el inventario y subdividen a los proveedores (RF-02.9)
+CATEGORIAS_INSUMO = (
+    "CARNES", "GRANOS", "LACTEOS", "FRUTAS_VERDURAS", "BEBIDAS", "ABARROTES",
+    "DESECHABLES", "LIMPIEZA", "MOBILIARIO", "OTROS",
+)
 
-class Insumo(db.Model):
+
+class Insumo(DeEmpresa, db.Model):
     __tablename__ = "insumos"
+    __table_args__ = (db.UniqueConstraint("empresa_id", "codigo", name="uq_insumo_empresa_codigo"),)
 
     id = db.Column(db.Integer, primary_key=True)
-    codigo = db.Column(db.String(30), nullable=False, unique=True)
+    codigo = db.Column(db.String(30), nullable=False)
     nombre = db.Column(db.String(120), nullable=False)
+    categoria = db.Column(db.Enum(*CATEGORIAS_INSUMO, name="categoria_insumo"), nullable=False,
+                          default="OTROS", server_default="OTROS")
     unidad_medida = db.Column(db.Enum(*UNIDADES_MEDIDA, name="unidad_medida"), nullable=False)
     stock_actual = db.Column(db.Numeric(12, 3), nullable=False, default=0, server_default="0")
     stock_minimo = db.Column(db.Numeric(12, 3), nullable=False, default=0, server_default="0")
@@ -32,6 +42,7 @@ class Insumo(db.Model):
             "id": self.id,
             "codigo": self.codigo,
             "nombre": self.nombre,
+            "categoria": self.categoria,
             "unidad_medida": self.unidad_medida,
             "stock_actual": float(self.stock_actual),  # Decimal -> número para JSON
             "stock_minimo": float(self.stock_minimo),
@@ -41,7 +52,7 @@ class Insumo(db.Model):
         }
 
 
-class MovimientoInventario(db.Model):
+class MovimientoInventario(DeEmpresa, db.Model):
     """ILF05 Un cambio de stock: entrada o salida, con su motivo, cantidad y responsable."""
 
     __tablename__ = "movimientos_inventario"

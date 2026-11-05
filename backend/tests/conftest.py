@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+from flask import g
+
 from app import create_app
 from app.config import TestConfig
 from app.extensions import db
@@ -39,6 +41,7 @@ def app():
     with app.app_context():
         db.create_all()
         _cargar_seed()
+        g.empresa_id = 1  # lo que crean las pruebas es del restaurante del seed
         yield app
         db.session.remove()
         db.drop_all()

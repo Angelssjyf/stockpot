@@ -23,12 +23,15 @@
   <main class="contenido">
     <form class="campo buscador" id="form-buscar" role="search">
       <span class="icono" aria-hidden="true">search</span>
-      <input id="buscar" type="search" placeholder="Buscar por razón social, NIT o contacto"
+      <input id="buscar" type="search" placeholder="Buscar por nombre, NIT o lo que vende (ej. cerdo)"
              aria-label="Buscar proveedores">
       <button type="button" class="boton-icono" id="limpiar" title="Limpiar">
         <span class="icono" aria-hidden="true">close</span>
       </button>
     </form>
+
+    <!-- RF-02.9 Subdividir los proveedores por la categoría de lo que venden -->
+    <div class="categorias" id="categorias" role="group" aria-label="Filtrar por categoría"></div>
 
     <div class="estado" id="estado" hidden>
       <p id="estado-texto"></p>

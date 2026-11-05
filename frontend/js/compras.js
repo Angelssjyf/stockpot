@@ -1,6 +1,7 @@
 // Órdenes de compra: RF-02.6 Registrar, RF-02.7 Actualizar estado y RF-02.8 Relación con inventario.
 import { api, exigirSesion } from './api.js';
-import { crear, formato, mostrarAviso } from './ui.js';
+import { reportarIncidencia } from './reportar.js';
+import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('compras.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('compras.gestionar');
@@ -26,26 +27,24 @@ const ACCIONES = {
 // =====================================================================
 
 async function cargar() {
-  mostrarEstado('Cargando…');
-  $('lista').replaceChildren();
+  if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
   try {
     const estado = $('filtro-estado').value;
     const ordenes = await api('GET', `/ordenes-compra${estado ? `?estado=${estado}` : ''}`);
     if (ordenes.length === 0) {
-      mostrarEstado('No hay órdenes de compra');
+      mostrarEstado(estado ? 'No hay órdenes con ese estado' : 'Todavía no hay órdenes de compra', {
+        icono: 'shopping_cart',
+        detalle: estado ? 'Elige otro estado en el filtro.' : 'Pide insumos a un proveedor y registra aquí cuando lleguen.',
+        accion: !estado && puedeGestionar ? { texto: 'Crear la primera orden', alHacer: abrirNueva } : null,
+      });
+      pintarSuave($('lista'));
     } else {
       $('estado').hidden = true;
-      $('lista').replaceChildren(...ordenes.map(filaDeOrden));
+      pintarSuave($('lista'), ...ordenes.map(filaDeOrden));
     }
   } catch (error) {
-    mostrarEstado(error.message, true);
+    mostrarEstado(error.message, { reintentar: true });
   }
-}
-
-function mostrarEstado(texto, conReintentar = false) {
-  $('estado').hidden = false;
-  $('estado-texto').textContent = texto;
-  $('reintentar').hidden = !conReintentar;
 }
 
 function filaDeOrden(orden) {
@@ -81,7 +80,7 @@ async function abrirDetalle(id) {
     pintarDetalle(orden);
     if (!dialogoDetalle.open) dialogoDetalle.showModal();
   } catch (error) {
-    mostrarAviso(error.message);
+    mostrarAviso(error.message, 'error');
   }
 }
 
@@ -96,14 +95,14 @@ function pintarDetalle(orden) {
     ['Recibida', formato.fecha(orden.fecha_recepcion)],
     ['Observaciones', orden.observaciones || '—'],
   ];
-  $('detalle-datos').replaceChildren(...datos.flatMap(([etiqueta, valor]) => [
+  pintarSuave($('detalle-datos'), ...datos.flatMap(([etiqueta, valor]) => [
     crear('dt', { texto: etiqueta }),
     valor === null
       ? crear('dd', {}, [crear('span', { className: `chip estado-${orden.estado}`, texto: orden.estado })])
       : crear('dd', { texto: valor }),
   ]));
 
-  $('detalle-lineas').replaceChildren(...orden.detalles.map((linea) => crear('li', {}, [
+  pintarSuave($('detalle-lineas'), ...orden.detalles.map((linea) => crear('li', {}, [
     crear('span', {
       texto: `${linea.insumo} · ${formato.cantidad(linea.cantidad)} ${linea.unidad_medida} × ${formato.dinero(linea.precio_unitario)}`,
     }),
@@ -125,7 +124,20 @@ function pintarDetalle(orden) {
   }) : [];
   const cerrar = crear('button', { type: 'button', className: 'boton-texto', texto: 'Cerrar' });
   cerrar.addEventListener('click', () => dialogoDetalle.close());
-  $('detalle-acciones').replaceChildren(cerrar, ...botones);
+  // RF-12.2 Reportar un error en la orden (precio, cantidad, proveedor...)
+  const reportar = [];
+  if (yo.permisos.includes('incidencias.reportar')) {
+    const boton = crear('button', { type: 'button', className: 'boton-texto' }, [
+      crear('span', { className: 'icono', texto: 'report', 'aria-hidden': 'true' }), crear('span', { texto: ' Reportar un error' }),
+    ]);
+    boton.addEventListener('click', () => reportarIncidencia({
+      modulo: 'COMPRAS',
+      referencia: { orden_compra_id: orden.id },
+      descripcion: `Orden ${orden.codigo} · ${orden.proveedor} · ${formato.dinero(orden.total)} · registró ${orden.usuario}`,
+    }));
+    reportar.push(boton);
+  }
+  $('detalle-acciones').replaceChildren(cerrar, ...reportar, ...botones);
 }
 
 async function cambiarEstado(orden, estado) {
@@ -140,7 +152,7 @@ async function cambiarEstado(orden, estado) {
     pintarDetalle(actualizada);
     mostrarAviso(estado === 'RECIBIDA'
       ? 'Orden recibida: el inventario se actualizó'
-      : `Orden ${actualizada.estado.toLowerCase()}`);
+      : `Orden ${actualizada.estado.toLowerCase()}`, 'exito');
     cargar();
   } catch (error) {
     $('error-detalle').textContent = error.message;
@@ -276,7 +288,7 @@ $('form-orden').addEventListener('submit', async (evento) => {
       })),
     });
     dialogoNueva.close();
-    mostrarAviso(`Orden ${orden.codigo} registrada`);
+    mostrarAviso(`Orden ${orden.codigo} registrada`, 'exito');
     cargar();
   } catch (error) {
     $('error-nueva').textContent = error.message; // por ejemplo "El insumo 'Arroz' está repetido"
