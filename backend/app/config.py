@@ -21,8 +21,12 @@ class Config:
         f"/{os.getenv('DB_NAME', 'stockpot')}?charset=utf8mb4"
     )
 
-    # Revisa que la conexión siga viva antes de usarla (MySQL cierra las inactivas)
-    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
+    # Revisa que la conexión siga viva antes de usarla y la renueva antes de los 5 minutos
+    # (MySQL, y sobre todo el de PythonAnywhere, cierra las conexiones inactivas)
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 280}
+    # En la nube el servidor de MySQL está en hora UTC: DB_TIME_ZONE=-05:00 lo pone en hora de Colombia
+    if os.getenv("DB_TIME_ZONE"):
+        SQLALCHEMY_ENGINE_OPTIONS["connect_args"] = {"init_command": f"SET time_zone = '{os.getenv('DB_TIME_ZONE')}'"}
 
     # Tokens JWT del inicio de sesión: se firman con la misma SECRET_KEY
     # y vencen a las 8 horas (una jornada de trabajo).
