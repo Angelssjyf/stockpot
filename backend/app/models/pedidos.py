@@ -3,20 +3,22 @@
 from sqlalchemy.orm import backref
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 
 def _fecha(valor):
     return valor.isoformat() if valor else None
 
 
-class Mesa(db.Model):
+class Mesa(DeEmpresa, db.Model):
     """ILF08 Mesa del restaurante (RF-05.2). Que esté ocupada no se guarda: se calcula a
     partir de sus pedidos abiertos, así nunca queda desactualizado."""
 
     __tablename__ = "mesas"
+    __table_args__ = (db.UniqueConstraint("empresa_id", "numero", name="uq_mesa_empresa_numero"),)
 
     id = db.Column(db.Integer, primary_key=True)
-    numero = db.Column(db.Integer, nullable=False, unique=True)
+    numero = db.Column(db.Integer, nullable=False)
     capacidad = db.Column(db.Integer, nullable=False, default=4, server_default="4")
     ubicacion = db.Column(db.String(60))  # Salón, Terraza, Barra...
     activa = db.Column(db.Boolean, nullable=False, default=True, server_default="1")
@@ -46,7 +48,7 @@ class Mesa(db.Model):
         return datos
 
 
-class PedidoMesa(db.Model):
+class PedidoMesa(DeEmpresa, db.Model):
     """ILF09 (complemento) Pedido tomado en una mesa. Las líneas y el total viven en su orden (tipo MESA);
     aquí queda la mesa, los comensales y el recorrido del pedido.
 

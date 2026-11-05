@@ -4,13 +4,15 @@ Cada clase corresponde a una tabla creada en database/01_schema.sql.
 """
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 
-class Proveedor(db.Model):
+class Proveedor(DeEmpresa, db.Model):
     __tablename__ = "proveedores"
+    __table_args__ = (db.UniqueConstraint("empresa_id", "nit", name="uq_proveedor_empresa_nit"),)
 
     id = db.Column(db.Integer, primary_key=True)
-    nit = db.Column(db.String(20), nullable=False, unique=True)
+    nit = db.Column(db.String(20), nullable=False)
     razon_social = db.Column(db.String(150), nullable=False)
     contacto = db.Column(db.String(100))
     telefono = db.Column(db.String(20))
@@ -62,7 +64,7 @@ class ProveedorInsumo(db.Model):
         }
 
 
-class OrdenCompra(db.Model):
+class OrdenCompra(DeEmpresa, db.Model):
     """ILF17 Encabezado de una orden de compra."""
 
     __tablename__ = "ordenes_compra"

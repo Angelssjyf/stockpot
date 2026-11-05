@@ -3149,3 +3149,8 @@ dialog.extra-ancho {
   font-size: 12px;
   color: var(--texto-suave);
 }
+
+/* Restaurantes del súper administrador: el desactivado se ve apagado */
+.fila.inactiva {
+  opacity: 0.6;
+}

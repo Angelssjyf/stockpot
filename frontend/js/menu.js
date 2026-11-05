@@ -22,8 +22,14 @@ const MODULOS = [
 ];
 
 const usuario = await exigirSesion(); // sin sesión vuelve al login
+// El súper administrador no tiene restaurante: su única pantalla es la de restaurantes
+if (usuario.permisos.includes('empresas.gestionar')) {
+  location.replace('/empresas.html');
+  await new Promise(() => {});
+}
 
-document.getElementById('usuario-actual').textContent = `${usuario.nombre} · ${usuario.rol}`;
+document.getElementById('usuario-actual').textContent = [usuario.empresa, `${usuario.nombre} · ${usuario.rol}`]
+  .filter(Boolean).join(' — ');
 document.getElementById('cerrar-sesion').addEventListener('click', cerrarSesion);
 
 // El filtro por rol: solo los módulos cuyo permiso tiene el usuario

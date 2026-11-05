@@ -3,15 +3,17 @@
 from decimal import Decimal
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 CATEGORIAS = ("ENTRADA", "PLATO_FUERTE", "BEBIDA", "POSTRE", "ADICIONAL")
 
 
-class Producto(db.Model):
+class Producto(DeEmpresa, db.Model):
     __tablename__ = "productos"
+    __table_args__ = (db.UniqueConstraint("empresa_id", "codigo", name="uq_producto_empresa_codigo"),)
 
     id = db.Column(db.Integer, primary_key=True)
-    codigo = db.Column(db.String(30), nullable=False, unique=True)
+    codigo = db.Column(db.String(30), nullable=False)
     nombre = db.Column(db.String(120), nullable=False)
     descripcion = db.Column(db.String(255))
     categoria = db.Column(db.Enum(*CATEGORIAS, name="categoria_producto"), nullable=False)
