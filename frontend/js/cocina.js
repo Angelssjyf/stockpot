@@ -2,7 +2,8 @@
 import { api, exigirSesion } from './api.js';
 import { crear, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
-const yo = await exigirSesion('cocina.ver'); // sin el permiso vuelve al menú
+// El tablero queda prendido en la cocina: no se bloquea solo (sí con el botón)
+const yo = await exigirSesion('cocina.ver', { bloqueoAutomatico: false });
 const puedeGestionar = yo.permisos.includes('cocina.gestionar');
 
 const $ = (id) => document.getElementById(id);

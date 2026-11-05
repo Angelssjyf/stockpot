@@ -83,6 +83,7 @@ CREATE TABLE usuarios (
     apellido       VARCHAR(80)  NOT NULL,
     email          VARCHAR(120) NOT NULL UNIQUE,  -- con él se inicia sesión
     password_hash  VARCHAR(255) NOT NULL,         -- contraseña cifrada, nunca en texto plano
+    pin_hash       VARCHAR(255),                -- PIN personal cifrado (cobrar, anular, salidas)
     telefono       VARCHAR(20),
     rol_id         INT          NOT NULL,
     activo         BOOLEAN      NOT NULL DEFAULT TRUE,  -- desactivar en vez de borrar
@@ -91,6 +92,24 @@ CREATE TABLE usuarios (
     updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id) REFERENCES roles(id),
     CONSTRAINT fk_usuarios_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+);
+
+-- ---------------------------------------------------------------------
+-- Sesiones seguras (tercer corte): cada inicio de sesión queda guardado para
+-- poder bloquearla, cerrarla por inactividad o al salir aunque el token no haya vencido.
+-- ---------------------------------------------------------------------
+CREATE TABLE sesiones (
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    jti               VARCHAR(36)  NOT NULL UNIQUE,   -- identificador del token
+    usuario_id        INT          NOT NULL,
+    creada            DATETIME     NOT NULL,
+    ultima_actividad  DATETIME     NOT NULL,          -- a los 30 min sin uso se cierra
+    bloqueada         BOOLEAN      NOT NULL DEFAULT FALSE,
+    intentos_pin      INT          NOT NULL DEFAULT 0, -- al quinto PIN equivocado se cierra
+    cerrada           DATETIME,                       -- NULL = abierta
+    motivo_cierre     ENUM('SALIDA','INACTIVIDAD','PIN','USUARIO'),
+    CONSTRAINT fk_sesion_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    INDEX idx_sesion_usuario (usuario_id)
 );
 
 

@@ -1,10 +1,12 @@
 """Módulo 1 - Gestión de usuarios y roles (RF-01)."""
 
+from datetime import datetime
+
 from flask import Blueprint, jsonify, request
 from sqlalchemy import or_
 
 from ...extensions import db
-from ...models import Permiso, Rol, Usuario
+from ...models import Permiso, Rol, Sesion, Usuario
 from ...services.empresas import MODULO_SUPERADMIN  # sus permisos no son para un restaurante
 from ...utils.auth import permiso_requerido, usuario_actual
 
@@ -27,6 +29,13 @@ def listar_usuarios():
 
     usuarios = consulta.order_by(Usuario.nombre, Usuario.apellido).all()
     return jsonify([u.to_dict() for u in usuarios])
+
+
+def cerrar_sesiones(usuario, motivo):
+    """Cierra las sesiones abiertas del usuario (por ejemplo, al desactivarlo o cambiarle la clave)."""
+    for sesion in Sesion.query.filter_by(usuario_id=usuario.id, cerrada=None):
+        sesion.cerrada = datetime.now()
+        sesion.motivo_cierre = motivo
 
 
 def correo_ocupado(email, salvo_id=None):
@@ -128,6 +137,12 @@ def modificar_usuario(usuario_id):
         if len(data["password"]) < 8:
             return rechazar("La contraseña debe tener al menos 8 caracteres", 422)
         usuario.set_password(data["password"])
+        if usuario.id != usuario_actual().id:  # con la clave cambiada, sus sesiones abiertas se cierran
+            cerrar_sesiones(usuario, "USUARIO")
+
+    # Si olvidó el PIN, el administrador se lo quita y el usuario crea uno nuevo con su contraseña
+    if data.get("quitar_pin"):
+        usuario.pin_hash = None
 
     if "activo" in data:
         if not isinstance(data["activo"], bool):
@@ -136,6 +151,8 @@ def modificar_usuario(usuario_id):
         if data["activo"] is False and usuario.id == usuario_actual().id:
             return rechazar("No puedes desactivar tu propio usuario", 409)
         usuario.activo = data["activo"]
+        if not usuario.activo:
+            cerrar_sesiones(usuario, "USUARIO")
 
     db.session.commit()
     return jsonify(usuario.to_dict())

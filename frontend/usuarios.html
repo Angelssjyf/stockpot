@@ -88,6 +88,15 @@
           <span>Usuario activo<small>Un usuario inactivo no puede iniciar sesión</small></span>
           <input type="checkbox" id="f-activo">
         </label>
+        <div class="dato-rol" id="bloque-pin">
+          <div>
+            <div>PIN personal</div>
+            <div class="valor" id="pin-actual"></div>
+          </div>
+          <button type="button" class="boton-texto" id="quitar-pin" hidden>
+            <span class="icono" aria-hidden="true">key_off</span> Quitar PIN
+          </button>
+        </div>
       </div>
 
       <div class="alerta-error" id="error-formulario" role="alert" hidden></div>

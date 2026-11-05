@@ -96,7 +96,7 @@ async function avisosDeCocina() {
   if (document.hidden) return;
   try {
     const consulta = desdeCocina ? `?desde=${encodeURIComponent(desdeCocina)}` : '';
-    const { hora, listos } = await api('GET', `/cocina/novedades${consulta}`);
+    const { hora, listos } = await api('GET', `/cocina/novedades${consulta}`, undefined, { segundoPlano: true });
     desdeCocina = hora;
     if (listos.length) {
       mostrarAviso(listos.length === 1 ? `Mesa ${listos[0].mesa}: el pedido está listo para llevar`

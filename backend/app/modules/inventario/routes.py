@@ -9,7 +9,7 @@ from ...extensions import db
 from ...models import Insumo, MovimientoInventario
 from ...models.inventario import CATEGORIAS_INSUMO, UNIDADES_MEDIDA
 from ...services.inventario import StockInsuficiente, registrar_movimiento
-from ...utils.auth import permiso_requerido, usuario_actual
+from ...utils.auth import permiso_requerido, usuario_actual, verificar_pin
 
 bp = Blueprint("inventario", __name__)
 
@@ -189,6 +189,10 @@ def registrar_movimiento_manual(insumo_id):
     cantidad, error = _decimal_no_negativo(data.get("cantidad"), "cantidad")
     if error or cantidad == 0:
         return jsonify(error=error or "La cantidad debe ser mayor que cero"), 422
+    if tipo == "SALIDA":  # sacar inventario pide el PIN de quien tiene la sesión
+        error = verificar_pin(data)
+        if error:
+            return error
 
     try:
         movimiento = registrar_movimiento(
