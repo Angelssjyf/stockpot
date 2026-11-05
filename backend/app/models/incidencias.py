@@ -1,6 +1,7 @@
 """Modelos de ILF10 Códigos de incidencia e ILF11 Incidencias (RF-12, sugerencia de la sustentación)."""
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 MODULOS_INCIDENCIA = ("INVENTARIO", "VENTAS", "COMPRAS", "DOMICILIOS", "OTRO")
 
@@ -33,7 +34,7 @@ class CodigoIncidencia(db.Model):
         }
 
 
-class Incidencia(db.Model):
+class Incidencia(DeEmpresa, db.Model):
     """RF-12.2 Un error reportado sobre un registro: quién lo cometió, quién lo reportó y qué pasó."""
 
     __tablename__ = "incidencias"

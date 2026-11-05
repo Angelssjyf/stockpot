@@ -1,13 +1,14 @@
 """Modelos de ILF14 Pagos, ILF15 Ventas e ILF16 Consumo (Iteración 4)."""
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 
 def _fecha(valor):
     return valor.isoformat() if valor else None
 
 
-class Pago(db.Model):
+class Pago(DeEmpresa, db.Model):
     """ILF14 Un pago (o abono) a la cuenta de una orden."""
 
     __tablename__ = "pagos"
@@ -46,7 +47,7 @@ class Pago(db.Model):
         }
 
 
-class Venta(db.Model):
+class Venta(DeEmpresa, db.Model):
     """ILF15 Venta: una orden pagada por completo."""
 
     __tablename__ = "ventas"

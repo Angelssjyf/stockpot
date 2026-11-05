@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 from ..extensions import db
+from .empresas import DeEmpresa
 
 PROPINA_SUGERIDA = Decimal("0.10")  # Ley 1935 de 2018: sugerida y voluntaria, solo en mesa
 
@@ -11,14 +12,15 @@ def _fecha(valor):
     return valor.isoformat() if valor else None
 
 
-class Cliente(db.Model):
+class Cliente(DeEmpresa, db.Model):
     """ILF12 Cliente que pide a domicilio (RF-08.2)."""
 
     __tablename__ = "clientes"
+    __table_args__ = (db.UniqueConstraint("empresa_id", "telefono", name="uq_cliente_empresa_telefono"),)
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(120), nullable=False)
-    telefono = db.Column(db.String(20), nullable=False, unique=True)
+    telefono = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120))
     direccion = db.Column(db.String(200))
     barrio = db.Column(db.String(80))
@@ -37,7 +39,7 @@ class Cliente(db.Model):
         }
 
 
-class Orden(db.Model):
+class Orden(DeEmpresa, db.Model):
     """ILF09 Encabezado de un pedido (a domicilio, en mesa o para llevar)."""
 
     __tablename__ = "ordenes"
@@ -129,7 +131,7 @@ class DetalleOrden(db.Model):
         }
 
 
-class Domicilio(db.Model):
+class Domicilio(DeEmpresa, db.Model):
     """ILF13 Entrega a domicilio de una orden (RF-08.1 a RF-08.8)."""
 
     __tablename__ = "domicilios"

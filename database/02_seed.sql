@@ -8,15 +8,22 @@
 USE stockpot;
 
 -- ---------------------------------------------------------------------
--- 1. Roles del restaurante
+-- 0. El primer restaurante (empresa 1). Cada restaurante tiene sus propios
+--    roles y datos; el súper administrador solo crea y activa empresas.
 -- ---------------------------------------------------------------------
-INSERT INTO roles (nombre, descripcion) VALUES
- ('ADMINISTRADOR', 'Dueño o administrador: acceso total al sistema'),
- ('MESERO',        'Toma pedidos en mesa y gestiona reservas'),
- ('COCINERO',      'Ve y actualiza las órdenes en cocina'),
- ('CAJERO',        'Registra pagos, ventas y domicilios'),
- ('BODEGUERO',     'Gestiona inventario, proveedores y compras'),
- ('DOMICILIARIO',  'Consulta y entrega los pedidos a domicilio');
+INSERT INTO empresas (id, nombre, nit) VALUES (1, 'StockPot Restaurante', '900000001-1');
+
+-- ---------------------------------------------------------------------
+-- 1. Roles del restaurante (empresa 1) y el del súper administrador (sin empresa)
+-- ---------------------------------------------------------------------
+INSERT INTO roles (empresa_id, nombre, descripcion) VALUES
+ (1, 'ADMINISTRADOR', 'Dueño o administrador: acceso total al sistema'),
+ (1, 'MESERO',        'Toma pedidos en mesa y gestiona reservas'),
+ (1, 'COCINERO',      'Ve y actualiza las órdenes en cocina'),
+ (1, 'CAJERO',        'Registra pagos, ventas y domicilios'),
+ (1, 'BODEGUERO',     'Gestiona inventario, proveedores y compras'),
+ (1, 'DOMICILIARIO',  'Consulta y entrega los pedidos a domicilio'),
+ (NULL, 'SUPERADMIN', 'Administra los restaurantes (empresas); no ve sus datos');
 
 -- ---------------------------------------------------------------------
 -- 2. Permisos: uno para consultar (.ver) y otro para modificar
@@ -54,7 +61,9 @@ INSERT INTO permisos (codigo, modulo, descripcion) VALUES
  -- Incidencias (RF-12, sugerencia de la sustentación del 2.º corte)
  ('incidencias.reportar',  'incidencias', 'Reportar errores en inventario, ventas y compras'),
  ('incidencias.ver',       'incidencias', 'Ver la bitácora de incidencias'),
- ('incidencias.gestionar', 'incidencias', 'Administrar el catálogo de códigos de incidencia');
+ ('incidencias.gestionar', 'incidencias', 'Administrar el catálogo de códigos de incidencia'),
+ -- Varios restaurantes (tercer corte): solo para el súper administrador
+ ('empresas.gestionar',    'empresas',    'Crear, modificar, activar y desactivar restaurantes');
 
 -- ---------------------------------------------------------------------
 -- 3. Permisos de cada rol (tabla rol_permisos)
@@ -62,11 +71,17 @@ INSERT INTO permisos (codigo, modulo, descripcion) VALUES
 --    número le asignó MySQL a cada registro.
 -- ---------------------------------------------------------------------
 
--- ADMINISTRADOR: todos los permisos
+-- ADMINISTRADOR: todos los permisos del restaurante
 INSERT INTO rol_permisos (rol_id, permiso_id)
 SELECT r.id, p.id
 FROM roles r CROSS JOIN permisos p
-WHERE r.nombre = 'ADMINISTRADOR';
+WHERE r.nombre = 'ADMINISTRADOR' AND p.modulo <> 'empresas';
+
+-- SUPERADMIN: solo administrar empresas
+INSERT INTO rol_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM roles r JOIN permisos p ON p.codigo = 'empresas.gestionar'
+WHERE r.nombre = 'SUPERADMIN';
 
 -- Resto de roles: solo lo que necesitan para su trabajo
 INSERT INTO rol_permisos (rol_id, permiso_id)

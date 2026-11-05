@@ -66,7 +66,7 @@ def client_real():
 
 @pytest.mark.parametrize(
     "pagina",
-    ["/", "/menu.html", "/usuarios.html", "/insumos.html", "/proveedores.html", "/compras.html",
+    ["/", "/menu.html", "/empresas.html", "/usuarios.html", "/insumos.html", "/proveedores.html", "/compras.html",
      "/pedidos.html", "/comanda.html"],
 )
 def test_cp_web_6_paginas_existen(client_real, pagina):
