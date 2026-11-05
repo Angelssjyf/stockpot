@@ -135,7 +135,7 @@ function barrasSemana(ventas) {
 const intentar = (promesa) => promesa.catch(() => null);
 
 async function pintarResumenHoy() {
-  const [ventasHoy, ventasSemana, masVendidos, mesas, porCobrar, domicilios, alertas, activos] = await Promise.all([
+  const [ventasHoy, ventasSemana, masVendidos, mesas, porCobrar, domicilios, alertas, activos, cocina, reservas] = await Promise.all([
     puede('ventas.ver') ? intentar(api('GET', `/ventas?desde=${hoy}&hasta=${hoy}`)) : null,
     puede('ventas.ver') ? intentar(api('GET', `/ventas?desde=${haceSeis}&hasta=${hoy}`)) : null,
     puede('ventas.ver') ? intentar(api('GET', `/ventas/mas-vendidos?desde=${haceSeis}&hasta=${hoy}`)) : null,
@@ -144,6 +144,8 @@ async function pintarResumenHoy() {
     puede('domicilios.ver') ? intentar(api('GET', '/domicilios')) : null,
     puede('inventario.ver') ? intentar(api('GET', '/inventario/alertas')) : null,
     puede('pedidos.ver') && !puede('ventas.ver') ? intentar(api('GET', '/pedidos')) : null, // el mesero ve sus pedidos
+    puede('cocina.ver') ? intentar(api('GET', '/cocina/ordenes')) : null,
+    puede('reservas.ver') ? intentar(api('GET', `/reservas?fecha=${hoy}`)) : null,
   ]);
 
   const tarjetas = [];
@@ -174,6 +176,21 @@ async function pintarResumenHoy() {
     tarjetas.push(tarjetaHoy({
       icono: 'delivery_dining', titulo: 'Domicilios en curso', valor: domicilios.length, pagina: 'domicilios.html',
       detalle: domicilios.length ? 'por entregar' : 'Ninguno pendiente',
+    }));
+  }
+  if (cocina) {
+    const { POR_PREPARAR: nuevas, PREPARANDO: preparando, espera_maxima: espera } = cocina.resumen;
+    tarjetas.push(tarjetaHoy({
+      icono: 'soup_kitchen', titulo: 'En cocina', valor: nuevas + preparando, pagina: 'cocina.html', alerta: espera >= 30,
+      detalle: nuevas + preparando ? `${nuevas} por preparar · espera ${espera} min` : 'Nada pendiente',
+    }));
+  }
+  if (reservas) {
+    const proxima = reservas.reservas.find((r) => r.activa && new Date(r.fin) > ahora);
+    const hora = (iso) => new Date(iso).toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' });
+    tarjetas.push(tarjetaHoy({
+      icono: 'event_seat', titulo: 'Reservas de hoy', valor: reservas.resumen.activas, pagina: 'reservas.html',
+      detalle: proxima ? `Próxima: ${hora(proxima.fecha_hora)} · mesa ${proxima.mesa}` : 'Ninguna pendiente',
     }));
   }
   if (alertas) {

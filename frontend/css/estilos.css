@@ -766,12 +766,13 @@ dialog.ancho {
 
 .filtros {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
 }
 
 .filtros .campo {
-  flex: 1;
+  flex: 1 1 150px;
 }
 
 .datos-orden {

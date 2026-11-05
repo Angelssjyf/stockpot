@@ -190,3 +190,26 @@ def test_cp_seg_38_usuario_desactivado_o_nueva_clave(client, admin_headers):
     otra = iniciar_sesion(client, "mesero2@stockpot.test", "NuevaClave2026")
     client.put(f"/api/usuarios/{mesero.id}", headers=admin_headers, json={"activo": False})
     assert client.get("/api/pedidos", headers=otra).status_code == 401
+
+
+def test_cp_seg_39_limite_de_intentos_de_login(client, admin_headers):
+    """CP-SEG-39 | RF-01.4 | Con 5 contraseñas equivocadas el correo queda bloqueado 15 minutos (aunque luego
+    escriba la correcta); otro correo no se afecta."""
+    entrar = lambda email, clave: client.post("/api/auth/login", json={"email": email, "password": clave})  # noqa: E731
+    for _ in range(5):
+        assert entrar("admin@stockpot.test", "adivinando").status_code == 401
+    r = entrar("admin@stockpot.test", CLAVE)
+    assert r.status_code == 429 and "Espera 15 minutos" in r.get_json()["error"]
+    crear_usuario("MESERO", "otro@stockpot.test")
+    assert entrar("otro@stockpot.test", CLAVE).status_code == 200
+
+
+def test_cp_seg_39b_acierto_reinicia_intentos(client, admin_headers):
+    """CP-SEG-39 | RF-01.4 | Entrar bien borra los fallos anteriores (4 fallos + acierto + 4 fallos no bloquea)."""
+    entrar = lambda clave: client.post("/api/auth/login", json={"email": "admin@stockpot.test", "password": clave})  # noqa: E731
+    for _ in range(4):
+        entrar("adivinando")
+    assert entrar(CLAVE).status_code == 200
+    for _ in range(4):
+        entrar("adivinando")
+    assert entrar(CLAVE).status_code == 200

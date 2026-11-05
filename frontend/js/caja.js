@@ -136,7 +136,8 @@ async function cargarPorCobrar() {
       const chips = [crear('span', { className: 'chip', texto: `Saldo ${formato.dinero(orden.saldo)}` })];
       if (orden.pagado > 0) chips.unshift(crear('span', { className: 'chip estado-PARCIAL', texto: 'Pago parcial' }));
       const tipo = orden.mesa ? `Mesa ${orden.mesa}` : TIPOS[orden.tipo];
-      const detalle = [tipo, orden.cliente, fechaHora(orden.fecha)].filter(Boolean).join(' · ');
+      const detalle = [tipo, orden.cliente, fechaHora(orden.fecha),
+        orden.propina ? `+ propina ${formato.dinero(orden.propina)}` : null].filter(Boolean).join(' · ');
       const fila = crear('li', { className: 'fila editable' }, [
         crear('div', { className: 'avatar' }, [crear('span', { className: 'icono', texto: 'receipt_long', 'aria-hidden': 'true' })]),
         crear('div', { className: 'datos' }, [

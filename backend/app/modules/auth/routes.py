@@ -5,7 +5,8 @@ pantalla y volver con el PIN, cerrar la sesión de verdad y crear o cambiar el P
 """
 
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
+from threading import Lock
 
 from flask import Blueprint, current_app, g, jsonify, request
 from flask_jwt_extended import create_access_token, decode_token, verify_jwt_in_request
@@ -18,6 +19,20 @@ from ...utils.auth import abrir_sesion, cerrar_sesion, comprobar_secreto, rechaz
 bp = Blueprint("auth", __name__)
 
 PIN_VALIDO = re.compile(r"^\d{4,6}$")
+
+# Contra quien adivina contraseñas: 5 intentos fallidos con un correo lo bloquean 15 minutos
+INTENTOS_LOGIN = 5
+ESPERA_LOGIN = timedelta(minutes=15)
+_candado = Lock()
+
+
+def _fallos(email):
+    """Fallos recientes de ese correo (en memoria del servidor; se borran al entrar bien)."""
+    registro = current_app.extensions.setdefault("fallos_login", {})
+    limite = datetime.now() - ESPERA_LOGIN
+    with _candado:
+        registro[email] = [f for f in registro.get(email, []) if f > limite]
+        return registro[email]
 
 
 def _pin_debil(pin):
@@ -36,13 +51,21 @@ def login():
     if not email or not password:
         return jsonify(error="El correo y la contraseña son obligatorios"), 400
 
+    fallos = _fallos(email)
+    if len(fallos) >= INTENTOS_LOGIN:
+        minutos = max(1, int((fallos[0] + ESPERA_LOGIN - datetime.now()).total_seconds() // 60) + 1)
+        return jsonify(error=f"Demasiados intentos fallidos. Espera {minutos} minutos e inténtalo de nuevo"), 429
+
     # El correo es único en todo StockPot: se busca en todas las empresas
     usuario = Usuario.query.execution_options(todas_las_empresas=True).filter_by(email=email).first()
 
     # Mismo mensaje si no existe el correo o si la clave es incorrecta,
     # para no revelar qué correos están registrados.
     if usuario is None or not usuario.check_password(password):
+        with _candado:
+            fallos.append(datetime.now())
         return jsonify(error="Correo o contraseña incorrectos"), 401
+    fallos.clear()
     if not usuario.activo:
         return jsonify(error="El usuario está desactivado"), 403
     empresa = db.session.get(Empresa, usuario.empresa_id) if usuario.empresa_id else None
