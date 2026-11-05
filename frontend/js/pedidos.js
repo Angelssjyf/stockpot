@@ -90,6 +90,24 @@ setInterval(() => {
   if (!document.querySelector('dialog[open]') && vistaActual !== 'historial') refrescar();
 }, 30000);
 
+// RF-06.7 La cocina avisa: cada 15 s se pregunta qué pedidos quedaron listos para llevarlos a la mesa
+let desdeCocina = null;
+async function avisosDeCocina() {
+  if (document.hidden) return;
+  try {
+    const consulta = desdeCocina ? `?desde=${encodeURIComponent(desdeCocina)}` : '';
+    const { hora, listos } = await api('GET', `/cocina/novedades${consulta}`);
+    desdeCocina = hora;
+    if (listos.length) {
+      mostrarAviso(listos.length === 1 ? `Mesa ${listos[0].mesa}: el pedido está listo para llevar`
+        : `Listos para llevar: mesas ${listos.map((p) => p.mesa).join(', ')}`, 'exito');
+      if (!document.querySelector('dialog[open]')) refrescar();
+    }
+  } catch { /* si falla, la siguiente consulta lo intenta otra vez */ }
+}
+avisosDeCocina();
+setInterval(avisosDeCocina, 15000);
+
 // =====================================================================
 //  RF-05.2 Mesas del salón
 // =====================================================================
@@ -700,6 +718,21 @@ function pintarAcciones(pedido) {
     botones.push(botonPrincipal('Enviar a cocina', 'soup_kitchen', async () => {
       const ok = await ejecutar('PATCH', `/pedidos/${pedido.id}/enviar-cocina`, undefined, `${pedido.codigo} enviado a cocina`);
       if (ok) abrirComanda(pedido.id);
+    }));
+  }
+  // RF-06.6 La cocina lo dejó listo: el mesero lo lleva a la mesa y lo marca entregado
+  if (puedeGestionar && pedido.estado === 'LISTO') {
+    botones.push(botonPrincipal('Entregado en la mesa', 'room_service', async () => {
+      $('error-detalle').hidden = true;
+      try {
+        await api('PATCH', `/cocina/ordenes/MESA/${pedido.id}/estado`, { estado: 'ENTREGADO' });
+        mostrarAviso(`${pedido.codigo} entregado en la mesa`, 'exito');
+        pintarDetalle(await api('GET', `/pedidos/${pedido.id}`));
+        refrescar();
+      } catch (error) {
+        $('error-detalle').textContent = error.message;
+        $('error-detalle').hidden = false;
+      }
     }));
   }
   if (pedido.fecha_envio_cocina) {

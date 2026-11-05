@@ -3154,3 +3154,113 @@ dialog.extra-ancho {
 .fila.inactiva {
   opacity: 0.6;
 }
+
+/* ------------------------------------------------------------ Cocina (RF-06): tablero de comandas */
+.contenido.contenido-ancho {
+  max-width: 1400px;
+}
+
+.tablero-cocina {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.columna-cocina {
+  background: var(--superficie-variante);
+  border-radius: var(--radio);
+  padding: 12px;
+  min-height: 200px;
+}
+
+.columna-cocina h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.columna-cocina h2 .chip {
+  margin-left: auto;
+}
+
+.tarjetas-cocina {
+  display: grid;
+  gap: 12px;
+}
+
+.vacia-cocina {
+  text-align: center;
+  padding: 24px 8px;
+}
+
+.comanda {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  border-left: 6px solid var(--borde);
+  box-shadow: var(--sombra);
+  padding: 12px 14px;
+}
+
+.comanda.demorada { border-left-color: #e0a100; }
+.comanda.urgente  { border-left-color: var(--error); }
+.comanda.urgente .espera { background: var(--contenedor-error); color: var(--sobre-contenedor-error); }
+.comanda.demorada .espera { background: #fff0c2; color: #5c4300; }
+
+.cabeza-comanda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cabeza-comanda > .icono {
+  color: var(--primario);
+  font-size: 28px;
+}
+
+.cabeza-comanda .origen {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.cabeza-comanda .espera {
+  margin-left: auto;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--superficie-variante);
+}
+
+.productos-comanda {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.nota-producto {
+  margin: 2px 0 0 1.6em;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--sobre-contenedor-primario);
+}
+
+p.nota-producto {
+  margin-left: 0;
+}
+
+.comanda .acciones {
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .tablero-cocina {
+    grid-template-columns: 1fr;
+  }
+}

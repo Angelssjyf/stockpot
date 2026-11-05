@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockPot · Cocina</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <a href="menu.html" class="boton-icono" title="Volver al menú">
+      <span class="icono" aria-hidden="true">arrow_back</span>
+    </a>
+    <h1>Cocina</h1>
+    <span class="usuario-actual" id="actualizado"></span>
+    <button type="button" class="boton-icono" id="sonido" title="Sonido de pedidos nuevos: activado" aria-pressed="true">
+      <span class="icono" aria-hidden="true">volume_up</span>
+    </button>
+  </header>
+
+  <!-- RF-06.1 a RF-06.7: pedidos de mesa y domicilios en orden de llegada, de izquierda a derecha -->
+  <main class="contenido contenido-ancho">
+    <div class="resumen" id="resumen"></div>
+
+    <div class="estado" id="estado" hidden>
+      <p id="estado-texto"></p>
+      <button type="button" class="boton-texto" id="reintentar" hidden>Reintentar</button>
+    </div>
+
+    <div class="tablero-cocina" id="tablero">
+      <section class="columna-cocina" aria-labelledby="t-por-preparar">
+        <h2 id="t-por-preparar"><span class="icono" aria-hidden="true">inbox</span> Por preparar <span class="chip" id="n-POR_PREPARAR">0</span></h2>
+        <div class="tarjetas-cocina" id="col-POR_PREPARAR"></div>
+      </section>
+      <section class="columna-cocina" aria-labelledby="t-preparando">
+        <h2 id="t-preparando"><span class="icono" aria-hidden="true">skillet</span> Preparando <span class="chip" id="n-PREPARANDO">0</span></h2>
+        <div class="tarjetas-cocina" id="col-PREPARANDO"></div>
+      </section>
+      <section class="columna-cocina" aria-labelledby="t-listos">
+        <h2 id="t-listos"><span class="icono" aria-hidden="true">room_service</span> Listos <span class="chip" id="n-LISTO">0</span></h2>
+        <div class="tarjetas-cocina" id="col-LISTO"></div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="js/cocina.js"></script>
+</body>
+</html>
