@@ -67,7 +67,7 @@ def client_real():
 @pytest.mark.parametrize(
     "pagina",
     ["/", "/menu.html", "/empresas.html", "/usuarios.html", "/insumos.html", "/proveedores.html", "/compras.html",
-     "/pedidos.html", "/comanda.html", "/cocina.html"],
+     "/pedidos.html", "/comanda.html", "/cocina.html", "/reservas.html"],
 )
 def test_cp_web_6_paginas_existen(client_real, pagina):
     """CP-WEB-6 | Interfaz web | Las páginas de la interfaz existen y se entregan."""
