@@ -138,6 +138,11 @@ function pintarMesas() {
   pintarSuave($('mesas'), ...mesas.map(tarjetaMesa));
 }
 
+/** RF-07.6 Reserva que empieza en menos de 2 horas (o ya empezó y el cliente no ha llegado). */
+function reservaCercana(mesa) {
+  return mesa.reserva && new Date(mesa.reserva.fecha_hora) - Date.now() < 2 * 3600 * 1000;
+}
+
 function tarjetaMesa(mesa) {
   // Como las tarjetas del menú: arriba el número en un marquito, al centro el ícono y abajo su estado
   const partes = [
@@ -178,7 +183,14 @@ function tarjetaMesa(mesa) {
   }, partes);
   tarjeta.addEventListener('click', () => {
     if (mesa.ocupada) abrirDetalle(mesa.pedido.id);
-    else if (puedeGestionar) abrirFormulario(null, mesa.id);
+    else if (puedeGestionar && reservaCercana(mesa)) {
+      const r = mesa.reserva;
+      const horaReserva = new Date(r.fecha_hora).toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' });
+      if (confirm(`La mesa ${mesa.numero} está reservada a las ${horaReserva} para ${r.cliente} (${r.personas} personas).
+¿Tomar el pedido de todas formas?`)) {
+        abrirFormulario(null, mesa.id);
+      }
+    } else if (puedeGestionar) abrirFormulario(null, mesa.id);
     else mostrarAviso(`La mesa ${mesa.numero} está libre`);
   });
   return tarjeta;
