@@ -10,13 +10,12 @@ from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import get_jwt
 
 from ...extensions import db
 from ...models import CodigoIncidencia, Domicilio, Incidencia, MovimientoInventario, OrdenCompra, Venta
 from ...models.incidencias import MODULOS_INCIDENCIA
 from ...services.inventario import StockInsuficiente, registrar_movimiento
-from ...utils.auth import permiso_requerido, usuario_actual
+from ...utils.auth import permiso_requerido, tiene_permiso, usuario_actual
 from ...utils.fechas import filtrar_por_fechas
 
 bp = Blueprint("incidencias", __name__)
@@ -145,7 +144,7 @@ def reportar_incidencia():
         return jsonify(error=f"El código {tipo.codigo} es de {tipo.modulo.lower()}, no de {modulo.lower()}"), 422
     registro = db.session.get(modelo, data[campo] or 0)
     # RF-12.5 El domiciliario solo reporta sobre sus propias entregas
-    if (isinstance(registro, Domicilio) and "domicilios.gestionar" not in get_jwt().get("permisos", [])
+    if (isinstance(registro, Domicilio) and not tiene_permiso("domicilios.gestionar")
             and registro.domiciliario_id != usuario.id):
         registro = None
     if registro is None:

@@ -31,6 +31,7 @@ if (usuario.permisos.includes('empresas.gestionar')) {
 document.getElementById('usuario-actual').textContent = [usuario.empresa, `${usuario.nombre} · ${usuario.rol}`]
   .filter(Boolean).join(' — ');
 document.getElementById('cerrar-sesion').addEventListener('click', cerrarSesion);
+document.getElementById('mi-pin').addEventListener('click', async () => (await import('./seguridad.js')).crearPin());
 
 // El filtro por rol: solo los módulos cuyo permiso tiene el usuario
 const visibles = MODULOS.filter((modulo) => usuario.permisos.includes(modulo.permiso));

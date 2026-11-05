@@ -94,6 +94,8 @@ async function abrirFormulario(usuario) {
     $('f-activo').checked = usuario.activo;
     $('rol-actual').textContent = usuario.rol;
     $('cambiar-rol').hidden = !puedeCambiarRol;
+    $('pin-actual').textContent = usuario.tiene_pin ? 'Creado' : 'Sin PIN (lo crea al cobrar o desde el menú)';
+    $('quitar-pin').hidden = !usuario.tiene_pin;
   }
 
   dialogo.showModal();
@@ -177,6 +179,19 @@ $('form-usuario').addEventListener('submit', async (evento) => {
 });
 
 $('cancelar').addEventListener('click', () => dialogo.close());
+
+// Si el usuario olvidó su PIN, se le quita y crea uno nuevo con su contraseña
+$('quitar-pin').addEventListener('click', async () => {
+  if (!confirm(`¿Quitarle el PIN a ${usuarioEditado.nombre}? Tendrá que crear uno nuevo con su contraseña.`)) return;
+  try {
+    await api('PUT', `/usuarios/${usuarioEditado.id}`, { quitar_pin: true });
+    $('pin-actual').textContent = 'Sin PIN (lo crea al cobrar o desde el menú)';
+    $('quitar-pin').hidden = true;
+    mostrarAviso('PIN quitado', 'exito');
+  } catch (error) {
+    mostrarErrorFormulario(error.message);
+  }
+});
 
 // Al cerrar el formulario se recarga la lista (el rol pudo cambiar aunque no se haya guardado)
 dialogo.addEventListener('close', cargar);

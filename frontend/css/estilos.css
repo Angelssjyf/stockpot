@@ -3324,3 +3324,72 @@ p.nota-producto {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ------------------------------------------------------------ Sesiones seguras: bloqueo y PIN */
+.capa-bloqueo {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(35, 26, 22, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: fundido 0.25s ease-out;
+}
+
+.tarjeta-bloqueo {
+  width: min(360px, 100%);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+  padding: 28px 24px;
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-elevada);
+}
+
+.tarjeta-bloqueo h2 {
+  margin: 0;
+}
+
+.tarjeta-bloqueo .campo,
+.tarjeta-bloqueo .boton-principal,
+.tarjeta-bloqueo .alerta-error {
+  width: 100%;
+}
+
+.tarjeta-bloqueo .boton-principal {
+  justify-content: center;
+}
+
+.icono-bloqueo {
+  font-size: 44px;
+  color: var(--primario);
+}
+
+.acciones-bloqueo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+#clave-bloqueo,
+.campo-pin input {
+  text-align: center;
+  font-size: 1.4rem;
+  letter-spacing: 0.4em;
+}
+
+.dialogo-pin {
+  width: min(380px, calc(100% - 32px));
+}
+
+#clave-bloqueo::placeholder,
+.campo-pin input::placeholder {
+  letter-spacing: normal;
+  font-size: 1rem;
+}

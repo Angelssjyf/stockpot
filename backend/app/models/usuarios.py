@@ -67,6 +67,7 @@ class Usuario(DeEmpresa, db.Model):
     apellido = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    pin_hash = db.Column(db.String(255))  # PIN personal para cobrar, anular y sacar inventario
     telefono = db.Column(db.String(20))
     rol_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
@@ -86,6 +87,13 @@ class Usuario(DeEmpresa, db.Model):
         """Compara una contraseña escrita con el hash guardado."""
         return check_password_hash(self.password_hash, password)
 
+    def set_pin(self, pin):
+        """El PIN también se guarda cifrado."""
+        self.pin_hash = generate_password_hash(pin)
+
+    def check_pin(self, pin):
+        return bool(self.pin_hash) and check_password_hash(self.pin_hash, pin)
+
     def to_dict(self):
         # password_hash NO se incluye: nunca se envía al cliente
         return {
@@ -97,4 +105,5 @@ class Usuario(DeEmpresa, db.Model):
             "rol": self.rol.nombre if self.rol else None,
             "activo": self.activo,
             "empresa": self.empresa.nombre if self.empresa else None,
+            "tiene_pin": bool(self.pin_hash),
         }

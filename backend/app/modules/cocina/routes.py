@@ -10,11 +10,10 @@ La cocina recibe los pedidos de las mesas (cuando el mesero los envía, RF-05.8)
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import get_jwt
 
 from ...extensions import db
 from ...models import Domicilio, Orden, PedidoMesa
-from ...utils.auth import permiso_requerido
+from ...utils.auth import permiso_requerido, tiene_permiso
 
 bp = Blueprint("cocina", __name__)
 
@@ -101,7 +100,7 @@ def cambiar_estado(tipo, orden_id):
     if nuevo != esperado:
         return jsonify(error=f"Una orden {objeto.estado} solo puede pasar a {esperado}"), 409
     # El mesero (sin permisos de cocina) solo puede marcar la entrega en la mesa
-    if "cocina.gestionar" not in get_jwt().get("permisos", []) and nuevo != "ENTREGADO":
+    if not tiene_permiso("cocina.gestionar") and nuevo != "ENTREGADO":
         return jsonify(error="No tienes permiso para realizar esta acción"), 403
 
     objeto.estado = nuevo

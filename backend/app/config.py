@@ -29,6 +29,12 @@ class Config:
     JWT_SECRET_KEY = SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
 
+    # Sesiones seguras (tercer corte): la pantalla se bloquea a los 10 minutos sin uso y el
+    # servidor cierra la sesión a los 30. Cobrar, anular pagos y sacar inventario piden el PIN.
+    BLOQUEO_MINUTOS = 10
+    INACTIVIDAD_MINUTOS = 30
+    EXIGIR_PIN = True
+
     # Carpeta de la interfaz web (HTML, CSS y JavaScript). Flask la entrega en "/"
     FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
 
@@ -44,3 +50,5 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_ENGINE_OPTIONS = {}
     SECRET_KEY = JWT_SECRET_KEY = "clave-solo-para-pruebas-con-32-caracteres-o-mas"
+    # Las pruebas de cada módulo no escriben el PIN; las de seguridad lo activan (test_sesiones.py)
+    EXIGIR_PIN = False

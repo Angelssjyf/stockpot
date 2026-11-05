@@ -9,7 +9,7 @@ from ...extensions import db
 from ...models import Orden, Pago
 from ...services.inventario import StockInsuficiente
 from ...services.ventas import PagoRechazado, cambiar_propina, cuenta, pagado, registrar_pago
-from ...utils.auth import permiso_requerido, usuario_actual
+from ...utils.auth import permiso_requerido, usuario_actual, verificar_pin
 from ...utils.fechas import filtrar_por_fechas
 
 bp = Blueprint("pagos", __name__)
@@ -116,7 +116,11 @@ def pagar_orden(orden_id):
     if orden is None:
         return jsonify(error="La orden no existe"), 404
 
-    datos, error = leer_pago(request.get_json(silent=True) or {})
+    data = request.get_json(silent=True) or {}
+    error = verificar_pin(data)  # cobrar pide el PIN de quien tiene la sesión
+    if error:
+        return error
+    datos, error = leer_pago(data)
     if error:
         return jsonify(error=error), 422
     try:
@@ -143,6 +147,9 @@ def anular_pago(pago_id):
         return jsonify(error="El pago ya está anulado"), 409
     if pago.orden.estado != "ABIERTA":
         return jsonify(error="La venta ya se cerró: no se pueden anular sus pagos"), 409
+    error = verificar_pin(request.get_json(silent=True) or {})
+    if error:
+        return error
     pago.estado = "ANULADO"
     db.session.commit()
     return jsonify(pago=pago.to_dict(), cuenta=cuenta(pago.orden))
