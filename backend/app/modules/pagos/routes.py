@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, request
 from ...extensions import db
 from ...models import Orden, Pago
 from ...services.inventario import StockInsuficiente
-from ...services.ventas import PagoRechazado, cuenta, pagado, registrar_pago
+from ...services.ventas import PagoRechazado, cambiar_propina, cuenta, pagado, registrar_pago
 from ...utils.auth import permiso_requerido, usuario_actual
 from ...utils.fechas import filtrar_por_fechas
 
@@ -64,8 +64,9 @@ def ordenes_por_cobrar():
         "mesa": o.pedido_mesa.mesa.numero if o.pedido_mesa else None,
         "estado_pedido": o.pedido_mesa.estado if o.pedido_mesa else None,
         "total": float(o.total),
+        "propina": float(o.propina),
         "pagado": float(pagado(o)),
-        "saldo": float(o.total - pagado(o)),
+        "saldo": float(o.a_pagar - pagado(o)),
     } for o in ordenes])
 
 
@@ -76,6 +77,28 @@ def ver_cuenta(orden_id):
     orden = db.session.get(Orden, orden_id)
     if orden is None:
         return jsonify(error="La orden no existe"), 404
+    return jsonify(cuenta(orden))
+
+
+@bp.patch("/ordenes/<int:orden_id>/propina")
+@permiso_requerido("pagos.gestionar")
+def propina_de_la_orden(orden_id):
+    """Propina sugerida del 10 % en mesa: el cliente decide si la paga (Ley 1935 de 2018).
+
+    Body: {"incluir": false}
+    """
+    orden = db.session.get(Orden, orden_id)
+    if orden is None:
+        return jsonify(error="La orden no existe"), 404
+    incluir = (request.get_json(silent=True) or {}).get("incluir")
+    if not isinstance(incluir, bool):
+        return jsonify(error="'incluir' debe ser true o false"), 422
+    try:
+        cambiar_propina(orden, incluir)
+    except PagoRechazado as rechazo:
+        db.session.rollback()
+        return jsonify(error=str(rechazo)), rechazo.codigo
+    db.session.commit()
     return jsonify(cuenta(orden))
 
 

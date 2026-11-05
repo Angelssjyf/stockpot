@@ -39,8 +39,15 @@ try {
   partes.push(
     fila('TOTAL', formato.dinero(c.total), 'grande'),
     fila('Incluye impoconsumo (8 %)', formato.dinero(c.impoconsumo_incluido), 'pequena'),
-    crear('hr'),
   );
+  if (c.propina) {
+    partes.push(
+      fila('Propina voluntaria (10 %)', formato.dinero(c.propina)),
+      fila('TOTAL A PAGAR', formato.dinero(c.a_pagar), 'grande'),
+      crear('p', { className: 'centrado pequena', texto: 'La propina es sugerida y voluntaria (Ley 1935 de 2018). Es para el personal.' }),
+    );
+  }
+  partes.push(crear('hr'));
   for (const p of c.pagos) {
     partes.push(fila(METODOS[p.metodo] + (p.referencia ? ` (ref. ${p.referencia})` : ''), formato.dinero(p.monto)));
     if (p.recibido) partes.push(fila('  Recibido', formato.dinero(p.recibido), 'pequena'));

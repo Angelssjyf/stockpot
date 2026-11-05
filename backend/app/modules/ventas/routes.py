@@ -79,6 +79,7 @@ def consultar_ventas():
         "ticket_promedio": float(round(total / len(ventas), 2)) if ventas else 0.0,
         "costo_insumos": float(costo),
         "ganancia": float(subtotal - costo),
+        "propinas": float(sum((v.propina for v in ventas), Decimal("0"))),  # del personal, aparte
     }
     return jsonify(resumen=resumen, ventas=[v.to_dict() for v in ventas])
 

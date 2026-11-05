@@ -1,6 +1,10 @@
 """Modelos de ILF12 Clientes, ILF09 Órdenes, ILF10 Detalle de órdenes e ILF13 Domicilios."""
 
+from decimal import Decimal
+
 from ..extensions import db
+
+PROPINA_SUGERIDA = Decimal("0.10")  # Ley 1935 de 2018: sugerida y voluntaria, solo en mesa
 
 
 def _fecha(valor):
@@ -50,6 +54,7 @@ class Orden(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
     subtotal = db.Column(db.Numeric(14, 2), nullable=False, default=0, server_default="0")
     observaciones = db.Column(db.String(255))
+    incluye_propina = db.Column(db.Boolean, nullable=False, default=True, server_default="1")
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
     cliente = db.relationship("Cliente")
@@ -64,6 +69,23 @@ class Orden(db.Model):
         envio = self.domicilio.costo_envio if self.domicilio else 0
         return self.subtotal + envio
 
+    @property
+    def propina_sugerida(self):
+        """El 10 % de los productos, en pesos redondos. Solo se sugiere en los pedidos en mesa."""
+        if self.tipo != "MESA":
+            return Decimal("0")
+        return (Decimal(self.subtotal) * PROPINA_SUGERIDA).quantize(Decimal("1"))
+
+    @property
+    def propina(self):
+        """La propina que se cobra: la sugerida, salvo que el cliente no la quiera."""
+        return self.propina_sugerida if self.incluye_propina else Decimal("0")
+
+    @property
+    def a_pagar(self):
+        """Lo que paga el cliente: el total de la venta más la propina (que no es venta)."""
+        return self.total + self.propina
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -74,6 +96,7 @@ class Orden(db.Model):
             "usuario": f"{self.usuario.nombre} {self.usuario.apellido}",
             "subtotal": float(self.subtotal),
             "total": float(self.total),
+            "propina": float(self.propina),
             "observaciones": self.observaciones,
             "detalles": [d.to_dict() for d in self.detalles],
         }

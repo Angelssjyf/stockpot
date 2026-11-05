@@ -81,7 +81,7 @@ def test_cp_11_2_1_reporte_de_ventas(client, admin_headers, negocio, hoy):
     desde = (hoy - timedelta(days=6)).isoformat()
     r = _get(client, admin_headers, f"/api/reportes/ventas?desde={desde}&hasta={HOY}")
     assert r["resumen"] == {"ventas": 2, "total": 62000.0, "costo_insumos": 14800.0,
-                            "ganancia": 47200.0, "margen": 76.1, "ticket_promedio": 31000.0}
+                            "ganancia": 47200.0, "margen": 76.1, "ticket_promedio": 31000.0, "propinas": 0.0}
     assert len(r["por_dia"]) == 7                         # también los días sin ventas
     assert r["por_dia"][-1] == {"fecha": HOY, "ventas": 2, "total": 62000.0, "ganancia": 47200.0}
     assert r["por_tipo"] == {"LLEVAR": {"ventas": 2, "total": 62000.0}}

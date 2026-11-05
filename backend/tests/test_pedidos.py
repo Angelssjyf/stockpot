@@ -367,8 +367,8 @@ def test_cp_05_9_2_cobro_en_caja(client, mesero_headers, admin_headers, pedido, 
 
     _accion(client, mesero_headers, pedido["id"], "confirmar")
     assert [(o["codigo"], o["tipo"], o["mesa"]) for o in por_cobrar()] == [(pedido["codigo"], "MESA", 1)]
-    r = client.post(f"/api/ordenes/{orden_id}/pagos", headers=admin_headers, json={"metodo": "TARJETA", "monto": 50000})
-    assert r.status_code == 201, r.get_json()
+    r = client.post(f"/api/ordenes/{orden_id}/pagos", headers=admin_headers, json={"metodo": "TARJETA", "monto": 55000})
+    assert r.status_code == 201, r.get_json()  # $50.000 de la cuenta + $5.000 de propina sugerida
 
     assert db.session.get(Insumo, carta["pollo"]).stock_actual == 0.5  # 1 − 2 × 0,25
     assert MovimientoInventario.query.filter_by(motivo="CONSUMO").count() == 2
@@ -383,3 +383,79 @@ def test_cp_05_9_3_producto_agotado(client, mesero_headers, mesas, carta):
     db.session.commit()
     r = _pedir(client, mesero_headers, mesas[1], carta)
     assert r.status_code == 409 and "no está disponible" in r.get_json()["error"]
+
+
+# ------------------------------------------------------- Propina sugerida (Ley 1935 de 2018)
+
+
+def _confirmado(client, mesero_headers, pedido):
+    _accion(client, mesero_headers, pedido["id"], "confirmar")
+    return pedido["orden_id"]
+
+
+def _propina(client, headers, orden_id, incluir):
+    return client.patch(f"/api/ordenes/{orden_id}/propina", headers=headers, json={"incluir": incluir})
+
+
+def test_cp_09_8_1_propina_sugerida(client, mesero_headers, admin_headers, pedido):
+    """CP-09.8-1 | RF-09.3 | En mesa se sugiere el 10 % de los productos aparte del total de la venta;
+    el cliente paga cuenta + propina, la venta queda por $50.000 y la ganancia no incluye la propina."""
+    orden_id = _confirmado(client, mesero_headers, pedido)
+    cuenta = client.get(f"/api/ordenes/{orden_id}/cuenta", headers=admin_headers).get_json()
+    assert (cuenta["total"], cuenta["propina_sugerida"], cuenta["incluye_propina"]) == (50000, 5000, True)
+    assert (cuenta["propina"], cuenta["a_pagar"], cuenta["saldo"]) == (5000, 55000, 55000)
+
+    r = client.post(f"/api/ordenes/{orden_id}/pagos", headers=admin_headers, json={"metodo": "EFECTIVO", "monto": 50000})
+    assert r.get_json()["cuenta"]["estado_pago"] == "PARCIAL"  # falta la propina
+    r = client.post(f"/api/ordenes/{orden_id}/pagos", headers=admin_headers, json={"metodo": "EFECTIVO", "monto": 5000})
+    venta = r.get_json()["cuenta"]["venta"]
+    ventas = client.get("/api/ventas", headers=admin_headers).get_json()
+    assert venta and ventas["ventas"][0]["total"] == 50000 and ventas["ventas"][0]["propina"] == 5000
+    assert (ventas["resumen"]["total"], ventas["resumen"]["propinas"]) == (50000, 5000)
+    reporte = client.get("/api/reportes/ventas", headers=admin_headers).get_json()["resumen"]
+    assert (reporte["total"], reporte["propinas"]) == (50000, 5000)
+    assert ventas["ventas"][0]["ganancia"] == 50000 - ventas["ventas"][0]["costo_insumos"]
+
+
+def test_cp_09_8_2_quitar_propina(client, mesero_headers, admin_headers, pedido):
+    """CP-09.8-2 | RF-09.3 | Si el cliente no la quiere se quita: paga solo los $50.000 y la venta queda sin propina."""
+    orden_id = _confirmado(client, mesero_headers, pedido)
+    r = _propina(client, admin_headers, orden_id, False)
+    assert r.status_code == 200
+    assert (r.get_json()["propina"], r.get_json()["saldo"], r.get_json()["propina_sugerida"]) == (0, 50000, 5000)
+    r = client.post(f"/api/ordenes/{orden_id}/pagos", headers=admin_headers, json={"metodo": "TARJETA", "monto": 50000})
+    assert r.get_json()["cuenta"]["venta"] is not None
+    assert client.get("/api/ventas", headers=admin_headers).get_json()["ventas"][0]["propina"] == 0
+
+
+@pytest.mark.parametrize("caso, codigo, mensaje", [
+    ("pagada", 409, "Ya se pagó parte de la propina"),
+    ("invalida", 422, "'incluir' debe ser true o false"),
+    ("cerrada", 409, "está CERRADA"),
+])
+def test_cp_09_8_3_propina_no_se_cambia(client, mesero_headers, admin_headers, pedido, caso, codigo, mensaje):
+    """CP-09.8-3 | RF-09.3 | No se quita la propina si ya se pagó parte de ella, si el dato no es
+    true/false o si la venta ya se cerró."""
+    orden_id = _confirmado(client, mesero_headers, pedido)
+    if caso == "pagada":
+        client.post(f"/api/ordenes/{orden_id}/pagos", headers=admin_headers, json={"metodo": "EFECTIVO", "monto": 52000})
+    if caso == "cerrada":
+        client.post(f"/api/ordenes/{orden_id}/pagos", headers=admin_headers, json={"metodo": "EFECTIVO", "monto": 55000})
+    r = _propina(client, admin_headers, orden_id, "no" if caso == "invalida" else False)
+    assert r.status_code == codigo and mensaje in r.get_json()["error"]
+
+
+def test_cp_09_8_4_propina_solo_en_mesa(client, admin_headers, carta):
+    """CP-09.8-4 | RF-09.3 | Para llevar y a domicilio no se sugiere propina; el mesero no la puede cambiar."""
+    r = client.post("/api/ventas", headers=admin_headers,
+                    json={"items": [{"producto_id": carta["limonada"], "cantidad": 1}], "metodo": "EFECTIVO"})
+    cuenta = r.get_json()["cuenta"]
+    assert (cuenta["propina_sugerida"], cuenta["a_pagar"]) == (0, 6000)
+    r = _propina(client, admin_headers, cuenta["orden_id"], True)
+    assert r.status_code == 409
+
+
+def test_cp_seg_24_quien_cambia_la_propina(client, mesero_headers, pedido):
+    """CP-SEG-24 | RF-09.3 | Solo quien cobra (pagos.gestionar) puede quitar la propina → 403 al mesero."""
+    orden_id = _confirmado(client, mesero_headers, pedido)
+    assert _propina(client, mesero_headers, orden_id, False).status_code == 403

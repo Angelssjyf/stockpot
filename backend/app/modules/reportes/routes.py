@@ -146,6 +146,7 @@ def reporte_ventas(desde, hasta):
         "ganancia": _dinero(subtotal - costo),
         "margen": round(float((subtotal - costo) / subtotal * 100), 1) if subtotal else 0.0,
         "ticket_promedio": _dinero(total / len(ventas)) if ventas else 0.0,
+        "propinas": _dinero(sum((v.propina for v in ventas), Decimal("0"))),  # del personal, aparte
     }
     return jsonify(
         desde=desde.isoformat(), hasta=hasta.isoformat(), resumen=resumen,

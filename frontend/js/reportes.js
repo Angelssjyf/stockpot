@@ -167,6 +167,7 @@ const REPORTES = {
           tarjeta('payments', 'Total vendido', formato.dinero(s.total)),
           tarjeta('trending_up', 'Ganancia', formato.dinero(s.ganancia), `Margen ${s.margen} %`),
           tarjeta('shopping_bag', 'Ticket promedio', formato.dinero(s.ticket_promedio)),
+          tarjeta('volunteer_activism', 'Propinas', formato.dinero(s.propinas), 'Del personal: no suman a la venta'),
         ]),
         panel('Ventas por día', graficaBarras(r.por_dia.map((d) => ({ etiqueta: diaCorto(d.fecha), valor: d.total })))),
         crear('div', { className: 'dos-columnas paneles' }, [
