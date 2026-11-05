@@ -14,7 +14,7 @@ const MODULOS = [
   { titulo: 'Menú', icono: 'restaurant_menu', permiso: 'productos.ver', pagina: 'productos.html' },
   { titulo: 'Pedidos', icono: 'receipt_long', permiso: 'pedidos.ver', pagina: 'pedidos.html' },
   { titulo: 'Cocina', icono: 'soup_kitchen', permiso: 'cocina.ver', pagina: 'cocina.html' },
-  { titulo: 'Reservas', icono: 'event_seat', permiso: 'reservas.ver', pagina: null },
+  { titulo: 'Reservas', icono: 'event_seat', permiso: 'reservas.ver', pagina: 'reservas.html' },
   { titulo: 'Domicilios', icono: 'delivery_dining', permiso: 'domicilios.ver', pagina: 'domicilios.html' },
   { titulo: 'Pagos', icono: 'payments', permiso: 'pagos.ver', pagina: 'caja.html' },
   { titulo: 'Ventas', icono: 'point_of_sale', permiso: 'ventas.ver', pagina: 'ventas.html' },

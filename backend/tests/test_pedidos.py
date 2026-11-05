@@ -80,7 +80,7 @@ def test_cp_05_2_2_crear_mesa(client, admin_headers, mesas):
     r = client.post("/api/mesas", headers=admin_headers, json={"numero": 9, "capacidad": 6, "ubicacion": " Barra "})
     assert r.status_code == 201
     assert r.get_json() | {"id": 0} == {"id": 0, "numero": 9, "capacidad": 6, "ubicacion": "Barra", "activa": True,
-                                         "ocupada": False, "pedido": None}
+                                         "ocupada": False, "pedido": None, "reserva": None}
     assert client.post("/api/mesas", headers=admin_headers, json={"numero": 1}).status_code == 409
     assert client.post("/api/mesas", headers=admin_headers, json={"numero": 10, "capacidad": 0}).status_code == 422
     assert client.post("/api/mesas", headers=admin_headers, json={"numero": "diez"}).status_code == 422

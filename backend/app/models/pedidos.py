@@ -33,6 +33,20 @@ class Mesa(DeEmpresa, db.Model):
                 .filter(PedidoMesa.mesa_id == self.id, Orden.estado == "ABIERTA")
                 .order_by(PedidoMesa.id.desc()).first())
 
+    @property
+    def proxima_reserva(self):
+        """RF-07.6 La siguiente reserva activa de hoy que todavía no termina (para avisar en el salón)."""
+        from datetime import datetime, timedelta
+
+        from .reservas import Reserva
+
+        ahora = datetime.now()
+        manana = datetime.combine(ahora.date() + timedelta(days=1), datetime.min.time())
+        reservas = (Reserva.query.filter(Reserva.mesa_id == self.id, Reserva.estado.in_(Reserva.ACTIVAS),
+                                         Reserva.fecha_hora < manana)
+                    .order_by(Reserva.fecha_hora).all())
+        return next((r for r in reservas if r.fin > ahora), None)
+
     def to_dict(self, con_pedido=True):
         datos = {
             "id": self.id,
@@ -45,6 +59,9 @@ class Mesa(DeEmpresa, db.Model):
             pedido = self.pedido_abierto
             datos["ocupada"] = pedido is not None
             datos["pedido"] = pedido.resumen() if pedido else None
+            reserva = self.proxima_reserva
+            datos["reserva"] = {"codigo": reserva.codigo, "cliente": reserva.cliente, "personas": reserva.personas,
+                                "fecha_hora": _fecha(reserva.fecha_hora)} if reserva else None
         return datos
 
 

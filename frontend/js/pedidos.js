@@ -160,12 +160,21 @@ function tarjetaMesa(mesa) {
       ]),
     );
   }
+  // RF-07.6 Si tiene una reserva hoy, se avisa para no sentar a otra persona encima
+  if (mesa.reserva) {
+    const hora = new Date(mesa.reserva.fecha_hora).toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' });
+    partes.push(crear('span', {
+      className: 'chip chip-reserva',
+      title: `Reservada para ${mesa.reserva.cliente} (${mesa.reserva.personas} personas) a las ${hora}`,
+    }, [crear('span', { className: 'icono', texto: 'event', 'aria-hidden': 'true' }), document.createTextNode(` ${hora}`)]));
+  }
   const tarjeta = crear('button', {
     type: 'button', className: `mesa${mesa.ocupada ? ' ocupada' : ''}`,
     'aria-label': `Mesa ${mesa.numero}, ${mesa.ocupada ? 'ocupada' : 'libre'}`,
     // Clave y versión: al refrescar solo se ilumina la mesa que cambió (no por el "hace N min")
     'data-clave': mesa.id,
-    'data-version': mesa.ocupada ? [mesa.pedido.codigo, mesa.pedido.estado, mesa.pedido.total, mesa.pedido.productos].join('|') : 'libre',
+    'data-version': (mesa.ocupada ? [mesa.pedido.codigo, mesa.pedido.estado, mesa.pedido.total, mesa.pedido.productos].join('|') : 'libre')
+      + (mesa.reserva ? `|${mesa.reserva.codigo}` : ''),
   }, partes);
   tarjeta.addEventListener('click', () => {
     if (mesa.ocupada) abrirDetalle(mesa.pedido.id);
