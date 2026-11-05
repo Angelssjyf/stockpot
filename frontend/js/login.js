@@ -20,8 +20,16 @@ if (sesion.token) {
   api('GET', '/auth/me')
     .then(entrar)
     .catch((error) => {
-      if (error.codigo === 401) sesion.cerrar(); // token vencido: hay que iniciar sesión
+      if (error.codigo === 401 || error.codigo === 403) sesion.cerrar(); // vencido o restaurante desactivado
     });
+}
+
+// Si la sesión se cerró por algo que el usuario debe saber (por ejemplo, restaurante desactivado)
+const aviso = sessionStorage.getItem('stockpot_aviso');
+if (aviso) {
+  sessionStorage.removeItem('stockpot_aviso');
+  errorLogin.textContent = aviso;
+  errorLogin.hidden = false;
 }
 
 // Botón del ojo: muestra u oculta la contraseña

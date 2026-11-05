@@ -74,7 +74,8 @@ export async function exigirSesion(permiso) {
     }
     return usuario;
   } catch (error) {
-    if (error.codigo === 401) sesion.cerrar(); // token vencido o inválido
+    if (error.codigo === 401 || error.codigo === 403) sesion.cerrar(); // token vencido o restaurante desactivado
+    if (error.codigo === 403) sessionStorage.setItem('stockpot_aviso', error.message);
     location.replace('/');
     return detener();
   }
