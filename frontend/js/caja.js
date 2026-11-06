@@ -196,9 +196,11 @@ function pintarCuenta(cuenta) {
     ['Pagado', formato.dinero(cuenta.pagado)],
     ['Saldo', formato.dinero(cuenta.saldo)],
   );
-  pintarSuave($('cuenta-totales'), ...filas.flatMap(([titulo, valor]) => [
-    crear('dt', { texto: titulo }), crear('dd', { texto: valor }),
-  ]));
+  const DESTACADAS = ['Total', 'A pagar', 'Saldo'];
+  pintarSuave($('cuenta-totales'), ...filas.flatMap(([titulo, valor]) => {
+    const clase = DESTACADAS.includes(titulo) ? `destacada${titulo === 'Total' ? ' separada' : ''}` : undefined;
+    return [crear('dt', { texto: titulo, className: clase }), crear('dd', { texto: valor, className: clase })];
+  }));
   pintarPropina(cuenta);
 
   // Pagos ya hechos, con opción de anular mientras la orden siga abierta
