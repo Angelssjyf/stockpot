@@ -772,7 +772,8 @@ dialog.ancho {
 }
 
 .filtros .campo {
-  flex: 1 1 150px;
+  flex: 1 1 0;
+  min-width: 120px;
 }
 
 .datos-orden {
@@ -3393,4 +3394,47 @@ p.nota-producto {
 .campo-pin input::placeholder {
   letter-spacing: normal;
   font-size: 1rem;
+}
+
+
+/* ------------------------------------------------------------ Revisión de vistas: más aire en pantallas medianas
+   En un portátil (unos 1024 px) las tarjetas quedaban apretadas: títulos partidos y valores cortados. */
+@media (min-width: 700px) {
+  .hoy {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .resumen {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
+
+  .mesas {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+.tarjeta-hoy small {
+  line-height: 1.35;
+}
+
+/* Cuenta en Caja: los valores a la derecha, como en un recibo */
+.datos-orden.costos {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 16px;
+  padding-top: 8px;
+}
+
+.datos-orden.costos dd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.datos-orden.costos .destacada {
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.datos-orden.costos .separada {
+  padding-top: 8px;
+  border-top: 1px solid var(--borde);
 }
