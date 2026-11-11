@@ -7,12 +7,12 @@ Software **IEEE 1058**, igual que en la entrega del 2.º corte.
 
 | Carpeta | Sección IEEE 1058 | Contenido |
 |---|---|---|
-| `01_Plan_de_gestion_del_proyecto` | 5. Planes del proceso de gestión (inicio, calendario, control) | **Acta de constitución (Project Charter) v0.3** con el **70 % entregado en el 2.º corte, el 15 % entregado en este corte y el 15 % pendiente**, cronograma de hitos actualizado y evidencias |
+| `01_Plan_de_gestion_del_proyecto` | 5. Planes del proceso de gestión (inicio, calendario, control) | **Acta de constitución v6** (la v5 del 2.º corte actualizada al **85 % = 70 % + 15 %**, con el título y los objetivos corregidos por la docente y el valor ganado al corte) · **Excel de puntos de función, PERT y presupuesto** con la fórmula corregida (**BAC $61.038.487,40**) |
 | `03_Verificacion_y_validacion` | 7.2 Plan de verificación y validación | **Plan de pruebas al 75 % (50 % + 25 %)**: **78 casos** en el formato de la docente: 53 de los módulos del 70 % (los 33 del 2.º corte + 20 nuevos, por encima del mínimo de 50) y **25 de Pedidos y Cocina** · **Informe de pruebas automatizadas del 15 %** (43 pruebas de pytest, todas aprobadas) |
 | `05_Producto_desarrollado` | 6.3 Plan de infraestructura · producto | **Proyecto desarrollado (70 % + 15 %)**: guía de despliegue con ngrok y el código fuente de la versión entregada |
 
 Siguen vigentes, sin cambios, los documentos del 2.º corte que no hacen parte de esta entrega (en
-[`../entrega-2do-corte`](../entrega-2do-corte)): cronograma y Excel de puntos de función (5), métodos, herramientas e
+[`../entrega-2do-corte`](../entrega-2do-corte)): cronograma (5), métodos, herramientas e
 IA utilizada (6.2), matriz de criterios de aceptación y acta UAT (6.4).
 
 El resto de la estructura técnica está en la raíz del repositorio:
