@@ -153,5 +153,5 @@ INSERT IGNORE INTO clientes (empresa_id, nombre, telefono, direccion, barrio, re
 -- Requiere la tabla mesas (01_schema.sql actual o script 09).
 -- ---------------------------------------------------------------------
 INSERT IGNORE INTO mesas (empresa_id, numero, capacidad, ubicacion) VALUES
- (1, 1, 4, 'Salón'), (2, 4, 'Salón'), (3, 2, 'Salón'), (4, 6, 'Salón'),
- (1, 5, 4, 'Terraza'), (6, 2, 'Terraza'), (7, 8, 'Terraza'), (8, 2, 'Barra');
+ (1, 1, 4, 'Salón'), (1, 2, 4, 'Salón'), (1, 3, 2, 'Salón'), (1, 4, 6, 'Salón'),
+ (1, 5, 4, 'Terraza'), (1, 6, 2, 'Terraza'), (1, 7, 8, 'Terraza'), (1, 8, 2, 'Barra');
