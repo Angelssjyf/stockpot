@@ -30,3 +30,6 @@ database/respaldos/
 *.zip
 docs/2 PARCIAL*/
 docs/sustentacion/
+
+# Informes HTML de Lighthouse (16 MB): van en la entrega, no en el repositorio
+docs/entrega-final/03_Verificacion_y_validacion/Lighthouse/informes/

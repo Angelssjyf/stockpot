@@ -2,11 +2,6 @@
 import { api, exigirSesion } from './api.js';
 import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
-const yo = await exigirSesion('productos.ver'); // sin el permiso vuelve al menú
-const puedeGestionar = yo.permisos.includes('productos.gestionar');
-// La cocina también puede marcar un plato como agotado (RF-04.6)
-const puedeCambiarDisponibilidad = puedeGestionar || yo.permisos.includes('cocina.gestionar');
-
 const $ = (id) => document.getElementById(id);
 
 const CATEGORIAS = {
@@ -41,6 +36,14 @@ function pintarCategorias() {
     return boton;
   }));
 }
+
+// Las categorías no dependen de la sesión: se pintan antes de esperarla, así la lista no salta al aparecer
+pintarCategorias();
+
+const yo = await exigirSesion('productos.ver'); // sin el permiso vuelve al menú
+const puedeGestionar = yo.permisos.includes('productos.gestionar');
+// La cocina también puede marcar un plato como agotado (RF-04.6)
+const puedeCambiarDisponibilidad = puedeGestionar || yo.permisos.includes('cocina.gestionar');
 
 async function cargar() {
   if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada

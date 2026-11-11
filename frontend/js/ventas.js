@@ -155,6 +155,9 @@ $('ver-comprobante').addEventListener('click', () => {
   window.open(`comprobante.html?orden=${ventaAbierta.orden_id}`, '_blank');
 });
 
+// Las tarjetas del resumen ocupan su lugar desde el inicio (sin saltos cuando llegan los datos)
+pintarSuave($('resumen'), ...['receipt_long', 'payments', 'shopping_bag', 'trending_up', 'volunteer_activism']
+  .map((icono) => tarjetaResumen(icono, '…', '…')));
 cargar();
 
 // RF-12.2 Reportar un error en la venta abierta (método de pago, monto, producto...)

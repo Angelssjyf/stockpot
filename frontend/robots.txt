@@ -1,0 +1,3 @@
+# StockPot es una aplicación interna del restaurante: la API no se indexa
+User-agent: *
+Disallow: /api/

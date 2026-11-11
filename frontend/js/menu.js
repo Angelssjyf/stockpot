@@ -236,4 +236,8 @@ async function pintarResumenHoy() {
   document.getElementById('resumen-hoy').hidden = false;
 }
 
-pintarResumenHoy();
+// Los módulos esperan al resumen (máximo 1,5 s) para no saltar hacia abajo cuando este aparece
+const modulosVisibles = [document.getElementById('titulo-modulos'), contenedor];
+modulosVisibles.forEach((el) => el.classList.add('esperando-resumen'));
+Promise.race([pintarResumenHoy().catch(() => {}), new Promise((listo) => setTimeout(listo, 1500))])
+  .then(() => modulosVisibles.forEach((el) => el.classList.remove('esperando-resumen')));

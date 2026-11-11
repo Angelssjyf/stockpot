@@ -1,0 +1,710 @@
+[
+  {
+    "pantalla": "Inicio de sesión (RF-01.4)",
+    "archivo": "index.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/index.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.3 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Inicio de sesión (RF-01.4)",
+    "archivo": "index.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/index.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.2 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Menú principal",
+    "archivo": "menu.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/menu.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.6 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Menú principal",
+    "archivo": "menu.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/menu.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.8 s",
+      "TBT": "0 ms",
+      "CLS": "0.001"
+    }
+  },
+  {
+    "pantalla": "Usuarios y roles (RF-01)",
+    "archivo": "usuarios.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/usuarios.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "document-latency-insight (50)",
+      "font-display-insight (0)",
+      "forced-reflow-insight (0)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.3 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Usuarios y roles (RF-01)",
+    "archivo": "usuarios.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/usuarios.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.2 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Proveedores (RF-02)",
+    "archivo": "proveedores.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/proveedores.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.3 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Proveedores (RF-02)",
+    "archivo": "proveedores.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/proveedores.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.2 s",
+      "TBT": "0 ms",
+      "CLS": "0.005"
+    }
+  },
+  {
+    "pantalla": "Órdenes de compra (RF-02)",
+    "archivo": "compras.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/compras.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.4 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Órdenes de compra (RF-02)",
+    "archivo": "compras.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/compras.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.5 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Inventario (RF-03)",
+    "archivo": "insumos.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/insumos.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (0)",
+      "unused-css-rules (50)",
+      "uses-text-compression (0)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.4 s",
+      "LCP": "0.5 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Inventario (RF-03)",
+    "archivo": "insumos.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/insumos.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.5 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Productos y menú (RF-04)",
+    "archivo": "productos.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/productos.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (0)",
+      "unused-css-rules (50)",
+      "uses-text-compression (0)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.4 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Productos y menú (RF-04)",
+    "archivo": "productos.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/productos.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.0 s",
+      "LCP": "1.1 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Pedidos en mesa (RF-05)",
+    "archivo": "pedidos.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/pedidos.html",
+    "fallas": [
+      "font-display (50)",
+      "label-content-name-mismatch (0)",
+      "unminified-javascript (0)",
+      "unused-css-rules (50)",
+      "unused-javascript (0)",
+      "uses-text-compression (0)",
+      "document-latency-insight (50)",
+      "forced-reflow-insight (0)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.5 s",
+      "TBT": "0 ms",
+      "CLS": "0.005"
+    }
+  },
+  {
+    "pantalla": "Pedidos en mesa (RF-05)",
+    "archivo": "pedidos.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/pedidos.html",
+    "fallas": [
+      "font-display (50)",
+      "label-content-name-mismatch (0)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "unused-javascript (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.5 s",
+      "TBT": "0 ms",
+      "CLS": "0.053"
+    }
+  },
+  {
+    "pantalla": "Cocina (RF-06)",
+    "archivo": "cocina.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/cocina.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "document-latency-insight (50)",
+      "font-display-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.4 s",
+      "TBT": "0 ms",
+      "CLS": "0.04"
+    }
+  },
+  {
+    "pantalla": "Cocina (RF-06)",
+    "archivo": "cocina.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/cocina.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.0 s",
+      "LCP": "1.6 s",
+      "TBT": "0 ms",
+      "CLS": "0.001"
+    }
+  },
+  {
+    "pantalla": "Reservas (RF-07)",
+    "archivo": "reservas.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/reservas.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.3 s",
+      "TBT": "0 ms",
+      "CLS": "0.005"
+    }
+  },
+  {
+    "pantalla": "Reservas (RF-07)",
+    "archivo": "reservas.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/reservas.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.2 s",
+      "TBT": "0 ms",
+      "CLS": "0.03"
+    }
+  },
+  {
+    "pantalla": "Domicilios (RF-08)",
+    "archivo": "domicilios.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/domicilios.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (0)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.4 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Domicilios (RF-08)",
+    "archivo": "domicilios.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/domicilios.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.2 s",
+      "LCP": "1.4 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Caja y pagos (RF-09)",
+    "archivo": "caja.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/caja.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (0)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.3 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Caja y pagos (RF-09)",
+    "archivo": "caja.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/caja.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.2 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  },
+  {
+    "pantalla": "Ventas y consumo (RF-10)",
+    "archivo": "ventas.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/ventas.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "uses-text-compression (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.3 s",
+      "TBT": "0 ms",
+      "CLS": "0.037"
+    }
+  },
+  {
+    "pantalla": "Ventas y consumo (RF-10)",
+    "archivo": "ventas.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/ventas.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "document-latency-insight (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.1 s",
+      "LCP": "1.2 s",
+      "TBT": "0 ms",
+      "CLS": "0.02"
+    }
+  },
+  {
+    "pantalla": "Reportes (RF-11)",
+    "archivo": "reportes.html",
+    "modo": "escritorio",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/reportes.html",
+    "fallas": [
+      "font-display (50)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "unused-javascript (0)",
+      "uses-text-compression (0)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (50)"
+    ],
+    "metricas": {
+      "FCP": "0.3 s",
+      "LCP": "0.5 s",
+      "TBT": "0 ms",
+      "CLS": "0.023"
+    }
+  },
+  {
+    "pantalla": "Reportes (RF-11)",
+    "archivo": "reportes.html",
+    "modo": "celular",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "urlFinal": "http://127.0.0.1:5070/reportes.html",
+    "fallas": [
+      "font-display (50)",
+      "render-blocking-resources (0)",
+      "unminified-javascript (50)",
+      "unused-css-rules (50)",
+      "unused-javascript (50)",
+      "network-dependency-tree-insight (0)",
+      "render-blocking-insight (0)"
+    ],
+    "metricas": {
+      "FCP": "1.3 s",
+      "LCP": "1.6 s",
+      "TBT": "0 ms",
+      "CLS": "0"
+    }
+  }
+]
