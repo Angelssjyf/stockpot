@@ -23,14 +23,18 @@ frontend/                                              backend/                 
 |---|---|---|---|
 | 1 | Andrés Mateo Puentes | Usuarios y roles (RF-01) · Proveedores y compras (RF-02) | ✅ Terminado |
 | 2 | Jhorman Caballero | Inventario (RF-03) · Productos y menú (RF-04) | ✅ Terminado |
-| 3 | Yovany Peñaranda | Pedidos en mesa (RF-05) ✅ · Cocina (RF-06) · Reservas (RF-07) | ⏳ En curso: falta cocina y reservas |
+| 3 | Yovany Peñaranda | Pedidos en mesa (RF-05) · Cocina (RF-06) · Reservas (RF-07) | ✅ Terminado |
 | 4 | Ángel David Rodríguez Vega (líder) | Domicilios (RF-08) · Pagos (RF-09) · Ventas y consumo (RF-10) · Reportes (RF-11) | ✅ Terminado |
 
 **Entrega del 2.º corte (20/10/2026): 70 % del software** = Iteraciones 1, 2 y 4 → 233 de 330 puntos
 de función (376 de 515 PFSA). 267 pruebas automáticas aprobadas (41 de ellas unitarias), 95 % de cobertura del backend.
 
-**Después del corte (Iteración 3, en curso):** módulo de pedidos en mesa (RF-05) terminado, con mesas,
-confirmación, envío a cocina y cobro en caja. Total actual: 304 pruebas automáticas aprobadas.
+**Entrega final (3.er corte): 100 % del software** = las 4 iteraciones → 330 de 330 puntos de función.
+La Iteración 3 terminó pedidos en mesa (RF-05), cocina (RF-06) y reservas (RF-07).
+402 pruebas automáticas aprobadas, 95 % de cobertura del backend.
+
+**Versión publicada:** `main` (v0.8.1) · en línea con ngrok desde el PC del equipo
+([guía de despliegue](docs/despliegue/Guia_Despliegue_ngrok.md)).
 
 ## Gestión del proyecto
 
@@ -60,11 +64,11 @@ Hitos: **20/10/2026** entrega parcial del 70 % (2.º corte) · **21/10 – 13/11
 ```
 stockpot/
 ├── database/            Scripts SQL
-│   ├── 01_schema.sql    Crea la base y sus 21 tablas (instalación desde cero)
+│   ├── 01_schema.sql    Crea la base y sus 26 tablas (instalación desde cero)
 │   ├── 02_seed.sql      Roles y permisos iniciales
 │   ├── 03_usuario_app.sql   Usuario de MySQL para la aplicación
 │   ├── 04_datos_ejemplo.sql Datos de demostración (insumos, proveedores, carta, clientes)
-│   └── 05 a 09_*.sql    Actualizan una base existente sin borrar datos
+│   └── 05 a 16_*.sql    Actualizan una base existente sin borrar datos
 ├── backend/             API Flask
 │   ├── app/
 │   │   ├── models/      Tablas como clases de Python
@@ -78,7 +82,8 @@ stockpot/
 │   ├── *.html           Una pantalla por módulo (usuarios, inventario, domicilios, caja...)
 │   ├── css/estilos.css  Diseño de toda la interfaz
 │   └── js/              Lógica de cada pantalla (api.js habla con la API)
-└── docs/                Documentación (modelo de datos y entregables del 2.º corte)
+├── docs/                Documentación (modelo de datos, despliegue y entregables)
+└── iniciar.bat          Enciende el servidor y el enlace público de ngrok
 ```
 
 ---
@@ -106,12 +111,11 @@ En MySQL Workbench, conectado como `root`, ejecuta en este orden (rayo ⚡):
 4. *(Opcional)* `database/04_datos_ejemplo.sql`: insumos, proveedores, 8 platos con sus recetas y
    3 clientes y 8 mesas de ejemplo. Se puede ejecutar más de una vez sin duplicar datos.
 
-Verifica con `SHOW TABLES FROM stockpot;`: deben salir 21 tablas.
+Verifica con `SHOW TABLES FROM stockpot;`: deben salir 26 tablas.
 
 **¿Ya tenías la base creada de antes?** No vuelvas a ejecutar el `01` (borra todo). Ejecuta solo
-los scripts de actualización que te falten, en orden: `05_iteracion2_inventario.sql`,
-`06_iteracion2_productos.sql`, `07_iteracion4_domicilios.sql`, `08_iteracion4_pagos_ventas.sql` y
-`09_iteracion3_pedidos.sql`.
+los scripts de actualización que te falten, en orden numérico, del `05` al `16`
+(por ejemplo `09_iteracion3_pedidos.sql` y `15_reservas.sql`).
 Solo agregan columnas y tablas; tus datos se conservan.
 
 ### 4. Configurar el backend
@@ -160,9 +164,12 @@ navegador (F5).
 > pantallas nuevas muestran *"La ruta de la API no existe"*.
 
 Para comprobar solo la API: http://127.0.0.1:5000/api/health debe responder con la versión de
-MySQL y los 6 roles.
+MySQL y los roles.
 
 ### Enlace público con ngrok
+
+Paso a paso, con la arquitectura, la seguridad y los problemas frecuentes:
+[docs/despliegue/Guia_Despliegue_ngrok.md](docs/despliegue/Guia_Despliegue_ngrok.md).
 
 1. Instala [ngrok](https://ngrok.com/download) y vincula tu cuenta una sola vez:
    `ngrok config add-authtoken <tu-token>` (el token está en dashboard.ngrok.com).
@@ -219,6 +226,11 @@ Todas las rutas, excepto `login` y `health`, requieren el encabezado
 | GET/POST/PUT | `/api/pedidos` · `/<id>` · `/<id>/productos` | RF-05.1 a RF-05.5 Registrar, agregar productos, modificar y consultar | `pedidos.*` |
 | POST | `/api/pedidos/disponibilidad` | RF-05.6 Validar disponibilidad de insumos (sin guardar) | `pedidos.ver` |
 | PATCH/GET | `/api/pedidos/<id>/confirmar` · `/enviar-cocina` · `/comanda` · `/estado` · `/cancelar` | RF-05.7 a RF-05.9 | `pedidos.*` |
+| GET | `/api/cocina/ordenes` | RF-06.1 a RF-06.3 Recibir y ver las órdenes pendientes por llegada | `cocina.ver` |
+| PATCH | `/api/cocina/ordenes/<MESA\|DOMICILIO>/<id>/estado` | RF-06.4 a RF-06.6 En preparación, listo y entregado | `cocina.gestionar` (entregado también `pedidos.gestionar`) |
+| GET | `/api/cocina/novedades?desde=` | RF-06.7 Notificar cambios de estado | `cocina.ver` / `pedidos.ver` |
+| GET/POST/PUT/PATCH | `/api/reservas` · `/<id>` · `/<id>/cancelar` · `/<id>/estado` | RF-07.1 a RF-07.5, RF-07.8 | `reservas.*` |
+| GET | `/api/reservas/disponibilidad` | RF-07.6 y RF-07.7 Mesas libres para una fecha, hora y número de personas | `reservas.ver` |
 | GET/POST/PUT | `/api/clientes` · `/api/domicilios` (+ `asignar`, `estado`, `entrega`, `historial`) | RF-08.1 a RF-08.8 | `domicilios.*` |
 | GET/POST/PATCH | `/api/ordenes/por-cobrar` · `/<id>/cuenta` · `/<id>/pagos` · `/<id>/comprobante` · `/api/pagos` | RF-09.1 a RF-09.7 | `pagos.*` |
 | GET/POST | `/api/ventas` · `/mas-vendidos` · `/consumo` | RF-10.1 a RF-10.6 | `ventas.ver` / `pagos.gestionar` |
@@ -259,6 +271,11 @@ Después abre un **Pull Request hacia `develop`** en GitHub para que otro integr
 - [ ] Si cambiaste tablas, actualizaste `database/01_schema.sql` **y** `backend/app/models/`.
 
 ---
+
+## Despliegue
+
+StockPot se publica con **ngrok** desde el PC del equipo (opción aprobada por la docente):
+[Guía de despliegue con ngrok](docs/despliegue/Guia_Despliegue_ngrok.md).
 
 ## Documentación del 2.º corte
 
