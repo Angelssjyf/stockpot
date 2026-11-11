@@ -1,8 +1,6 @@
-"""Punto de entrada para un servidor web en la nube (PythonAnywhere u otro con WSGI).
+"""Punto de entrada para un servidor WSGI en Linux (por ejemplo, si algún día se publica en la nube).
 
-El archivo WSGI de PythonAnywhere solo tiene que agregar esta carpeta a sys.path y hacer
-    from wsgi import application
-Ver docs/despliegue/Guia_Despliegue_PythonAnywhere.md
+En el PC del equipo se usa iniciar.bat (Waitress + ngrok): ver docs/despliegue/Guia_Despliegue_ngrok.md
 """
 
 import os
