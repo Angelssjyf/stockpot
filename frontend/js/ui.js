@@ -134,6 +134,10 @@ export function empezarCarga(contenedor) {
  */
 export function mostrarEstado(texto, { icono = '', detalle = '', accion = null, reintentar = false, cargando = false } = {}) {
   const estado = document.getElementById('estado');
+  // El aviso va después de la lista: así, cuando llegan los datos, la lista ya está en su lugar y no
+  // salta hacia arriba al ocultarse el aviso (Lighthouse: estabilidad visual, CLS)
+  const lista = estado.nextElementSibling;
+  if (lista?.classList.contains('lista')) lista.after(estado);
   // Cargando: filas «esqueleto» con un brillo que pasa, en vez del texto solo
   let esqueleto = estado.querySelector('.esqueleto');
   if (cargando && !esqueleto) {

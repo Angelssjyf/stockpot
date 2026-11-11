@@ -50,6 +50,11 @@ h1, h2 {
   font-size: 24px;
   line-height: 1;
   display: inline-block;
+  /* Cuadrado fijo: mientras carga la fuente, el nombre del ícono ("restaurant_menu") no ocupa más
+     espacio ni hace saltar la página cuando aparece el ícono (Lighthouse: estabilidad visual, CLS) */
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
   white-space: nowrap;
   font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
@@ -314,8 +319,15 @@ a.boton-texto {
 
 @media (prefers-reduced-motion: no-preference) {
   .ingreso .login {
-    animation: fundido 0.35s ease-out both;
+    /* Entra con un pequeño desplazamiento y siempre visible: si empezara transparente, en el celular
+       (donde es lo único en pantalla) el navegador no cuenta la primera pintura (Lighthouse NO_FCP) */
+    animation: entrar-login 0.35s ease-out both;
   }
+}
+
+@keyframes entrar-login {
+  from { transform: translateY(10px); }
+  to   { transform: none; }
 }
 
 .login form {
@@ -3437,4 +3449,53 @@ p.nota-producto {
 .datos-orden.costos .separada {
   padding-top: 8px;
   border-top: 1px solid var(--borde);
+}
+
+
+/* ------------------------------------------------------------ Auditoría Lighthouse (accesibilidad y estabilidad) */
+.alertas h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #5c4400;
+}
+
+.alertas .mini-lista li {
+  padding: 0;
+}
+
+button.alerta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+}
+
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.titulo-lista {
+  margin: 20px 0 8px;
+  font-size: 18px;
+}
+
+.esperando-resumen {
+  visibility: hidden;
 }

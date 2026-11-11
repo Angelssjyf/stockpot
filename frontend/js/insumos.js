@@ -51,34 +51,35 @@ function pintarResumen(resumen) {
   });
 }
 
+/** Pide el resumen y las alertas; devuelve la función que los pinta (ver recargar). */
 async function cargarResumen() {
   try {
     const [existencias, alertas] = await Promise.all([
       api('GET', '/inventario/existencias'),
       api('GET', '/inventario/alertas'),
     ]);
-    pintarResumen(existencias.resumen);
-
-    $('alertas').hidden = alertas.length === 0;
-    pintarSuave($('lista-alertas'), alertas.map(filaDeAlerta));
+    return () => {
+      pintarResumen(existencias.resumen);
+      $('alertas').hidden = alertas.length === 0;
+      pintarSuave($('lista-alertas'), alertas.map(filaDeAlerta));
+    };
   } catch (error) {
-    $('resumen').replaceChildren(crear('p', { className: 'nota', texto: error.message }));
+    return () => $('resumen').replaceChildren(crear('p', { className: 'nota', texto: error.message }));
   }
 }
 
 /** Una alerta: al tocarla abre la ficha del insumo para reponerlo ahí mismo. */
 function filaDeAlerta(alerta) {
-  const fila = crear('li', { className: 'alerta-item', tabindex: '0', role: 'button' }, [
+  // Un botón dentro de la fila: se abre con clic, Enter o espacio (accesible con teclado y lector de pantalla)
+  const boton = crear('button', { type: 'button', className: 'alerta-item' }, [
     crear('span', { texto: `${alerta.nombre} · ${textoStock(alerta)} (mínimo ${formato.cantidad(alerta.stock_minimo)})` }),
     crear('span', { className: `chip estado-${alerta.estado_stock}`,
                     texto: alerta.estado_stock === 'AGOTADO' ? 'Agotado' : `Faltan ${formato.cantidad(alerta.faltante)}` }),
   ]);
+  boton.addEventListener('click', () => abrirFormulario(alerta));
+  const fila = crear('li', {}, [boton]);
   fila.dataset.clave = alerta.id;
   fila.dataset.version = alerta.stock_actual;
-  fila.addEventListener('click', () => abrirFormulario(alerta));
-  fila.addEventListener('keydown', (evento) => {
-    if (evento.key === 'Enter') abrirFormulario(alerta); // también con teclado
-  });
   return fila;
 }
 
@@ -126,16 +127,20 @@ function pintarCategorias() {
   }));
 }
 
+/** Pide los insumos; devuelve la función que pinta las categorías y la lista (ver recargar). */
 async function cargar() {
   // Solo la primera vez se ve "Cargando…"; al recargar, la lista actual se queda hasta que llegan los datos
   if (insumos.length === 0) mostrarEstado('Cargando…', { cargando: true });
   try {
-    insumos = await api('GET', '/insumos');
-    if (categoriaElegida && !insumos.some((i) => i.categoria === categoriaElegida)) categoriaElegida = '';
-    pintarCategorias();
-    pintarLista();
+    const datos = await api('GET', '/insumos');
+    return () => {
+      insumos = datos;
+      if (categoriaElegida && !insumos.some((i) => i.categoria === categoriaElegida)) categoriaElegida = '';
+      pintarCategorias();
+      pintarLista();
+    };
   } catch (error) {
-    mostrarEstado(error.message, { reintentar: true });
+    return () => mostrarEstado(error.message, { reintentar: true });
   }
 }
 
@@ -162,8 +167,9 @@ function pintarLista() {
 
 /** Recarga todo: resumen, alertas y lista (después de cualquier cambio). */
 function recargar() {
-  cargarResumen();
-  cargar();
+  // Se pinta todo junto cuando llegan ambas respuestas: así la lista no salta hacia abajo cuando
+  // aparecen el resumen, las alertas y las categorías (Lighthouse: estabilidad visual, CLS)
+  Promise.all([cargarResumen(), cargar()]).then((pintores) => pintores.forEach((pintar) => pintar()));
 }
 
 /** Una fila: código, nombre y el stock con color según su estado (OK, BAJO, AGOTADO). */
@@ -194,7 +200,7 @@ $('limpiar').addEventListener('click', () => {
   pintarLista();
   $('buscar').focus();
 });
-$('reintentar').addEventListener('click', cargar);
+$('reintentar').addEventListener('click', recargar);
 
 // =====================================================================
 //  RF-03.1 Registrar, RF-03.3 Modificar y RF-03.7 Niveles mínimos
