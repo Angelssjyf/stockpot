@@ -7,6 +7,17 @@ from .models import Empresa, Rol, Usuario
 
 
 def register_cli(app):
+    @app.cli.command("respaldar")
+    def respaldar_cmd():
+        """Copia de seguridad de la base de datos en database/respaldos (guarda las últimas 15)."""
+        from .respaldos import RespaldoFallido, respaldar
+
+        try:
+            archivo = respaldar()
+        except RespaldoFallido as error:
+            raise click.ClickException(f"No se pudo hacer el respaldo: {error}")
+        click.echo(f"Respaldo listo: database/respaldos/{archivo.name} ({archivo.stat().st_size // 1024} KB)")
+
     @app.cli.command("crear-admin")
     @click.option("--email", prompt="Correo del administrador")
     @click.option("--nombre", prompt="Nombre")
