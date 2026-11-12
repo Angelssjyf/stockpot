@@ -1,4 +1,4 @@
-// Módulo de caja y pagos (RF-09.1 a RF-09.7) y venta de mostrador (RF-10.1).
+// Módulo de caja y pagos (RF-09.1 a RF-09.7), venta de mostrador (RF-10.1) y cierre de caja.
 import { api, exigirSesion } from './api.js';
 import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
@@ -108,7 +108,7 @@ function formularioDePago(contenedor, { montoInicial = 0, montoFijo = null } = {
 //  Pestañas
 // =====================================================================
 
-const vistas = { cobrar: cargarPorCobrar, mostrador: prepararMostrador, pagos: cargarPagos };
+const vistas = { cobrar: cargarPorCobrar, mostrador: prepararMostrador, pagos: cargarPagos, cierre: cargarCierre };
 
 function mostrarPestana(nombre) {
   for (const clave of Object.keys(vistas)) {
@@ -128,6 +128,7 @@ $('tab-mostrador').hidden = !puedeCobrar;
 // =====================================================================
 
 async function cargarPorCobrar() {
+  avisarCajaCerrada();
   try {
     const ordenes = await api('GET', '/ordenes/por-cobrar');
     $('estado-cobrar').hidden = ordenes.length > 0;
@@ -451,5 +452,268 @@ $('form-pagos').addEventListener('submit', (evento) => {
   evento.preventDefault();
   cargarPagos();
 });
+
+// =====================================================================
+//  Cierre de caja: turno con base de efectivo y arqueo al cerrar
+// =====================================================================
+
+const METODOS_ARQUEO = [
+  ['efectivo', 'Efectivo', 'payments'],
+  ['tarjeta', 'Tarjeta', 'credit_card'],
+  ['transferencia', 'Transferencia', 'swap_horiz'],
+];
+let turnoActual = null;
+
+/** Chip según la diferencia: cuadra, sobra o falta. */
+function chipDiferencia(diferencia) {
+  if (Math.abs(diferencia) < 0.005) return crear('span', { className: 'chip estado-OK', texto: 'Cuadra' });
+  return diferencia > 0
+    ? crear('span', { className: 'chip estado-BAJO', texto: `Sobran ${formato.dinero(diferencia)}` })
+    : crear('span', { className: 'chip estado-AGOTADO', texto: `Faltan ${formato.dinero(-diferencia)}` });
+}
+
+async function avisarCajaCerrada() {
+  if (!puedeCobrar) return;
+  try {
+    const { turno } = await api('GET', '/caja/turno');
+    $('aviso-caja-cerrada').hidden = Boolean(turno);
+  } catch {
+    $('aviso-caja-cerrada').hidden = true; // si no se pudo consultar, no se molesta al cajero
+  }
+}
+
+$('ir-a-cierre').addEventListener('click', () => mostrarPestana('cierre'));
+
+async function cargarCierre() {
+  try {
+    const { turno } = await api('GET', '/caja/turno');
+    turnoActual = turno;
+    pintarTurno(turno);
+  } catch (error) {
+    $('turno-detalle').textContent = error.message;
+  }
+  cargarHistorialCierres();
+}
+
+function pintarTurno(turno) {
+  const acciones = [];
+  if (!turno) {
+    $('turno-titulo').textContent = 'La caja está cerrada';
+    $('turno-detalle').textContent = 'Ábrela con el efectivo que hay en la caja para empezar a cobrar.';
+    $('turno-resumen').replaceChildren();
+    if (puedeCobrar) {
+      const abrir = crear('button', { type: 'button', className: 'boton-principal' }, [
+        crear('span', { className: 'icono', texto: 'lock_open', 'aria-hidden': 'true' }),
+        document.createTextNode(' Abrir caja'),
+      ]);
+      abrir.addEventListener('click', abrirDialogoAbrir);
+      acciones.push(abrir);
+    }
+  } else {
+    const { actual } = turno;
+    $('turno-titulo').textContent = 'Caja abierta';
+    $('turno-detalle').textContent = `Desde ${fechaHora(turno.abierto_en)} · abrió ${turno.abierto_por}`
+      + ` · base ${formato.dinero(turno.base_inicial)} · ${actual.num_pagos} pagos`
+      + (actual.anulados ? ` (${actual.anulados} anulados)` : '');
+    pintarSuave($('turno-resumen'),
+      tarjetaResumen('payments', 'Efectivo en caja', formato.dinero(actual.esperado.efectivo)),
+      tarjetaResumen('credit_card', 'Tarjeta', formato.dinero(actual.esperado.tarjeta)),
+      tarjetaResumen('swap_horiz', 'Transferencia', formato.dinero(actual.esperado.transferencia)),
+      tarjetaResumen('volunteer_activism', 'Propinas del turno', formato.dinero(actual.propinas)),
+    );
+    if (puedeCobrar) {
+      const cerrar = crear('button', { type: 'button', className: 'boton-principal' }, [
+        crear('span', { className: 'icono', texto: 'lock', 'aria-hidden': 'true' }),
+        document.createTextNode(' Cerrar caja'),
+      ]);
+      cerrar.addEventListener('click', abrirDialogoCerrar);
+      acciones.push(cerrar);
+    }
+  }
+  $('turno-acciones').replaceChildren(...acciones);
+}
+
+// ---- Abrir caja
+function abrirDialogoAbrir() {
+  $('error-abrir').hidden = true;
+  $('a-base').value = '0';
+  $('dialogo-abrir').showModal();
+  $('a-base').select();
+}
+
+$('cancelar-abrir').addEventListener('click', () => $('dialogo-abrir').close());
+$('form-abrir').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const base = Number($('a-base').value);
+  if ($('a-base').value === '' || !(base >= 0)) {
+    $('error-abrir').textContent = 'Escribe la base en efectivo (puede ser 0)';
+    $('error-abrir').hidden = false;
+    return;
+  }
+  $('confirmar-abrir').disabled = true;
+  try {
+    await api('POST', '/caja/abrir', { base_inicial: base });
+    $('dialogo-abrir').close();
+    mostrarAviso('Caja abierta', 'exito');
+    cargarCierre();
+  } catch (error) {
+    $('error-abrir').textContent = error.message;
+    $('error-abrir').hidden = false;
+  } finally {
+    $('confirmar-abrir').disabled = false;
+  }
+});
+
+// ---- Cerrar caja (arqueo)
+const contados = {};
+
+async function abrirDialogoCerrar() {
+  try {
+    turnoActual = (await api('GET', '/caja/turno')).turno; // lo esperado al momento de contar
+  } catch (error) {
+    mostrarAviso(error.message, 'error');
+    return;
+  }
+  if (!turnoActual) {
+    cargarCierre();
+    return;
+  }
+  const filas = [crear('span', { className: 'encabezado' }), crear('span', { className: 'encabezado', texto: 'Esperado' }),
+    crear('span', { className: 'encabezado', texto: 'Contado' }), crear('span', { className: 'encabezado', texto: 'Diferencia' })];
+  for (const [clave, nombre, icono] of METODOS_ARQUEO) {
+    const entrada = crear('input', { type: 'number', min: '0', step: 'any', inputmode: 'decimal', 'aria-label': `${nombre} contado` });
+    contados[clave] = entrada;
+    entrada.addEventListener('input', actualizarArqueo);
+    filas.push(
+      crear('span', { className: 'metodo' }, [crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }), document.createTextNode(` ${nombre}`)]),
+      crear('span', { className: 'valor esperado', texto: formato.dinero(turnoActual.actual.esperado[clave]) }),
+      crear('div', { className: 'campo' }, [entrada]),
+      crear('span', { className: 'diferencia', id: `dif-${clave}` }),
+    );
+  }
+  $('arqueo').replaceChildren(...filas);
+  $('c-observacion').value = '';
+  $('error-cerrar').hidden = true;
+  actualizarArqueo();
+  $('dialogo-cerrar').showModal();
+  contados.efectivo.focus();
+}
+
+/** Diferencia por método mientras el cajero escribe; la observación es obligatoria si no cuadra. */
+function actualizarArqueo() {
+  let total = 0;
+  let completo = true;
+  for (const [clave] of METODOS_ARQUEO) {
+    const celda = $(`dif-${clave}`);
+    if (contados[clave].value === '') {
+      completo = false;
+      celda.replaceChildren();
+      continue;
+    }
+    const diferencia = Number(contados[clave].value) - turnoActual.actual.esperado[clave];
+    total += diferencia;
+    celda.replaceChildren(chipDiferencia(diferencia));
+  }
+  const cuadra = Math.abs(total) < 0.005;
+  $('arqueo-total').replaceChildren(...(completo
+    ? [document.createTextNode('Resultado: '), chipDiferencia(total)]
+    : [document.createTextNode('Escribe lo contado en las tres formas de pago (0 si no hubo).')]));
+  $('obs-obligatoria').hidden = !completo || cuadra;
+}
+
+$('cancelar-cerrar').addEventListener('click', () => $('dialogo-cerrar').close());
+$('form-cerrar').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const datos = { observacion: $('c-observacion').value.trim() };
+  for (const [clave, nombre] of METODOS_ARQUEO) {
+    if (contados[clave].value === '' || Number(contados[clave].value) < 0) {
+      $('error-cerrar').textContent = `Escribe cuánto contaste en ${nombre.toLowerCase()} (0 si no hubo)`;
+      $('error-cerrar').hidden = false;
+      contados[clave].focus();
+      return;
+    }
+    datos[`contado_${clave}`] = Number(contados[clave].value);
+  }
+  if (!$('obs-obligatoria').hidden && !datos.observacion) {
+    $('error-cerrar').textContent = 'La caja no cuadra: explica la diferencia en la observación';
+    $('error-cerrar').hidden = false;
+    $('c-observacion').focus();
+    return;
+  }
+  $('confirmar-cerrar').disabled = true;
+  try {
+    const turno = await api('POST', '/caja/cerrar', datos); // pide el PIN, como cobrar
+    $('dialogo-cerrar').close();
+    mostrarAviso(Math.abs(turno.diferencia.total) < 0.005 ? 'Caja cerrada: cuadra' : 'Caja cerrada con diferencia', 'exito');
+    cargarCierre();
+  } catch (error) {
+    $('error-cerrar').textContent = error.message;
+    $('error-cerrar').hidden = false;
+  } finally {
+    $('confirmar-cerrar').disabled = false;
+  }
+});
+
+// ---- Historial de cierres
+async function cargarHistorialCierres() {
+  try {
+    const turnos = await api('GET', '/caja/turnos');
+    $('estado-cierres').hidden = turnos.length > 0;
+    $('estado-cierres').textContent = 'Todavía no hay cierres de caja';
+    pintarSuave($('lista-cierres'), ...turnos.map((turno) => {
+      // Lo cobrado en el turno según el sistema (sin la base de efectivo)
+      const cobrado = turno.esperado.efectivo - turno.base_inicial + turno.esperado.tarjeta + turno.esperado.transferencia;
+      const fila = crear('li', { className: 'fila editable' }, [
+        crear('div', { className: 'avatar' }, [crear('span', { className: 'icono', texto: 'point_of_sale', 'aria-hidden': 'true' })]),
+        crear('div', { className: 'datos' }, [
+          crear('div', { className: 'nombre', texto: `${fechaHora(turno.cerrado_en)} · cobrado ${formato.dinero(cobrado)}` }),
+          crear('div', { className: 'correo', texto: `${turno.num_pagos} pagos · cerró ${turno.cerrado_por}` }),
+        ]),
+        crear('div', { className: 'chips' }, [chipDiferencia(turno.diferencia.total)]),
+      ]);
+      fila.addEventListener('click', () => verTurno(turno.id));
+      return fila;
+    }));
+  } catch (error) {
+    $('estado-cierres').hidden = false;
+    $('estado-cierres').textContent = error.message;
+  }
+}
+
+async function verTurno(id) {
+  let turno;
+  try {
+    turno = await api('GET', `/caja/turnos/${id}`);
+  } catch (error) {
+    mostrarAviso(error.message, 'error');
+    return;
+  }
+  $('turno-detalle-titulo').replaceChildren(
+    document.createTextNode(`Cierre del ${fechaHora(turno.cerrado_en)} `), chipDiferencia(turno.diferencia.total));
+  $('turno-detalle-quien').textContent = `Abrió ${turno.abierto_por} (${fechaHora(turno.abierto_en)}) con base `
+    + `${formato.dinero(turno.base_inicial)} · cerró ${turno.cerrado_por}`
+    + (turno.propinas ? ` · propinas del turno ${formato.dinero(turno.propinas)}` : '');
+  const celdas = [crear('span', { className: 'encabezado' }), crear('span', { className: 'encabezado', texto: 'Esperado' }),
+    crear('span', { className: 'encabezado', texto: 'Contado' }), crear('span', { className: 'encabezado', texto: 'Diferencia' })];
+  for (const [clave, nombre, icono] of METODOS_ARQUEO) {
+    celdas.push(
+      crear('span', { className: 'metodo' }, [crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }), document.createTextNode(` ${nombre}`)]),
+      crear('span', { className: 'valor esperado', texto: formato.dinero(turno.esperado[clave]) }),
+      crear('span', { className: 'valor contado', texto: formato.dinero(turno.contado[clave]) }),
+      crear('span', { className: 'diferencia' }, [chipDiferencia(turno.diferencia[clave])]),
+    );
+  }
+  $('turno-detalle-arqueo').replaceChildren(...celdas);
+  $('turno-detalle-obs').textContent = turno.observacion ? `Observación: ${turno.observacion}` : '';
+  pintarSuave($('turno-detalle-pagos'), ...(turno.pagos.length ? turno.pagos.map((pago) => crear('li', {}, [
+    crear('span', { texto: `${pago.orden} · ${METODOS[pago.metodo]}` }),
+    crear('span', { className: 'nota', texto: fechaHora(pago.fecha) }),
+    pago.estado === 'ANULADO' ? crear('span', { className: 'chip estado-CANCELADO', texto: 'Anulado' })
+      : crear('span', { texto: formato.dinero(pago.monto) }),
+  ])) : [crear('li', { className: 'nota', texto: 'No hubo pagos en este turno' })]));
+  $('dialogo-turno').showModal();
+}
+
+$('cerrar-detalle-turno').addEventListener('click', () => $('dialogo-turno').close());
 
 mostrarPestana('cobrar');

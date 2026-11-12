@@ -259,6 +259,7 @@ Todas las rutas, excepto `login` y `health`, requieren el encabezado
 | GET | `/api/reservas/disponibilidad` | RF-07.6 y RF-07.7 Mesas libres para una fecha, hora y número de personas | `reservas.ver` |
 | GET/POST/PUT | `/api/clientes` · `/api/domicilios` (+ `asignar`, `estado`, `entrega`, `historial`) | RF-08.1 a RF-08.8 | `domicilios.*` |
 | GET/POST/PATCH | `/api/ordenes/por-cobrar` · `/<id>/cuenta` · `/<id>/pagos` · `/<id>/comprobante` · `/api/pagos` | RF-09.1 a RF-09.7 | `pagos.*` |
+| GET/POST | `/api/caja/turno` · `/api/caja/abrir` · `/api/caja/cerrar` · `/api/caja/turnos` · `/api/caja/turnos/<id>` | Cierre de caja (arqueo) | `pagos.*` |
 | GET/POST | `/api/ventas` · `/mas-vendidos` · `/consumo` | RF-10.1 a RF-10.6 | `ventas.ver` / `pagos.gestionar` |
 | GET | `/api/reportes/inventario` · `ventas` · `consumo` · `productos` · `historico` · `estadisticas` | RF-11.1 a RF-11.6 | `reportes.ver` |
 
