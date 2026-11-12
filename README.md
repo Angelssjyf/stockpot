@@ -182,6 +182,18 @@ Quien abra el enlace verá primero una advertencia de ngrok: debe tocar **Visit 
 > ⚠️ Mientras `iniciar.bat` esté abierto, cualquiera con el enlace puede ver la pantalla de
 > login. Usa contraseñas fuertes y cierra las ventanas cuando no lo estén usando.
 
+### Copias de seguridad de la base de datos
+
+Cada vez que se abre `iniciar.bat` se hace una copia de la base MySQL en `database/respaldos/`
+(carpeta que no se sube a GitHub). Se guardan las **últimas 15** copias automáticas
+(`stockpot_auto_AAAA-MM-DD_HHMMSS.sql`); las copias hechas a mano con otro nombre no se borran.
+
+- **Hacer una copia en cualquier momento** (en `backend`): `flask respaldar`
+- **Restaurar una copia** (reemplaza los datos actuales):
+  `mysql -u root -p stockpot < ..\database\respaldos\stockpot_auto_AAAA-MM-DD_HHMMSS.sql`
+
+Si `mysqldump` no está en la ruta normal de MySQL, pon su ubicación en `MYSQLDUMP` dentro de `backend/.env`.
+
 ### Para programar
 
 - **Backend con recarga automática:** en vez de `iniciar.bat`, ejecuta en `backend`:

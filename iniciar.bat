@@ -40,6 +40,12 @@ echo   Para apagar todo: cierra esta ventana y la de ngrok.
 echo ================================================================
 echo.
 
+REM --- Copia de seguridad de la base de datos (guarda las ultimas 15) ---
+echo Haciendo la copia de seguridad de la base de datos...
+".venv\Scripts\flask.exe" respaldar
+if errorlevel 1 echo [AVISO] No se pudo hacer la copia de seguridad; StockPot abre igual.
+echo.
+
 REM --- ngrok: enlace publico (opcional) ---------------------------
 where ngrok >nul 2>nul
 if errorlevel 1 (
