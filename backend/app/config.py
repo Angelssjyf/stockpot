@@ -42,6 +42,9 @@ class Config:
     # Carpeta de la interfaz web (HTML, CSS y JavaScript). Flask la entrega en "/"
     FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
 
+    # Registro de eventos y errores (logs): backend/logs/stockpot.log (no se sube a GitHub)
+    LOG_DIR = os.getenv("LOG_DIR") or Path(__file__).resolve().parents[1] / "logs"
+
 
 class TestConfig(Config):
     """Configuración para las pruebas automáticas (pytest).
@@ -51,6 +54,7 @@ class TestConfig(Config):
     """
 
     TESTING = True
+    LOG_DIR = None  # las pruebas no escriben archivos de registro
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_ENGINE_OPTIONS = {}
     SECRET_KEY = JWT_SECRET_KEY = "clave-solo-para-pruebas-con-32-caracteres-o-mas"
