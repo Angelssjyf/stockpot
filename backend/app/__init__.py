@@ -61,9 +61,11 @@ def create_app(config_class=Config):
     app.register_blueprint(cocina_bp, url_prefix="/api")
     app.register_blueprint(reservas_bp, url_prefix="/api")
 
+    from .cabeceras import register_cabeceras
     from .cli import register_cli
 
     register_cli(app)
+    register_cabeceras(app)  # cabeceras de seguridad HTTP en todas las respuestas
 
     @app.get("/api/health")
     def health():
