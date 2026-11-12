@@ -8,6 +8,8 @@ const puedeGestionar = yo.permisos.includes('inventario.gestionar');
 const puedeReportar = yo.permisos.includes('incidencias.reportar'); // RF-12.2
 
 const $ = (id) => document.getElementById(id);
+// Desde las alertas se arma la orden de compra con lo que está en el mínimo
+$('enlace-sugerir').hidden = !yo.permisos.includes('compras.gestionar');
 
 // RF-03.10 Opciones de categoría del formulario (OTROS queda al final y es la de un insumo nuevo)
 $('f-categoria').replaceChildren(...Object.entries(CATEGORIAS_INSUMO).map(([valor, texto]) => crear('option', { value: valor, texto })));

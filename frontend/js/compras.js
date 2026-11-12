@@ -300,4 +300,147 @@ $('form-orden').addEventListener('submit', async (evento) => {
 
 $('cancelar-nueva').addEventListener('click', () => dialogoNueva.close());
 
+// =====================================================================
+//  Sugerencia de compra: lo que está en el mínimo, agrupado por proveedor
+// =====================================================================
+
+const dialogoSugerencia = $('dialogo-sugerencia');
+let sugeridas = []; // [{insumo_id, insumo, unidad_medida, ..., proveedores, proveedor_id, cantidad, precio, incluir}]
+
+if (puedeGestionar) {
+  $('boton-sugerir').hidden = false;
+  $('boton-sugerir').addEventListener('click', abrirSugerencia);
+}
+
+async function abrirSugerencia() {
+  let datos;
+  try {
+    datos = await api('GET', '/ordenes-compra/sugerencia');
+  } catch (error) {
+    mostrarAviso(error.message, 'error');
+    return;
+  }
+  if (!datos.grupos.length && !datos.sin_proveedor.length) {
+    mostrarAviso(datos.cubiertos.length
+      ? 'Lo que está en el mínimo ya viene en camino: no hace falta pedir más'
+      : 'Ningún insumo está en su mínimo: no hace falta comprar', 'exito');
+    return;
+  }
+  sugeridas = datos.grupos.flatMap((grupo) => grupo.lineas.map((linea) => ({
+    ...linea, proveedor_id: grupo.proveedor_id, precio: linea.precio_unitario, incluir: true,
+  })));
+  $('error-sugerencia').hidden = true;
+  $('s-entrega').value = '';
+
+  $('bloque-sin-proveedor').hidden = datos.sin_proveedor.length === 0;
+  $('sin-proveedor').replaceChildren(...datos.sin_proveedor.map((i) => crear('li', {}, [
+    crear('span', { texto: i.insumo }),
+    crear('span', { className: 'nota', texto: `hay ${formato.cantidad(i.stock_actual)} / mín. ${formato.cantidad(i.stock_minimo)} ${i.unidad_medida}` }),
+    crear('span', { texto: `faltan ${formato.cantidad(i.cantidad)} ${i.unidad_medida}` }),
+  ])));
+  $('sugerencia-cubiertos').hidden = datos.cubiertos.length === 0;
+  $('sugerencia-cubiertos').textContent = `Ya vienen en camino y no se piden otra vez: ${datos.cubiertos.map((c) => c.insumo).join(', ')}.`;
+  pintarSugerencia();
+  dialogoSugerencia.showModal();
+}
+
+/** Agrupa las líneas por el proveedor elegido en cada una y pinta un bloque por orden. */
+function pintarSugerencia() {
+  const grupos = new Map();
+  for (const linea of sugeridas) {
+    if (!grupos.has(linea.proveedor_id)) grupos.set(linea.proveedor_id, []);
+    grupos.get(linea.proveedor_id).push(linea);
+  }
+  const bloques = [...grupos.entries()].map(([proveedorId, lineas]) => {
+    const nombre = lineas[0].proveedores.find((p) => p.proveedor_id === proveedorId).proveedor;
+    const total = lineas.filter((l) => l.incluir).reduce((suma, l) => suma + l.cantidad * l.precio, 0);
+    return crear('section', { className: 'grupo-sugerencia' }, [
+      crear('h3', {}, [
+        crear('span', { className: 'icono', texto: 'local_shipping', 'aria-hidden': 'true' }),
+        document.createTextNode(` ${nombre}`),
+        crear('span', { className: 'chip', texto: formato.dinero(total) }),
+      ]),
+      ...lineas.map(lineaSugerida),
+    ]);
+  });
+  $('sugerencia-grupos').replaceChildren(...bloques);
+
+  const elegidas = sugeridas.filter((l) => l.incluir && l.cantidad > 0);
+  const ordenes = new Set(elegidas.map((l) => l.proveedor_id)).size;
+  $('sugerencia-total').textContent = `Total: ${formato.dinero(elegidas.reduce((s, l) => s + l.cantidad * l.precio, 0))}`;
+  $('texto-crear').textContent = ordenes === 1 ? 'Crear 1 orden' : `Crear ${ordenes} órdenes`;
+  $('crear-sugeridas').disabled = ordenes === 0;
+  // Si no hay nada que se pueda pedir (todo en camino o sin proveedor), solo se informa
+  const hayQuePedir = sugeridas.length > 0;
+  $('bloque-pedir').hidden = !hayQuePedir;
+  $('crear-sugeridas').hidden = !hayQuePedir;
+  $('cancelar-sugerencia').textContent = hayQuePedir ? 'Cancelar' : 'Cerrar';
+}
+
+function lineaSugerida(linea) {
+  const incluir = crear('input', { type: 'checkbox', 'aria-label': `Pedir ${linea.insumo}` });
+  incluir.checked = linea.incluir;
+  incluir.addEventListener('change', () => {
+    linea.incluir = incluir.checked;
+    pintarSugerencia();
+  });
+
+  const cantidad = crear('input', { type: 'number', min: '0', step: 'any', inputmode: 'decimal', 'aria-label': `Cantidad de ${linea.insumo}` });
+  cantidad.value = linea.cantidad;
+  cantidad.addEventListener('change', () => {
+    linea.cantidad = Math.max(0, Number(cantidad.value) || 0);
+    pintarSugerencia();
+  });
+
+  const proveedor = crear('select', { 'aria-label': `Proveedor de ${linea.insumo}` },
+    linea.proveedores.map((p) => crear('option', { value: p.proveedor_id, texto: `${p.proveedor} · ${formato.dinero(p.precio)}` })));
+  proveedor.value = String(linea.proveedor_id);
+  proveedor.addEventListener('change', () => {
+    const elegido = linea.proveedores.find((p) => p.proveedor_id === Number(proveedor.value));
+    linea.proveedor_id = elegido.proveedor_id;
+    linea.precio = elegido.precio; // el precio de referencia de ese proveedor
+    pintarSugerencia();
+  });
+
+  const situacion = `hay ${formato.cantidad(linea.stock_actual)} / mín. ${formato.cantidad(linea.stock_minimo)} ${linea.unidad_medida}`
+    + (linea.en_camino ? ` · ${formato.cantidad(linea.en_camino)} en camino` : '');
+  return crear('div', { className: `linea-sugerida${linea.incluir ? '' : ' excluida'}` }, [
+    crear('label', { className: 'insumo-sugerido' }, [
+      incluir,
+      crear('span', {}, [crear('b', { texto: linea.insumo }), crear('small', { texto: situacion })]),
+    ]),
+    linea.proveedores.length > 1 ? crear('div', { className: 'campo' }, [proveedor])  // se puede elegir otro
+      : crear('span', { className: 'proveedor-unico', texto: `${linea.proveedores[0].proveedor} · ${formato.dinero(linea.precio)}` }),
+    crear('div', { className: 'campo' }, [cantidad, crear('span', { className: 'unidad', texto: linea.unidad_medida })]),
+    crear('span', { className: 'subtotal', texto: formato.dinero(linea.cantidad * linea.precio) }),
+  ]);
+}
+
+$('cancelar-sugerencia').addEventListener('click', () => dialogoSugerencia.close());
+$('form-sugerencia').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const lineas = sugeridas.filter((l) => l.incluir && l.cantidad > 0).map((l) => ({
+    proveedor_id: l.proveedor_id, insumo_id: l.insumo_id, cantidad: l.cantidad, precio_unitario: l.precio,
+  }));
+  if (!lineas.length) return;
+  $('crear-sugeridas').disabled = true;
+  try {
+    const creadas = await api('POST', '/ordenes-compra/sugerencia', {
+      lineas, fecha_entrega_estimada: $('s-entrega').value || undefined,
+    });
+    dialogoSugerencia.close();
+    mostrarAviso(`${creadas.length === 1 ? 'Orden creada' : `${creadas.length} órdenes creadas`}: ${creadas.map((o) => o.codigo).join(', ')}`, 'exito');
+    $('filtro-estado').value = 'PENDIENTE';
+    cargar();
+  } catch (error) {
+    $('error-sugerencia').textContent = error.message;
+    $('error-sugerencia').hidden = false;
+  } finally {
+    $('crear-sugeridas').disabled = false;
+  }
+});
+
+// Desde las alertas de Inventario se llega con ?sugerir=1
+if (puedeGestionar && new URLSearchParams(location.search).has('sugerir')) abrirSugerencia();
+
 cargar();

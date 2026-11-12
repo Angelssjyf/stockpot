@@ -3577,3 +3577,88 @@ button.alerta-item {
   .arqueo .esperado::before { content: "Esperado"; }
   .arqueo .contado::before { content: "Contado"; }
 }
+
+/* ------------------------------------------------------------ Sugerencia de compra */
+.grupo-sugerencia {
+  margin: 16px 0;
+}
+
+.grupo-sugerencia h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.grupo-sugerencia h3 .chip {
+  margin-left: auto;
+}
+
+.linea-sugerida {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.4fr) minmax(150px, 1.2fr) minmax(110px, 0.8fr) minmax(80px, auto);
+  gap: 8px 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--borde, #ead9d3);
+}
+
+.linea-sugerida .campo {
+  margin: 0;
+}
+
+.linea-sugerida .subtotal {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.linea-sugerida.excluida {
+  opacity: 0.5;
+}
+
+.insumo-sugerido {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.insumo-sugerido input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primario, #8b4a2b);
+  flex: none;
+}
+
+.insumo-sugerido span {
+  display: flex;
+  flex-direction: column;
+}
+
+.insumo-sugerido small {
+  color: var(--texto-suave);
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .linea-sugerida {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .linea-sugerida .insumo-sugerido,
+  .linea-sugerida .proveedor-unico,
+  .linea-sugerida .campo:has(select) {
+    grid-column: 1 / -1;
+  }
+}
+
+.alertas h2 .enlace-sugerir {
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.linea-sugerida .proveedor-unico {
+  font-size: 14px;
+  color: var(--texto-suave);
+}

@@ -245,6 +245,7 @@ Todas las rutas, excepto `login` y `health`, requieren el encabezado
 | PUT | `/api/roles/<id>/permisos` | RF-01.6 Gestionar permisos de un rol | `roles.gestionar` |
 | GET/POST/PUT | `/api/proveedores` · `/api/proveedores/<id>/insumos` · `/compras` | RF-02.1 a RF-02.5 | `proveedores.*` |
 | GET/POST/PATCH | `/api/ordenes-compra` · `/<id>/estado` | RF-02.6 a RF-02.8 | `compras.*` |
+| GET/POST | `/api/ordenes-compra/sugerencia` | Sugerencia de compra (stock mínimo → órdenes por proveedor) | `compras.*` |
 | GET/POST/PUT | `/api/insumos` · `/api/insumos/<id>/movimientos` | RF-03.1 a RF-03.5, RF-03.7 | `inventario.*` |
 | GET | `/api/inventario/existencias` · `/api/inventario/alertas` | RF-03.6 y RF-03.8 | `inventario.ver` |
 | GET/POST/PUT/PATCH | `/api/productos` · `/<id>/disponibilidad` | RF-04.1 a RF-04.6 | `productos.*` |

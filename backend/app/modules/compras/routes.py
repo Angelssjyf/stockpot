@@ -8,6 +8,7 @@ from flask import Blueprint, jsonify, request
 
 from ...extensions import db
 from ...models import DetalleOrdenCompra, Insumo, OrdenCompra, Proveedor
+from ...services.compras import agrupar_por_proveedor, sugerir
 from ...services.inventario import bloquear, registrar_movimiento
 from ...utils.auth import permiso_requerido, usuario_actual
 
@@ -62,38 +63,30 @@ def obtener_orden(orden_id):
     return jsonify(orden.to_dict())
 
 
-@bp.post("/ordenes-compra")
-@permiso_requerido("compras.gestionar")
-def crear_orden():
-    """RF-02.6 Registrar órdenes de compra.
-
-    Body: {"proveedor_id": 1, "fecha_entrega_estimada": "2026-10-20", "observaciones": "...",
-           "detalles": [{"insumo_id": 1, "cantidad": 20, "precio_unitario": 4200}, ...]}
-    El sistema calcula los subtotales, el total y el código consecutivo (OC-000001).
-    """
-    data = request.get_json(silent=True) or {}
-
+def armar_orden(data, usuario):
+    """Valida el body de una orden y la agrega a la sesión con su código (sin commit).
+    Devuelve (orden, None) o (None, mensaje de error)."""
     proveedor = db.session.get(Proveedor, data.get("proveedor_id") or 0)
     if proveedor is None or not proveedor.activo:
-        return jsonify(error="El proveedor no existe o está inactivo"), 422
+        return None, "El proveedor no existe o está inactivo"
 
     detalles = data.get("detalles")
     if not isinstance(detalles, list) or not detalles:
-        return jsonify(error="La orden debe tener al menos un insumo"), 422
+        return None, "La orden debe tener al menos un insumo"
 
     fecha_entrega = None
     if data.get("fecha_entrega_estimada"):
         try:
             fecha_entrega = date.fromisoformat(data["fecha_entrega_estimada"])
         except (TypeError, ValueError):
-            return jsonify(error="La fecha de entrega debe tener el formato AAAA-MM-DD"), 422
+            return None, "La fecha de entrega debe tener el formato AAAA-MM-DD"
 
     orden = OrdenCompra(
         codigo=uuid4().hex[:20],  # código temporal; el definitivo depende del id (ver abajo)
         proveedor=proveedor,
-        usuario=usuario_actual(),
+        usuario=usuario,
         fecha_entrega_estimada=fecha_entrega,
-        observaciones=(str(data.get("observaciones") or "").strip() or None),
+        observaciones=(str(data.get("observaciones") or "").strip()[:255] or None),
     )
 
     total = Decimal("0")
@@ -102,18 +95,17 @@ def crear_orden():
         insumo_id = linea.get("insumo_id") if isinstance(linea, dict) else None
         insumo = db.session.get(Insumo, insumo_id) if isinstance(insumo_id, int) else None
         if insumo is None or not insumo.activo:
-            return jsonify(error=f"El insumo {insumo_id} no existe"), 422
+            return None, f"El insumo {insumo_id} no existe"
         if insumo.id in ids_vistos:
-            return jsonify(error=f"El insumo '{insumo.nombre}' está repetido en la orden"), 422
+            return None, f"El insumo '{insumo.nombre}' está repetido en la orden"
         ids_vistos.add(insumo.id)
 
         cantidad, error = _numero(linea.get("cantidad"), "cantidad")
         if error:
-            return jsonify(error=error), 422
-        precio, error = _numero(linea.get("precio_unitario"), "precio_unitario",
-                                permitir_cero=True)
+            return None, error
+        precio, error = _numero(linea.get("precio_unitario"), "precio_unitario", permitir_cero=True)
         if error:
-            return jsonify(error=error), 422
+            return None, error
 
         subtotal = (cantidad * precio).quantize(Decimal("0.01"))  # redondeo a centavos
         orden.detalles.append(DetalleOrdenCompra(
@@ -125,8 +117,61 @@ def crear_orden():
     db.session.add(orden)
     db.session.flush()  # MySQL asigna el id sin terminar la transacción
     orden.codigo = f"OC-{orden.id:06d}"
+    return orden, None
+
+
+@bp.post("/ordenes-compra")
+@permiso_requerido("compras.gestionar")
+def crear_orden():
+    """RF-02.6 Registrar órdenes de compra.
+
+    Body: {"proveedor_id": 1, "fecha_entrega_estimada": "2026-10-20", "observaciones": "...",
+           "detalles": [{"insumo_id": 1, "cantidad": 20, "precio_unitario": 4200}, ...]}
+    El sistema calcula los subtotales, el total y el código consecutivo (OC-000001).
+    """
+    orden, error = armar_orden(request.get_json(silent=True) or {}, usuario_actual())
+    if error:
+        db.session.rollback()
+        return jsonify(error=error), 422
     db.session.commit()
     return jsonify(orden.to_dict()), 201
+
+
+@bp.get("/ordenes-compra/sugerencia")
+@permiso_requerido("compras.ver")
+def ver_sugerencia():
+    """Sugerencia de compra: insumos en su mínimo o por debajo, cuánto pedir de cada uno y a
+    qué proveedor, agrupados en las órdenes que se crearían (ver services/compras.py)."""
+    return jsonify(sugerir())
+
+
+@bp.post("/ordenes-compra/sugerencia")
+@permiso_requerido("compras.gestionar")
+def crear_desde_sugerencia():
+    """Crea una orden PENDIENTE por proveedor con las líneas revisadas por el administrador.
+
+    Body: {"lineas": [{"proveedor_id": 1, "insumo_id": 2, "cantidad": 7, "precio_unitario": 13000}, ...],
+           "fecha_entrega_estimada": "2026-11-20"}
+    Todo o nada: si una orden no es válida, no se crea ninguna.
+    """
+    data = request.get_json(silent=True) or {}
+    lineas = data.get("lineas")
+    if not isinstance(lineas, list) or not lineas or not all(isinstance(l, dict) for l in lineas):
+        return jsonify(error="Elige al menos un insumo para pedir"), 422
+
+    creadas = []
+    for proveedor_id, detalles in agrupar_por_proveedor(lineas).items():
+        orden, error = armar_orden({
+            "proveedor_id": proveedor_id, "detalles": detalles,
+            "fecha_entrega_estimada": data.get("fecha_entrega_estimada"),
+            "observaciones": "Sugerida por stock mínimo",
+        }, usuario_actual())
+        if error:
+            db.session.rollback()
+            return jsonify(error=error), 422
+        creadas.append(orden)
+    db.session.commit()
+    return jsonify([orden.to_dict() for orden in creadas]), 201
 
 
 @bp.patch("/ordenes-compra/<int:orden_id>/estado")
