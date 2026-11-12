@@ -1,0 +1,87 @@
+# Integración continua de StockPot: en cada push o pull request a main y develop, GitHub
+# corre todas las pruebas automatizadas y revisa la sintaxis del código. Si algo falla, el
+# commit queda marcado con una X roja en GitHub y no se debe integrar.
+name: Pruebas
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:  # también se puede lanzar a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Pruebas del backend (pytest + cobertura)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: America/Bogota  # la misma hora del restaurante (las pruebas usan fechas de hoy)
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Revisar la sintaxis de Python
+        run: python -m compileall -q app tests
+
+      - name: Correr las pruebas con cobertura
+        run: pytest -q --cov=app --cov-report=term --cov-report=xml:cobertura.xml --junitxml=resultados.xml
+
+      - name: Resumen en GitHub
+        if: always()
+        run: |
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          if Path("resultados.xml").exists():
+              s = ET.parse("resultados.xml").getroot()
+              s = s if s.tag == "testsuite" else s.find("testsuite")
+              total, fallas = int(s.get("tests")), int(s.get("failures")) + int(s.get("errors"))
+              print(f"### Pruebas: {total - fallas} de {total} aprobadas")
+          if Path("cobertura.xml").exists():
+              tasa = float(ET.parse("cobertura.xml").getroot().get("line-rate")) * 100
+              print(f"### Cobertura del backend: {tasa:.1f} %")
+          EOF
+
+      - name: Guardar los resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-pruebas
+          path: |
+            backend/resultados.xml
+            backend/cobertura.xml
+          retention-days: 30
+
+  frontend:
+    name: Sintaxis de la interfaz (JavaScript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Revisar cada módulo JavaScript
+        run: |
+          for archivo in frontend/js/*.js; do
+            cp "$archivo" /tmp/modulo.mjs   # .mjs: Node lo revisa como módulo ES (import/export)
+            node --check /tmp/modulo.mjs || { echo "::error file=$archivo::Error de sintaxis"; exit 1; }
+          done
+          echo "### Interfaz: $(ls frontend/js/*.js | wc -l) módulos JavaScript sin errores de sintaxis" >> "$GITHUB_STEP_SUMMARY"

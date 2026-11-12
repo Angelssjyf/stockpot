@@ -1,5 +1,7 @@
 # StockPot
 
+[![Pruebas](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml/badge.svg?branch=develop)](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml)
+
 Sistema de gestión para restaurantes pequeños y medianos: controla el inventario de insumos,
 gestiona los pedidos, comunica las áreas de atención y cocina, y genera información sobre
 el consumo y las ventas.
