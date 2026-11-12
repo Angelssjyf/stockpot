@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, request
 
 from ...extensions import db
 from ...models import DetalleOrdenCompra, Insumo, OrdenCompra, Proveedor
-from ...services.inventario import registrar_movimiento
+from ...services.inventario import bloquear, registrar_movimiento
 from ...utils.auth import permiso_requerido, usuario_actual
 
 bp = Blueprint("compras", __name__)
@@ -147,6 +147,7 @@ def actualizar_estado(orden_id):
 
     if nuevo == "RECIBIDA":
         usuario = usuario_actual()
+        bloquear(detalle.insumo for detalle in orden.detalles)  # en orden de id, sin deadlocks
         for detalle in orden.detalles:
             registrar_movimiento(  # RF-02.8 + RF-03.4: queda el registro de la entrada
                 detalle.insumo, "ENTRADA", "COMPRA", detalle.cantidad, usuario.id,
