@@ -63,9 +63,11 @@ def create_app(config_class=Config):
 
     from .cabeceras import register_cabeceras
     from .cli import register_cli
+    from .registro import register_registro
 
     register_cli(app)
     register_cabeceras(app)  # cabeceras de seguridad HTTP en todas las respuestas
+    register_registro(app)  # logs en backend/logs y respuesta clara ante errores inesperados
 
     @app.get("/api/health")
     def health():

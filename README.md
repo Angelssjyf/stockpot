@@ -194,6 +194,18 @@ Cada vez que se abre `iniciar.bat` se hace una copia de la base MySQL en `databa
 
 Si `mysqldump` no está en la ruta normal de MySQL, pon su ubicación en `MYSQLDUMP` dentro de `backend/.env`.
 
+### Registro de eventos y errores
+
+El servidor anota en `backend/logs/stockpot.log` (no se sube a GitHub; rota a 1 MB y guarda 5 anteriores):
+
+- **ERROR**: fallas inesperadas con su detalle técnico. El usuario ve *«Ocurrió un error inesperado
+  (código A1B2C3)»*; busca ese código en el archivo para ver qué pasó.
+- **WARNING**: eventos de seguridad (sin sesión, sin permiso, sesión bloqueada, demasiados intentos de
+  inicio de sesión) y peticiones que tardan más de 2 segundos.
+- **INFO**: arranque del servidor y copias de seguridad.
+
+Nunca se anotan contraseñas, tokens ni el contenido de las peticiones.
+
 ### Para programar
 
 - **Backend con recarga automática:** en vez de `iniciar.bat`, ejecuta en `backend`:

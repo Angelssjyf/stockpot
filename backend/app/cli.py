@@ -15,7 +15,9 @@ def register_cli(app):
         try:
             archivo = respaldar()
         except RespaldoFallido as error:
+            app.logger.error("Respaldo fallido: %s", error)
             raise click.ClickException(f"No se pudo hacer el respaldo: {error}")
+        app.logger.info("Respaldo listo: %s", archivo.name)
         click.echo(f"Respaldo listo: database/respaldos/{archivo.name} ({archivo.stat().st_size // 1024} KB)")
 
     @app.cli.command("crear-admin")
