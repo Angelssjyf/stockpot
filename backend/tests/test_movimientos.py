@@ -4,9 +4,11 @@ Formato del docstring:  ID del caso | requisito | qué se verifica
 """
 
 import pytest
+from sqlalchemy import select, update
 
 from app.extensions import db
-from app.models import Insumo, MovimientoInventario, Proveedor
+from app.models import Insumo, MovimientoInventario, Proveedor, Usuario
+from app.services.inventario import StockInsuficiente, bloquear, registrar_movimiento
 
 from .conftest import crear_usuario, iniciar_sesion
 
@@ -187,3 +189,54 @@ def test_cp_seg_17_cocinero_no_mueve_stock(client, arroz):
     headers = iniciar_sesion(client, "cocina@stockpot.test")
     assert client.get("/api/inventario/alertas", headers=headers).status_code == 200
     assert _mover(client, headers, arroz["id"], "SALIDA", "MERMA", 1).status_code == 403
+
+
+# ------------------------------------------------------- Concurrencia (varios usuarios a la vez)
+
+
+def _otro_usuario_deja_stock(insumo_id, stock):
+    """Simula que otra persona ya guardó un cambio: UPDATE directo en la base, sin pasar por
+    el objeto que esta sesión tiene en memoria (que queda con el stock viejo)."""
+    db.session.execute(update(Insumo).where(Insumo.id == insumo_id).values(stock_actual=stock)
+                       .execution_options(synchronize_session=False))
+
+
+def test_cp_03_9_3_salida_usa_stock_real(client, admin_headers, arroz):
+    """CP-03.9-3 | RF-03.5, RF-03.9 | Una salida resta sobre el stock real de la base, no sobre
+    el que quedó en memoria: no se pierde lo que guardó otro usuario al mismo tiempo."""
+    insumo = db.session.get(Insumo, arroz["id"])
+    assert insumo.stock_actual == 10  # lo que esta sesión leyó
+    _otro_usuario_deja_stock(insumo.id, 4)  # mientras tanto, otro mesero consumió 6 KG
+    usuario_id = db.session.scalar(select(Usuario.id))
+
+    movimiento = registrar_movimiento(insumo, "SALIDA", "CONSUMO", 3, usuario_id)
+
+    assert insumo.stock_actual == 1  # 4 − 3, no 10 − 3 = 7
+    assert movimiento.stock_resultante == 1
+
+
+def test_cp_03_9_4_salida_valida_con_stock_real(client, admin_headers, arroz):
+    """CP-03.9-4 | RF-03.5, RF-03.9 | Si otro usuario ya gastó el stock, la salida se rechaza
+    aunque en memoria pareciera alcanzar (el inventario nunca queda negativo)."""
+    insumo = db.session.get(Insumo, arroz["id"])
+    _otro_usuario_deja_stock(insumo.id, 2)
+    usuario_id = db.session.scalar(select(Usuario.id))
+
+    with pytest.raises(StockInsuficiente):
+        registrar_movimiento(insumo, "SALIDA", "CONSUMO", 5, usuario_id)
+    assert insumo.stock_actual == 2
+
+
+def test_cp_03_9_5_bloqueo_en_orden_de_id(client, admin_headers, arroz):
+    """CP-03.9-5 | RF-03.9 | Bloquear varios insumos recarga su stock real y no falla con
+    repetidos ni con insumos nuevos sin guardar."""
+    r = client.post("/api/insumos", headers=admin_headers, json={
+        "codigo": "INS-002", "nombre": "Pollo", "unidad_medida": "KG", "stock_minimo": 1,
+        "costo_unitario": 13000})
+    arroz_obj = db.session.get(Insumo, arroz["id"])
+    pollo = db.session.get(Insumo, r.get_json()["id"])
+    _otro_usuario_deja_stock(arroz_obj.id, 7)
+
+    bloquear([pollo, arroz_obj, arroz_obj, Insumo(codigo="NUEVO", nombre="Sin guardar")])
+
+    assert arroz_obj.stock_actual == 7 and pollo.stock_actual == 0
