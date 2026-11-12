@@ -28,6 +28,9 @@
           <option value="CANCELADA">Canceladas</option>
         </select>
       </div>
+      <button type="button" class="boton-texto" id="boton-sugerir" hidden>
+        <span class="icono" aria-hidden="true">auto_awesome</span> Sugerir compra
+      </button>
     </div>
 
     <div class="estado" id="estado" hidden>
@@ -89,6 +92,34 @@
     </section>
     <div class="alerta-error" id="error-detalle" role="alert" hidden></div>
     <div class="acciones" id="detalle-acciones"></div>
+  </dialog>
+
+  <!-- Sugerencia de compra: lo que está en el mínimo, agrupado por proveedor -->
+  <dialog id="dialogo-sugerencia" class="ancho">
+    <form id="form-sugerencia" novalidate>
+      <h2>Sugerencia de compra</h2>
+      <p class="nota">Insumos en su mínimo o por debajo. Se propone pedir hasta el doble del mínimo, descontando lo que ya
+        viene en camino, al proveedor más barato. Revisa las cantidades antes de crear las órdenes.</p>
+      <div id="sugerencia-grupos"></div>
+      <section class="seccion" id="bloque-sin-proveedor" hidden>
+        <h3>Sin proveedor</h3>
+        <p class="nota">Asígnales un proveedor en Proveedores para poder pedirlos.</p>
+        <ul class="mini-lista" id="sin-proveedor"></ul>
+      </section>
+      <p class="nota" id="sugerencia-cubiertos" hidden></p>
+      <div id="bloque-pedir">
+        <label class="etiqueta" for="s-entrega">Fecha de entrega estimada</label>
+        <div class="campo"><input id="s-entrega" type="date"></div>
+        <p class="total" id="sugerencia-total"></p>
+      </div>
+      <div class="alerta-error" id="error-sugerencia" role="alert" hidden></div>
+      <div class="acciones">
+        <button type="button" class="boton-texto" id="cancelar-sugerencia">Cancelar</button>
+        <button type="submit" class="boton-principal" id="crear-sugeridas">
+          <span class="icono" aria-hidden="true">add_shopping_cart</span> <span id="texto-crear">Crear órdenes</span>
+        </button>
+      </div>
+    </form>
   </dialog>
 
   <script type="module" src="js/compras.js"></script>
