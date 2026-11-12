@@ -94,3 +94,31 @@ def test_cp_web_8_css_con_tipo_correcto(client_real):
     r = client_real.get("/css/estilos.css")
     assert r.status_code == 200
     assert r.mimetype == "text/css"
+
+
+# ------------------------------------------------------- Cabeceras de seguridad HTTP (OWASP)
+
+
+def test_cp_seg_40_cabeceras_en_la_interfaz(client_con_app):
+    """CP-SEG-40 | RNF-01 | Las páginas llegan con CSP estricta, sin iframes de otros sitios
+    y sin que el navegador adivine el tipo de archivo."""
+    r = client_con_app.get("/")
+    csp = r.headers["Content-Security-Policy"]
+    assert "default-src 'self'" in csp and "script-src 'self'" in csp
+    assert "frame-ancestors 'none'" in csp and "'unsafe-inline'" not in csp
+    assert r.headers["X-Frame-Options"] == "DENY"
+    assert r.headers["X-Content-Type-Options"] == "nosniff"
+    assert r.headers["Referrer-Policy"] == "same-origin"
+    assert "camera=()" in r.headers["Permissions-Policy"]
+    assert "Strict-Transport-Security" not in r.headers  # por HTTP local no aplica
+
+
+def test_cp_seg_41_api_sin_cache_y_hsts_por_https(client_con_app):
+    """CP-SEG-41 | RNF-01 | Las respuestas de la API no se guardan en caché y, si se entra por
+    HTTPS (enlace de ngrok), el navegador queda obligado a usar HTTPS."""
+    r = client_con_app.get("/api/auth/yo")
+    assert r.headers["Cache-Control"] == "no-store"
+    assert r.headers["X-Content-Type-Options"] == "nosniff"
+    r = client_con_app.get("/", headers={"X-Forwarded-Proto": "https"})
+    assert r.headers["Strict-Transport-Security"].startswith("max-age=")
+    assert "Cache-Control" not in r.headers or r.headers["Cache-Control"] != "no-store"

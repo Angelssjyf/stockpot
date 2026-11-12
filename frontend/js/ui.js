@@ -55,7 +55,11 @@ export function crear(etiqueta, { className, texto, ...atributos } = {}, hijos =
   const elemento = document.createElement(etiqueta);
   if (className) elemento.className = className;
   if (texto !== undefined) elemento.textContent = texto;
-  for (const [nombre, valor] of Object.entries(atributos)) elemento.setAttribute(nombre, valor);
+  for (const [nombre, valor] of Object.entries(atributos)) {
+    // La política de seguridad (CSP) bloquea el atributo style; por CSSOM sí se permite
+    if (nombre === 'style') elemento.style.cssText = valor;
+    else elemento.setAttribute(nombre, valor);
+  }
   for (const hijo of hijos) elemento.appendChild(hijo);
   return elemento;
 }
