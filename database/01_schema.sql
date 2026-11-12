@@ -557,3 +557,33 @@ CREATE TABLE incidencias (
     CONSTRAINT fk_inc_ajuste      FOREIGN KEY (ajuste_id)            REFERENCES movimientos_inventario(id),
     CONSTRAINT fk_incidencias_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id)
 );
+
+-- ---------------------------------------------------------------------
+-- Turnos y cierre de caja (arqueo): la base de efectivo, lo esperado por
+-- método de pago y lo que contó el cajero al cerrar.
+-- ---------------------------------------------------------------------
+CREATE TABLE turnos_caja (
+    id                      INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id              INT NOT NULL,                      -- restaurante dueño de la fila
+    estado                  ENUM('ABIERTO','CERRADO') NOT NULL DEFAULT 'ABIERTO',
+    base_inicial            DECIMAL(14,2) NOT NULL DEFAULT 0,  -- efectivo con el que empieza la caja
+    abierto_por_id          INT           NOT NULL,
+    abierto_en              DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    cerrado_por_id          INT,
+    cerrado_en              DATETIME,
+    esperado_efectivo       DECIMAL(14,2),                     -- base + pagos en efectivo
+    esperado_tarjeta        DECIMAL(14,2),
+    esperado_transferencia  DECIMAL(14,2),
+    contado_efectivo        DECIMAL(14,2),                     -- lo que contó el cajero
+    contado_tarjeta         DECIMAL(14,2),
+    contado_transferencia   DECIMAL(14,2),
+    num_pagos               INT           NOT NULL DEFAULT 0,
+    propinas                DECIMAL(12,2) NOT NULL DEFAULT 0,  -- del personal, incluidas en lo recibido
+    observacion             VARCHAR(255),                      -- obligatoria si no cuadra
+    CONSTRAINT chk_turno_base CHECK (base_inicial >= 0),
+    CONSTRAINT fk_turno_abre   FOREIGN KEY (abierto_por_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_turno_cierra FOREIGN KEY (cerrado_por_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_turnos_caja_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id),
+    INDEX idx_turno_estado (empresa_id, estado),
+    INDEX idx_turno_cierre (cerrado_en)
+);

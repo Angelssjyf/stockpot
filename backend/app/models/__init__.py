@@ -1,5 +1,6 @@
 """Reúne todos los modelos para importarlos desde app.models."""
 
+from .caja import TurnoCaja
 from .empresas import DeEmpresa, Empresa
 from .incidencias import CodigoIncidencia, Incidencia
 from .inventario import Insumo, MovimientoInventario
@@ -36,6 +37,7 @@ __all__ = [
     "Receta",
     "Reserva",
     "Sesion",
+    "TurnoCaja",
     "Rol",
     "Usuario",
     "Venta",

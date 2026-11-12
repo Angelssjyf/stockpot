@@ -3499,3 +3499,81 @@ button.alerta-item {
 .esperando-resumen {
   visibility: hidden;
 }
+
+/* ------------------------------------------------------------ Cierre de caja (arqueo) */
+.aviso-caja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #fff3cd;
+  color: #5c4400;
+  border: 1px solid #e6c870;
+  border-radius: var(--radio);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.aviso-caja > span:nth-child(2) {
+  flex: 1 1 240px;
+}
+
+#turno-caja {
+  margin-bottom: 24px;
+}
+
+.arqueo {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.2fr) minmax(90px, 1fr) minmax(110px, 1fr) minmax(110px, 1.1fr);
+  gap: 8px 12px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.arqueo .encabezado {
+  font-size: 12px;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.arqueo .metodo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.arqueo .valor {
+  font-variant-numeric: tabular-nums;
+}
+
+.arqueo .campo {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .arqueo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .arqueo .encabezado {
+    display: none;
+  }
+
+  .arqueo .metodo {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+
+  /* Sin encabezados en el celular: cada valor dice qué es */
+  .arqueo .esperado::before,
+  .arqueo .contado::before {
+    display: block;
+    font-size: 12px;
+    color: var(--texto-suave);
+  }
+
+  .arqueo .esperado::before { content: "Esperado"; }
+  .arqueo .contado::before { content: "Contado"; }
+}
