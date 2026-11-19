@@ -1,7 +1,7 @@
 // Órdenes de compra: RF-02.6 Registrar, RF-02.7 Actualizar estado y RF-02.8 Relación con inventario.
 import { api, exigirSesion } from './api.js';
 import { reportarIncidencia } from './reportar.js';
-import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { confirmar, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('compras.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('compras.gestionar');
@@ -142,10 +142,12 @@ function pintarDetalle(orden) {
 
 async function cambiarEstado(orden, estado) {
   const preguntas = {
-    RECIBIDA: '¿Confirmas que llegó la mercancía? El stock de cada insumo aumentará con lo comprado.',
-    CANCELADA: '¿Seguro que quieres cancelar esta orden? No se puede deshacer.',
+    RECIBIDA: ['¿Llegó la mercancía?', { texto: 'El stock de cada insumo aumentará con lo comprado.',
+      aceptar: 'Sí, llegó', icono: 'inventory' }],
+    CANCELADA: ['¿Cancelar esta orden?', { texto: 'No se puede deshacer.', aceptar: 'Cancelar orden',
+      cancelar: 'Volver', peligro: true, icono: 'cancel' }],
   };
-  if (preguntas[estado] && !window.confirm(preguntas[estado])) return;
+  if (preguntas[estado] && !await confirmar(...preguntas[estado])) return;
 
   try {
     const actualizada = await api('PATCH', `/ordenes-compra/${orden.id}/estado`, { estado });

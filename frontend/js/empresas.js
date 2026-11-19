@@ -1,7 +1,7 @@
 // Restaurantes (tercer corte): el súper administrador crea, modifica, activa y desactiva empresas.
 // No ve el inventario, los pedidos ni las ventas de ningún restaurante.
 import { api, cerrarSesion, exigirSesion } from './api.js';
-import { crear, empezarCarga, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { confirmar, crear, empezarCarga, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('empresas.gestionar'); // sin el permiso vuelve al menú
 
@@ -121,7 +121,10 @@ $('form-empresa').addEventListener('submit', async (evento) => {
     if (editada) {
       await api('PUT', `/empresas/${editada.id}`, datos);
       if ($('f-activa').checked !== editada.activa) {
-        if (!$('f-activa').checked && !confirm(`¿Desactivar ${editada.nombre}? Su personal no podrá entrar.`)) {
+        if (!$('f-activa').checked && !await confirmar(`¿Desactivar ${editada.nombre}?`, {
+          texto: 'Su personal no podrá entrar hasta que lo vuelvas a activar.', aceptar: 'Desactivar', peligro: true,
+          icono: 'block',
+        })) {
           $('guardar').disabled = false;
           return;
         }

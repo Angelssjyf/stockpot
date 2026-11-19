@@ -1,6 +1,6 @@
 // Módulo de pedidos en mesa (RF-05.1 a RF-05.9): mesas, pedidos, cocina y estado.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, normalizar, pintarSuave } from './ui.js';
+import { confirmar, crear, empezarCarga, formato, mostrarAviso, normalizar, pedirTexto, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('pedidos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('pedidos.gestionar'); // MESERO, CAJERO, ADMINISTRADOR
@@ -186,10 +186,10 @@ function tarjetaMesa(mesa) {
     else if (puedeGestionar && reservaCercana(mesa)) {
       const r = mesa.reserva;
       const horaReserva = new Date(r.fecha_hora).toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' });
-      if (confirm(`La mesa ${mesa.numero} está reservada a las ${horaReserva} para ${r.cliente} (${r.personas} personas).
-¿Tomar el pedido de todas formas?`)) {
-        abrirFormulario(null, mesa.id);
-      }
+      confirmar(`La mesa ${mesa.numero} está reservada`, {
+        texto: `A las ${horaReserva} para ${r.cliente} (${r.personas} personas). ¿Tomar el pedido de todas formas?`,
+        aceptar: 'Tomar pedido', icono: 'event_seat',
+      }).then((si) => { if (si) abrirFormulario(null, mesa.id); });
     } else if (puedeGestionar) abrirFormulario(null, mesa.id);
     else mostrarAviso(`La mesa ${mesa.numero} está libre`);
   });
@@ -722,8 +722,11 @@ function pintarDetalle(pedido) {
 function pintarAcciones(pedido) {
   const botones = [botonTexto('Cerrar', () => dialogoDetalle.close())];
   if (puedeGestionar && pedido.editable) {
-    botones.push(botonTexto('Cancelar pedido', () => {
-      const motivo = prompt(`¿Por qué se cancela ${pedido.codigo}? (opcional)`, '');
+    botones.push(botonTexto('Cancelar pedido', async () => {
+      const motivo = await pedirTexto(`¿Cancelar ${pedido.codigo}?`, {
+        texto: '¿Por qué se cancela? (opcional)', aceptar: 'Cancelar pedido', cancelar: 'Volver', peligro: true,
+        icono: 'cancel',
+      });
       if (motivo !== null) ejecutar('PATCH', `/pedidos/${pedido.id}/cancelar`, { motivo }, `${pedido.codigo} cancelado`);
     }));
     botones.push(botonTexto('Modificar', () => {

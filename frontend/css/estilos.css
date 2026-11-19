@@ -3662,3 +3662,49 @@ button.alerta-item {
   font-size: 14px;
   color: var(--texto-suave);
 }
+
+/* ------------------------------------------------------------ Ventana de confirmación (confirmar / pedirTexto) */
+dialog.ventana-pregunta {
+  width: min(400px, calc(100vw - 32px));
+  text-align: center;
+}
+
+.ventana-pregunta .pregunta-icono {
+  font-size: 32px;
+  color: var(--primario);
+  background: var(--contenedor-primario);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.ventana-pregunta .pregunta-icono.peligro {
+  color: var(--error);
+  background: var(--contenedor-error);
+}
+
+.ventana-pregunta .pregunta-texto {
+  color: var(--texto-suave);
+  line-height: 1.5;
+}
+
+.ventana-pregunta .campo {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.ventana-pregunta .acciones {
+  justify-content: center;
+}
+
+.boton-principal.peligro {
+  background: var(--error);
+}
+
+.boton-principal.peligro:hover {
+  background: #93000a;
+}
