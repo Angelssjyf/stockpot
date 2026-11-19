@@ -14,7 +14,7 @@ from flask import Blueprint, jsonify, request
 
 from ...models import Domicilio, Insumo, MovimientoInventario, OrdenCompra, Pago, Producto, Venta
 from ...utils.auth import permiso_requerido
-from ...utils.fechas import filtrar_por_fechas
+from ...utils.fechas import filtrar_por_fechas, hoy_bd
 
 bp = Blueprint("reportes", __name__)
 
@@ -24,7 +24,7 @@ MESES = ("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "
 
 def _rango():
     """Lee ?desde y ?hasta (por defecto, los últimos 30 días). Lanza ValueError si son inválidas."""
-    hasta = date.fromisoformat(request.args["hasta"]) if request.args.get("hasta") else date.today()
+    hasta = date.fromisoformat(request.args["hasta"]) if request.args.get("hasta") else hoy_bd()
     desde = (date.fromisoformat(request.args["desde"]) if request.args.get("desde")
              else hasta - timedelta(days=29))
     if desde > hasta:
@@ -239,7 +239,7 @@ def reporte_historico():
     """RF-11.5 Consultar información histórica mes a mes (?meses=6, máximo 24): ventas,
     ganancia, compras recibidas y domicilios entregados."""
     meses = max(1, min(request.args.get("meses", 6, type=int), 24))
-    hoy = date.today()
+    hoy = hoy_bd()
     inicio = date(hoy.year, hoy.month, 1)
     for _ in range(meses - 1):  # retrocede al primer día del mes más antiguo
         inicio = date(inicio.year - (inicio.month == 1), (inicio.month - 2) % 12 + 1, 1)
