@@ -2,6 +2,9 @@
 
 let temporizadorAviso;
 
+/** Atajo para document.getElementById, el mismo en todas las pantallas. */
+export const $ = (id) => document.getElementById(id);
+
 /** RF-03.10 Categorías de insumos (también subdividen a los proveedores, RF-02.9). */
 export const CATEGORIAS_INSUMO = {
   CARNES: 'Carnes', GRANOS: 'Granos', LACTEOS: 'Lácteos y huevos', FRUTAS_VERDURAS: 'Frutas y verduras',
@@ -577,3 +580,39 @@ function prepararBotonSonido() {
   pintar();
 }
 prepararBotonSonido();
+
+// =====================================================================
+//  Piezas que se repiten en varias pantallas
+// =====================================================================
+
+/** Tarjeta de resumen: ícono, número grande y título (por ejemplo «12 · Pedidos activos»). */
+export function tarjetaResumen(icono, titulo, valor, clase = '') {
+  return crear('div', { className: `tarjeta-resumen ${clase}`.trim() }, [
+    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
+    crear('div', { className: 'valor', texto: valor }),
+    crear('div', { texto: titulo }),
+  ]);
+}
+
+/** "2026-11-18T22:10:00" -> "18 nov, 10:10 p. m." ('—' si no hay fecha). */
+export function fechaHora(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+}
+
+/** Muestra (o borra, con mensaje vacío) el error de un campo: #error-<nombre> y borde rojo en #campo-<nombre>. */
+export function marcarCampo(nombre, mensaje) {
+  document.getElementById(`error-${nombre}`).textContent = mensaje;
+  document.getElementById(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
+}
+
+/** «Buenas noches, Ángel» y la fecha de hoy («Miércoles, 18 de noviembre»), con un texto opcional al final. */
+export function pintarSaludo(contenedor, nombre, extra = '') {
+  const ahora = new Date();
+  const saludo = ahora.getHours() < 12 ? 'Buenos días' : ahora.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const fecha = ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+  contenedor.replaceChildren(crear('div', {}, [
+    crear('h2', { texto: `${saludo}, ${nombre}` }),
+    crear('p', { className: 'nota', texto: fecha.charAt(0).toUpperCase() + fecha.slice(1) + (extra ? ` · ${extra}` : '') }),
+  ]));
+}

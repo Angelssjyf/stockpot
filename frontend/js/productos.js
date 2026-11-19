@@ -1,8 +1,6 @@
 // Módulo de productos y menú (RF-04.1 a RF-04.6): carta, recetas, precios y disponibilidad.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
-
-const $ = (id) => document.getElementById(id);
+import { $, crear, empezarCarga, formato, marcarCampo, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const CATEGORIAS = {
   ENTRADA: 'Entradas', PLATO_FUERTE: 'Platos fuertes', BEBIDA: 'Bebidas',
@@ -310,11 +308,6 @@ function agregarInsumo() {
 $('agregar-insumo').addEventListener('click', agregarInsumo);
 
 // ---------------------------------------------------- Validar y guardar
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
-}
 
 function validar() {
   const obligatorio = (valor) => (valor.trim() ? '' : 'Campo obligatorio');

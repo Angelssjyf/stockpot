@@ -2,35 +2,25 @@
 // No ve el inventario, los pedidos ni las ventas de ningún restaurante.
 import { api, cerrarSesion, exigirSesion } from './api.js';
 import {
-  confirmar, contarHasta, crear, empezarCarga, mostrarAviso, mostrarEstado, normalizar, pintarSuave,
+  $, confirmar, contarHasta, crear, empezarCarga, marcarCampo, mostrarAviso, mostrarEstado, normalizar,
+  pintarSaludo, pintarSuave, tarjetaResumen,
 } from './ui.js';
 
 const yo = await exigirSesion('empresas.gestionar'); // sin el permiso vuelve al menú
 
-const $ = (id) => document.getElementById(id);
 $('usuario-actual').textContent = 'Súper administrador';
 $('cerrar-sesion').addEventListener('click', cerrarSesion);
 // Su PIN sirve para desbloquear la pantalla más rápido (la pantalla de bloqueo lo sugiere)
 $('mi-pin').addEventListener('click', async () => (await import('./seguridad.js')).crearPin(
   'Lo usarás para desbloquear la pantalla sin escribir tu contraseña completa.'));
 
-// Saludo según la hora, con la fecha de hoy (como en el menú de los restaurantes)
-const ahora = new Date();
-const saludo = ahora.getHours() < 12 ? 'Buenos días' : ahora.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches';
-const fechaLarga = ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
-$('saludo').replaceChildren(crear('div', {}, [
-  crear('h2', { texto: `${saludo}, ${yo.nombre}` }),
-  crear('p', { className: 'nota', texto: `${fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1)} · los restaurantes que usan StockPot` }),
-]));
+pintarSaludo($('saludo'), yo.nombre, 'los restaurantes que usan StockPot');
 
-function tarjetaResumen(icono, titulo, valor, clase = '') {
-  const numero = crear('div', { className: 'valor', texto: '0' });
-  contarHasta(numero, valor);
-  return crear('div', { className: `tarjeta-resumen ${clase}`.trim() }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    numero,
-    crear('div', { texto: titulo }),
-  ]);
+/** Tarjeta de resumen con el número que sube desde 0. */
+function tarjetaContada(icono, titulo, valor, clase = '') {
+  const tarjeta = tarjetaResumen(icono, titulo, '0', clase);
+  contarHasta(tarjeta.querySelector('.valor'), valor);
+  return tarjeta;
 }
 
 /** «Activo hace 5 min», «hace 3 h», «ayer», «hace 4 días» o la fecha. */
@@ -63,11 +53,11 @@ async function cargar() {
     const activas = empresas.filter((e) => e.activa).length;
     const desactivadas = empresas.length - activas;
     pintarSuave($('resumen'),
-      tarjetaResumen('storefront', 'Restaurantes', empresas.length),
-      tarjetaResumen('check_circle', 'Activos', activas),
-      tarjetaResumen('block', 'Desactivados', desactivadas, desactivadas ? 'aviso-agotado' : ''),
-      tarjetaResumen('group', 'Usuarios activos', empresas.reduce((n, e) => n + e.usuarios_activos, 0)),
-      tarjetaResumen('wifi', 'Conectados ahora', empresas.reduce((n, e) => n + (e.conectados ?? 0), 0)),
+      tarjetaContada('storefront', 'Restaurantes', empresas.length),
+      tarjetaContada('check_circle', 'Activos', activas),
+      tarjetaContada('block', 'Desactivados', desactivadas, desactivadas ? 'aviso-agotado' : ''),
+      tarjetaContada('group', 'Usuarios activos', empresas.reduce((n, e) => n + e.usuarios_activos, 0)),
+      tarjetaContada('wifi', 'Conectados ahora', empresas.reduce((n, e) => n + (e.conectados ?? 0), 0)),
     );
     pintarLista();
   } catch (error) {
@@ -179,11 +169,6 @@ function abrirFormulario(empresa) {
       : 'Este restaurante no tiene administrador activo.';
   }
   dialogo.showModal();
-}
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`).classList.toggle('invalido', Boolean(mensaje));
 }
 
 function validar() {

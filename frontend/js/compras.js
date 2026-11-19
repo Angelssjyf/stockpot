@@ -1,12 +1,10 @@
 // Órdenes de compra: RF-02.6 Registrar, RF-02.7 Actualizar estado y RF-02.8 Relación con inventario.
 import { api, exigirSesion } from './api.js';
 import { reportarIncidencia } from './reportar.js';
-import { confirmar, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { $, confirmar, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('compras.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('compras.gestionar');
-
-const $ = (id) => document.getElementById(id);
 
 // Botones que se muestran según el estado actual (las mismas reglas de la API)
 const ACCIONES = {

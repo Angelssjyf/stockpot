@@ -1,13 +1,13 @@
 // Módulo de domicilios (RF-08.1 a RF-08.8): pedidos, clientes, asignación, estados y entregas.
 import { api, exigirSesion } from './api.js';
 import { reportarIncidencia } from './reportar.js';
-import { confirmar, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import {
+  $, confirmar, crear, empezarCarga, fechaHora, formato, marcarCampo, mostrarAviso, mostrarEstado, pintarSuave, tarjetaResumen,
+} from './ui.js';
 
 const yo = await exigirSesion('domicilios.ver'); // sin el permiso vuelve al menú
 // CAJERO y ADMINISTRADOR gestionan; el DOMICILIARIO solo ve y entrega lo suyo
 const puedeGestionar = yo.permisos.includes('domicilios.gestionar');
-
-const $ = (id) => document.getElementById(id);
 
 const NOMBRES_ESTADO = {
   RECIBIDO: 'Recibido', EN_PREPARACION: 'En preparación', LISTO: 'Listo',
@@ -19,13 +19,6 @@ function espera(iso) {
   const minutos = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
   if (minutos < 60) return `hace ${minutos} min`;
   return `hace ${Math.floor(minutos / 60)} h ${minutos % 60} min`;
-}
-
-function fechaHora(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString('es-CO', {
-    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
-  });
 }
 
 function chipEstado(estado) {
@@ -163,14 +156,6 @@ async function cargarHistorial() {
   } catch (error) {
     $('estado-historial').textContent = error.message;
   }
-}
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
 }
 
 $('form-historial').addEventListener('submit', (evento) => {
@@ -350,11 +335,6 @@ function agregarProducto() {
 $('agregar-producto').addEventListener('click', agregarProducto);
 
 // ---------------------------------------------------- Validar y guardar
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
-}
 
 function mostrarErrorNuevo(mensaje) {
   $('error-nuevo').textContent = mensaje;

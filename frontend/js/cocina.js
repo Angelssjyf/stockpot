@@ -1,12 +1,11 @@
 // Módulo de cocina (RF-06.1 a RF-06.7): tablero con los pedidos de mesa y los domicilios por preparar.
 import { api, exigirSesion } from './api.js';
-import { crear, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { $, crear, mostrarAviso, mostrarEstado, pintarSuave, tarjetaResumen } from './ui.js';
 
 // El tablero queda prendido en la cocina: no se bloquea solo (sí con el botón)
 const yo = await exigirSesion('cocina.ver', { bloqueoAutomatico: false });
 const puedeGestionar = yo.permisos.includes('cocina.gestionar');
 
-const $ = (id) => document.getElementById(id);
 const COLUMNAS = ['POR_PREPARAR', 'PREPARANDO', 'LISTO'];
 const BOTON = {
   EN_PREPARACION: { texto: 'Empezar', icono: 'skillet' },
@@ -14,14 +13,6 @@ const BOTON = {
   ENTREGADO: { texto: 'Entregado', icono: 'room_service' },
 };
 const AVISO_MINUTOS = 15; // desde aquí la tarjeta se pone amarilla; al doble, roja
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
-}
 
 function espera(minutos) {
   if (minutos < 1) return 'recién llegado';

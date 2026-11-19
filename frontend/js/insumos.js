@@ -1,13 +1,14 @@
 // Módulo de inventario (RF-03.1 a RF-03.8): insumos, existencias, movimientos y alertas.
 import { api, exigirSesion } from './api.js';
 import { reportarIncidencia } from './reportar.js';
-import { CATEGORIAS_INSUMO, contarHasta, crear, formato, mostrarAviso, mostrarEstado, normalizar, pintarSuave } from './ui.js';
+import {
+  $, CATEGORIAS_INSUMO, contarHasta, crear, fechaHora, formato, marcarCampo, mostrarAviso, mostrarEstado, normalizar, pintarSuave,
+} from './ui.js';
 
 const yo = await exigirSesion('inventario.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('inventario.gestionar');
 const puedeReportar = yo.permisos.includes('incidencias.reportar'); // RF-12.2
 
-const $ = (id) => document.getElementById(id);
 // Desde las alertas se arma la orden de compra con lo que está en el mínimo
 $('enlace-sugerir').hidden = !yo.permisos.includes('compras.gestionar');
 
@@ -17,13 +18,6 @@ $('f-categoria').value = 'OTROS';
 
 function textoStock(insumo) {
   return `${formato.cantidad(insumo.stock_actual)} ${insumo.unidad_medida}`;
-}
-
-/** Fecha y hora cortas para el historial: "18 oct, 7:40 p. m." */
-function fechaHora(iso) {
-  return new Date(iso).toLocaleString('es-CO', {
-    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
-  });
 }
 
 // =====================================================================
@@ -254,11 +248,6 @@ function abrirFormulario(insumo) {
   }
 
   if (!dialogo.open) dialogo.showModal();
-}
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`).classList.toggle('invalido', Boolean(mensaje));
 }
 
 function validar() {

@@ -1,32 +1,18 @@
 // Módulo de caja y pagos (RF-09.1 a RF-09.7), venta de mostrador (RF-10.1) y cierre de caja.
 import { api, exigirSesion } from './api.js';
-import { confirmar, crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import {
+  $, confirmar, crear, empezarCarga, fechaHora, formato, mostrarAviso, pintarSuave, tarjetaResumen,
+} from './ui.js';
 
 const yo = await exigirSesion('pagos.ver'); // sin el permiso vuelve al menú
 const puedeCobrar = yo.permisos.includes('pagos.gestionar');
-
-const $ = (id) => document.getElementById(id);
 
 const METODOS = { EFECTIVO: 'Efectivo', TARJETA: 'Tarjeta', TRANSFERENCIA: 'Transferencia' };
 const TIPOS = { DOMICILIO: 'Domicilio', MESA: 'Mesa', LLEVAR: 'Para llevar' };
 const ESTADOS_PAGO = { PENDIENTE: 'Pendiente', PARCIAL: 'Pago parcial', PAGADO: 'Pagado' };
 
-function fechaHora(iso) {
-  return new Date(iso).toLocaleString('es-CO', {
-    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
-  });
-}
-
 function abrirComprobante(ordenId) {
   window.open(`comprobante.html?orden=${ordenId}`, '_blank');
-}
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
 }
 
 // =====================================================================
