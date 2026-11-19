@@ -100,7 +100,7 @@ async function avisosDeCocina() {
     desdeCocina = hora;
     if (listos.length) {
       mostrarAviso(listos.length === 1 ? `Mesa ${listos[0].mesa}: el pedido está listo para llevar`
-        : `Listos para llevar: mesas ${listos.map((p) => p.mesa).join(', ')}`, 'exito');
+        : `Listos para llevar: mesas ${listos.map((p) => p.mesa).join(', ')}`, 'exito', { sonido: 'listo' });
       if (!document.querySelector('dialog[open]')) refrescar();
     }
   } catch { /* si falla, la siguiente consulta lo intenta otra vez */ }

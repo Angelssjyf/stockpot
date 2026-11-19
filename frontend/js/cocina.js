@@ -110,39 +110,14 @@ async function avanzar(orden, boton) {
 //  RF-06.7 Notificar: pregunta cada 10 s qué llegó y suena un timbre corto
 // =====================================================================
 
-let sonidoActivo = true;
-$('sonido').addEventListener('click', () => {
-  sonidoActivo = !sonidoActivo;
-  $('sonido').setAttribute('aria-pressed', String(sonidoActivo));
-  $('sonido').title = `Sonido de pedidos nuevos: ${sonidoActivo ? 'activado' : 'apagado'}`;
-  $('sonido').querySelector('.icono').textContent = sonidoActivo ? 'volume_up' : 'volume_off';
-});
-
-function timbre() {
-  if (!sonidoActivo) return;
-  try {
-    const audio = new AudioContext();
-    for (const [i, frecuencia] of [880, 1320].entries()) {
-      const nota = audio.createOscillator();
-      const volumen = audio.createGain();
-      nota.frequency.value = frecuencia;
-      volumen.gain.setValueAtTime(0.15, audio.currentTime + i * 0.18);
-      volumen.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + i * 0.18 + 0.3);
-      nota.connect(volumen).connect(audio.destination);
-      nota.start(audio.currentTime + i * 0.18);
-      nota.stop(audio.currentTime + i * 0.18 + 0.3);
-    }
-  } catch { /* el navegador no deja sonar sin haber tocado la página: solo queda el aviso */ }
-}
-
 async function revisarNovedades() {
   if (document.hidden || !desde) return;
   try {
     const { hora, nuevos } = await api('GET', `/cocina/novedades?desde=${encodeURIComponent(desde)}`);
     desde = hora;
     if (nuevos.length) {
-      mostrarAviso(nuevos.length === 1 ? `Nuevo pedido: ${nuevos[0].origen}` : `${nuevos.length} pedidos nuevos`);
-      timbre();
+      mostrarAviso(nuevos.length === 1 ? `Nuevo pedido: ${nuevos[0].origen}` : `${nuevos.length} pedidos nuevos`, '',
+        { sonido: 'pedido' });
       cargar();
     }
   } catch { /* si falla una consulta, la siguiente lo intenta otra vez */ }
