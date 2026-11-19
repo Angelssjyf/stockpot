@@ -10,6 +10,9 @@ const yo = await exigirSesion('empresas.gestionar'); // sin el permiso vuelve al
 const $ = (id) => document.getElementById(id);
 $('usuario-actual').textContent = 'Súper administrador';
 $('cerrar-sesion').addEventListener('click', cerrarSesion);
+// Su PIN sirve para desbloquear la pantalla más rápido (la pantalla de bloqueo lo sugiere)
+$('mi-pin').addEventListener('click', async () => (await import('./seguridad.js')).crearPin(
+  'Lo usarás para desbloquear la pantalla sin escribir tu contraseña completa.'));
 
 // Saludo según la hora, con la fecha de hoy (como en el menú de los restaurantes)
 const ahora = new Date();
