@@ -1,59 +1,146 @@
 // Restaurantes (tercer corte): el súper administrador crea, modifica, activa y desactiva empresas.
 // No ve el inventario, los pedidos ni las ventas de ningún restaurante.
 import { api, cerrarSesion, exigirSesion } from './api.js';
-import { crear, empezarCarga, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import {
+  confirmar, contarHasta, crear, empezarCarga, mostrarAviso, mostrarEstado, normalizar, pintarSuave,
+} from './ui.js';
 
 const yo = await exigirSesion('empresas.gestionar'); // sin el permiso vuelve al menú
 
 const $ = (id) => document.getElementById(id);
-$('usuario-actual').textContent = `${yo.nombre} · Súper administrador`;
+$('usuario-actual').textContent = 'Súper administrador';
 $('cerrar-sesion').addEventListener('click', cerrarSesion);
 
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
+// Saludo según la hora, con la fecha de hoy (como en el menú de los restaurantes)
+const ahora = new Date();
+const saludo = ahora.getHours() < 12 ? 'Buenos días' : ahora.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches';
+const fechaLarga = ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+$('saludo').replaceChildren(crear('div', {}, [
+  crear('h2', { texto: `${saludo}, ${yo.nombre}` }),
+  crear('p', { className: 'nota', texto: `${fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1)} · los restaurantes que usan StockPot` }),
+]));
+
+function tarjetaResumen(icono, titulo, valor, clase = '') {
+  const numero = crear('div', { className: 'valor', texto: '0' });
+  contarHasta(numero, valor);
+  return crear('div', { className: `tarjeta-resumen ${clase}`.trim() }, [
     crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
+    numero,
     crear('div', { texto: titulo }),
   ]);
 }
 
+/** «Activo hace 5 min», «hace 3 h», «ayer», «hace 4 días» o la fecha. */
+function haceCuanto(iso) {
+  if (!iso) return 'Nadie ha entrado todavía';
+  const minutos = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
+  if (minutos < 1) return 'Activo hace un momento';
+  if (minutos < 60) return `Activo hace ${minutos} min`;
+  const horas = Math.round(minutos / 60);
+  if (horas < 24) return `Activo hace ${horas} h`;
+  const dias = Math.round(horas / 24);
+  if (dias === 1) return 'Activo ayer';
+  if (dias < 30) return `Activo hace ${dias} días`;
+  return `Activo el ${new Date(iso).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+}
+
+/** Iniciales del restaurante para su círculo: «Café La Esquina» → «CL», «Asadero El Fogón» → «AF». */
+function inicialesDe(nombre) {
+  const palabras = nombre.split(/\s+/).filter((p) => p.length > 2);
+  return (palabras.length ? palabras : [nombre]).slice(0, 2).map((p) => p[0].toUpperCase()).join('');
+}
+
+let empresas = [];
+let filtro = 'todos';
+
 async function cargar() {
   if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true });
   try {
-    const empresas = await api('GET', '/empresas');
+    empresas = await api('GET', '/empresas');
     const activas = empresas.filter((e) => e.activa).length;
+    const desactivadas = empresas.length - activas;
     pintarSuave($('resumen'),
-      tarjetaResumen('storefront', 'Restaurantes', String(empresas.length)),
-      tarjetaResumen('check_circle', 'Activos', String(activas)),
-      tarjetaResumen('block', 'Desactivados', String(empresas.length - activas)),
-      tarjetaResumen('group', 'Usuarios activos', String(empresas.reduce((n, e) => n + e.usuarios_activos, 0))),
+      tarjetaResumen('storefront', 'Restaurantes', empresas.length),
+      tarjetaResumen('check_circle', 'Activos', activas),
+      tarjetaResumen('block', 'Desactivados', desactivadas, desactivadas ? 'aviso-agotado' : ''),
+      tarjetaResumen('group', 'Usuarios activos', empresas.reduce((n, e) => n + e.usuarios_activos, 0)),
+      tarjetaResumen('wifi', 'Conectados ahora', empresas.reduce((n, e) => n + (e.conectados ?? 0), 0)),
     );
-    if (empresas.length === 0) {
-      mostrarEstado('Todavía no hay restaurantes', {
-        icono: 'storefront', detalle: 'Crea el primero con su administrador.',
-        accion: { texto: 'Nuevo restaurante', icono: 'add_business', alHacer: () => abrirFormulario(null) },
-      });
-      pintarSuave($('lista'));
-    } else {
-      $('estado').hidden = true;
-      pintarSuave($('lista'), ...empresas.map(filaDeEmpresa));
-    }
+    pintarLista();
   } catch (error) {
     mostrarEstado(error.message, { reintentar: true });
   }
 }
 
-/** Una fila: nombre, NIT y contacto, su administrador y cuántos usuarios tiene. */
+/** Aplica la búsqueda y el filtro de estado sin volver a pedir los datos. */
+function pintarLista() {
+  if (empresas.length === 0) {
+    mostrarEstado('Todavía no hay restaurantes', {
+      icono: 'storefront', detalle: 'Crea el primero con su administrador.',
+      accion: { texto: 'Nuevo restaurante', icono: 'add_business', alHacer: () => abrirFormulario(null) },
+    });
+    pintarSuave($('lista'));
+    return;
+  }
+  const texto = normalizar($('buscar').value.trim());
+  const visibles = empresas.filter((e) => (filtro === 'todos' || (filtro === 'activos') === e.activa)
+    && (!texto || normalizar([e.nombre, e.nit, ...e.administradores.flatMap((a) => [a.nombre, a.email])].join(' '))
+      .includes(texto)));
+  if (visibles.length === 0) {
+    mostrarEstado('Ningún restaurante coincide', {
+      icono: 'search_off', detalle: 'Prueba con otro nombre o NIT, o cambia el filtro.',
+      accion: { texto: 'Ver todos', icono: 'close', alHacer: limpiarFiltros },
+    });
+    pintarSuave($('lista'));
+    return;
+  }
+  $('estado').hidden = true;
+  pintarSuave($('lista'), ...visibles.map(filaDeEmpresa));
+}
+
+function elegirFiltro(nuevo) {
+  filtro = nuevo;
+  for (const chip of $('filtros').querySelectorAll('.chip')) {
+    chip.setAttribute('aria-pressed', String(chip.dataset.filtro === nuevo));
+  }
+  pintarLista();
+}
+
+function limpiarFiltros() {
+  $('buscar').value = '';
+  elegirFiltro('todos');
+}
+
+$('filtros').addEventListener('click', (evento) => {
+  const chip = evento.target.closest('.chip');
+  if (chip) elegirFiltro(chip.dataset.filtro);
+});
+$('buscar').addEventListener('input', pintarLista);
+$('form-buscar').addEventListener('submit', (evento) => evento.preventDefault());
+
+/** Una fila: iniciales, nombre, NIT y contacto, su administrador, actividad, estado y usuarios. */
 function filaDeEmpresa(empresa) {
-  const chips = [crear('span', { className: 'chip', texto: `${empresa.usuarios_activos} de ${empresa.usuarios} usuarios` })];
-  if (!empresa.activa) chips.unshift(crear('span', { className: 'chip estado-CANCELADO', texto: 'Desactivado' }));
+  const conectados = empresa.conectados ?? 0;
+  const chips = [
+    crear('span', { className: `chip ${empresa.activa ? 'estado-ENTREGADO' : 'estado-CANCELADO'}`,
+      texto: empresa.activa ? 'Activo' : 'Desactivado' }),
+    crear('span', { className: 'chip', texto: `${empresa.usuarios_activos} de ${empresa.usuarios} usuarios` }),
+  ];
   const admin = empresa.administradores[0];
-  const fila = crear('li', { className: `fila editable${empresa.activa ? '' : ' inactiva'}` }, [
-    crear('div', { className: 'avatar' }, [crear('span', { className: 'icono', texto: 'storefront', 'aria-hidden': 'true' })]),
+  const actividad = crear('div', { className: `actividad${conectados ? ' en-linea' : ''}` }, [
+    crear('span', { className: 'punto', 'aria-hidden': 'true' }),
+    crear('span', {
+      texto: conectados ? `${conectados} ${conectados === 1 ? 'persona conectada' : 'personas conectadas'} ahora`
+        : haceCuanto(empresa.ultima_actividad),
+    }),
+  ]);
+  const fila = crear('li', { className: `fila editable fila-empresa${empresa.activa ? '' : ' inactiva'}` }, [
+    crear('div', { className: 'avatar', texto: inicialesDe(empresa.nombre), 'aria-hidden': 'true' }),
     crear('div', { className: 'datos' }, [
       crear('div', { className: 'nombre', texto: empresa.nombre }),
       crear('div', { className: 'correo', texto: [`NIT ${empresa.nit}`, empresa.telefono, empresa.direccion].filter(Boolean).join(' · ') }),
       crear('div', { className: 'correo', texto: admin ? `Administra: ${admin.nombre} (${admin.email})` : 'Sin administrador' }),
+      actividad,
     ]),
     crear('div', { className: 'chips' }, chips),
   ]);
@@ -121,7 +208,10 @@ $('form-empresa').addEventListener('submit', async (evento) => {
     if (editada) {
       await api('PUT', `/empresas/${editada.id}`, datos);
       if ($('f-activa').checked !== editada.activa) {
-        if (!$('f-activa').checked && !confirm(`¿Desactivar ${editada.nombre}? Su personal no podrá entrar.`)) {
+        if (!$('f-activa').checked && !await confirmar(`¿Desactivar ${editada.nombre}?`, {
+          texto: 'Su personal no podrá entrar hasta que lo vuelvas a activar.', aceptar: 'Desactivar', peligro: true,
+          icono: 'block',
+        })) {
           $('guardar').disabled = false;
           return;
         }

@@ -1,6 +1,6 @@
 // Módulo de reservas (RF-07.1 a RF-07.8): reservas del día, mesas libres y estados.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { crear, empezarCarga, mostrarAviso, mostrarEstado, pedirTexto, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('reservas.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('reservas.gestionar');
@@ -133,8 +133,11 @@ function abrirDetalle(reserva) {
   };
   const botones = [boton('Cerrar', null, 'boton-texto', () => dialogoDetalle.close())];
   if (puedeGestionar && reserva.activa) {
-    botones.push(boton('Cancelar reserva', null, 'boton-texto', () => {
-      const motivo = prompt(`¿Por qué se cancela la reserva de ${reserva.cliente}? (opcional)`, '');
+    botones.push(boton('Cancelar reserva', null, 'boton-texto', async () => {
+      const motivo = await pedirTexto(`¿Cancelar la reserva de ${reserva.cliente}?`, {
+        texto: '¿Por qué se cancela? (opcional)', aceptar: 'Cancelar reserva', cancelar: 'Volver', peligro: true,
+        icono: 'event_busy',
+      });
       if (motivo !== null) cambiar(`/reservas/${reserva.id}/cancelar`, { motivo }, 'Reserva cancelada: la mesa quedó libre');
     }));
     botones.push(boton('Modificar', null, 'boton-texto', () => { dialogoDetalle.close(); abrirFormulario(reserva); }));

@@ -102,6 +102,8 @@ def test_cp_emp_4_modificar_y_listar(client, super_headers, fonda):
     assert [e["nombre"] for e in empresas] == ["La Fonda de Mateo", "StockPot Restaurante"]
     assert set(empresas[0]) >= {"nit", "telefono", "direccion", "activa", "usuarios", "administradores"}
     assert not {"ventas", "insumos", "total"} & set(empresas[0])  # nada del negocio
+    # Uso de la plataforma: el administrador de la fonda acaba de iniciar sesión
+    assert empresas[0]["conectados"] == 1 and empresas[0]["ultima_actividad"]
 
 
 def test_cp_emp_5_desactivar_restaurante(client, super_headers, fonda):

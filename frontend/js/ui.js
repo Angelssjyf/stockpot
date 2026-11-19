@@ -427,3 +427,61 @@ if (!sinMovimiento() && 'IntersectionObserver' in window) {
     .observe(document.body, { childList: true, subtree: true });
   buscar(document.body);
 }
+
+// =====================================================================
+//  Ventanas de confirmación con el estilo de StockPot (reemplazan confirm() y prompt())
+// =====================================================================
+
+let ventanaPregunta;
+
+/**
+ * Abre una ventana con título, texto y los botones Cancelar / Aceptar.
+ * Con `campo` agrega una caja de texto. Devuelve una promesa con:
+ * - confirmar: true o false;
+ * - con campo: el texto escrito ('' si lo deja vacío) o null si cancela.
+ */
+function preguntar({ titulo, texto = '', aceptar = 'Aceptar', cancelar = 'Cancelar', peligro = false,
+  icono = 'help', campo = null }) {
+  if (!ventanaPregunta) {
+    ventanaPregunta = crear('dialog', { className: 'ventana-pregunta', 'aria-labelledby': 'pregunta-titulo' });
+    document.body.appendChild(ventanaPregunta);
+    prepararVentana(ventanaPregunta);
+  }
+  const d = ventanaPregunta;
+  const entrada = campo ? crear('input', { id: 'pregunta-campo', autocomplete: 'off', maxlength: '200',
+    placeholder: campo }) : null;
+  const botonCancelar = crear('button', { type: 'button', className: 'boton-texto', texto: cancelar });
+  const botonAceptar = crear('button', { type: 'submit', className: `boton-principal${peligro ? ' peligro' : ''}`,
+    texto: aceptar });
+  const formulario = crear('form', { method: 'dialog' }, [
+    crear('span', { className: `icono pregunta-icono${peligro ? ' peligro' : ''}`, texto: icono, 'aria-hidden': 'true' }),
+    crear('h2', { id: 'pregunta-titulo', texto: titulo }),
+    ...(texto ? [crear('p', { className: 'pregunta-texto', texto })] : []),
+    ...(entrada ? [crear('div', { className: 'campo' }, [entrada])] : []),
+    crear('div', { className: 'acciones' }, [botonCancelar, botonAceptar]),
+  ]);
+  d.replaceChildren(formulario);
+
+  return new Promise((responder) => {
+    let respuesta = campo ? null : false;
+    botonCancelar.addEventListener('click', () => d.close());
+    formulario.addEventListener('submit', (evento) => {
+      evento.preventDefault();
+      respuesta = campo ? entrada.value.trim() : true;
+      d.close();
+    });
+    d.addEventListener('close', () => responder(respuesta), { once: true });
+    d.showModal();
+    (entrada || botonAceptar).focus();
+  });
+}
+
+/** Pregunta sí o no. Ejemplo: if (!await confirmar('¿Anular el pago?', {peligro: true})) return; */
+export function confirmar(titulo, opciones = {}) {
+  return preguntar({ titulo, ...opciones });
+}
+
+/** Pide un texto opcional (por ejemplo el motivo). Devuelve el texto, o null si cancela. */
+export function pedirTexto(titulo, opciones = {}) {
+  return preguntar({ titulo, campo: 'Escribe aquí (opcional)', ...opciones });
+}

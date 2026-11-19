@@ -1,6 +1,6 @@
 // Módulo de caja y pagos (RF-09.1 a RF-09.7), venta de mostrador (RF-10.1) y cierre de caja.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import { confirmar, crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('pagos.ver'); // sin el permiso vuelve al menú
 const puedeCobrar = yo.permisos.includes('pagos.gestionar');
@@ -294,7 +294,9 @@ async function registrarPago(boton) {
 }
 
 async function anularPago(pago) {
-  if (!confirm(`¿Anular el pago de ${formato.dinero(pago.monto)}?`)) return;
+  if (!await confirmar(`¿Anular el pago de ${formato.dinero(pago.monto)}?`, {
+    texto: 'El saldo de la cuenta vuelve a quedar pendiente.', aceptar: 'Anular pago', peligro: true, icono: 'money_off',
+  })) return;
   try {
     const { cuenta } = await api('PATCH', `/pagos/${pago.id}/anular`);
     mostrarAviso('Pago anulado', 'exito');

@@ -1,7 +1,7 @@
 // Módulo de domicilios (RF-08.1 a RF-08.8): pedidos, clientes, asignación, estados y entregas.
 import { api, exigirSesion } from './api.js';
 import { reportarIncidencia } from './reportar.js';
-import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { confirmar, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('domicilios.ver'); // sin el permiso vuelve al menú
 // CAJERO y ADMINISTRADOR gestionan; el DOMICILIARIO solo ve y entrega lo suyo
@@ -503,8 +503,10 @@ function pintarAcciones(domicilio) {
 
   if (puedeGestionar && SIGUIENTE[domicilio.estado]) {
     const cancelar = crear('button', { type: 'button', className: 'boton-texto', texto: 'Cancelar pedido' });
-    cancelar.addEventListener('click', () => {
-      if (confirm(`¿Cancelar el domicilio ${domicilio.codigo}? No se puede deshacer.`)) {
+    cancelar.addEventListener('click', async () => {
+      if (await confirmar(`¿Cancelar el domicilio ${domicilio.codigo}?`, {
+        texto: 'No se puede deshacer.', aceptar: 'Cancelar domicilio', cancelar: 'Volver', peligro: true, icono: 'cancel',
+      })) {
         cambiarEstado('CANCELADO');
       }
     });
