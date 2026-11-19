@@ -284,7 +284,7 @@ async function registrarPago(boton) {
   boton.disabled = true;
   try {
     const { cuenta } = await api('POST', `/ordenes/${cuentaAbierta.orden_id}/pagos`, datos); // RF-09.1
-    mostrarAviso(cuenta.venta ? `Pagado. Venta ${cuenta.venta} registrada` : 'Abono registrado', 'exito');
+    mostrarAviso(cuenta.venta ? `Pagado. Venta ${cuenta.venta} registrada` : 'Abono registrado', 'exito', { sonido: 'pago' });
     pintarCuenta(cuenta);
     cargarPorCobrar();
   } catch (error) {
@@ -395,7 +395,8 @@ $('m-cobrar').addEventListener('click', async () => {
       items: lineas.map((l) => ({ producto_id: l.producto_id, cantidad: l.cantidad })),
       metodo: pago.metodo, recibido: pago.recibido, referencia: pago.referencia,
     });
-    mostrarAviso(`Venta ${venta.codigo}` + (registrado.cambio ? ` · cambio ${formato.dinero(registrado.cambio)}` : ''), 'exito');
+    mostrarAviso(`Venta ${venta.codigo}` + (registrado.cambio ? ` · cambio ${formato.dinero(registrado.cambio)}` : ''), 'exito',
+      { sonido: 'pago' });
     lineas = [];
     pagoMostrador = formularioDePago($('m-pago'), { montoFijo: totalMostrador });
     pintarLineas();

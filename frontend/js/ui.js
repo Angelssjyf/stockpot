@@ -26,8 +26,12 @@ function palomita() {
   return svg;
 }
 
-/** Muestra un aviso abajo de la pantalla durante 3 segundos. tipo: 'exito' (palomita) o 'error'. */
-export function mostrarAviso(texto, tipo = '') {
+/**
+ * Muestra un aviso abajo de la pantalla durante 3 segundos. tipo: 'exito' (palomita) o 'error'.
+ * Suena según el tipo; con { sonido: 'pago' | 'listo' | ... } suena otro, y con { sonido: null }, ninguno.
+ */
+export function mostrarAviso(texto, tipo = '', { sonido = tipo === 'exito' || tipo === 'error' ? tipo : null } = {}) {
+  if (sonido) sonar(sonido);
   let aviso = document.getElementById('aviso');
   if (!aviso) {
     aviso = document.createElement('div');
@@ -485,3 +489,91 @@ export function confirmar(titulo, opciones = {}) {
 export function pedirTexto(titulo, opciones = {}) {
   return preguntar({ titulo, campo: 'Escribe aquí (opcional)', ...opciones });
 }
+
+// =====================================================================
+//  Sonidos: se generan en el navegador (sin archivos de audio) y se pueden silenciar
+// =====================================================================
+
+const CLAVE_SONIDO = 'stockpot_sonido';
+let audio = null;
+
+function sonidoActivo() {
+  try { return localStorage.getItem(CLAVE_SONIDO) !== 'no'; } catch { return true; }
+}
+
+/** El navegador no deja sonar hasta que la persona toca la página: el primer toque lo habilita. */
+function contexto() {
+  if (!audio) {
+    try { audio = new AudioContext(); } catch { return null; }
+  }
+  if (audio.state === 'suspended') audio.resume().catch(() => {});
+  return audio;
+}
+['pointerdown', 'keydown'].forEach((evento) => document.addEventListener(evento, contexto, { once: true, capture: true }));
+
+/** Una nota: frecuencia (Hz), cuándo empieza (s), cuánto dura (s), volumen y forma de onda. */
+function nota(ctx, frecuencia, inicio, duracion, volumen = 0.15, forma = 'sine') {
+  const osc = ctx.createOscillator();
+  const ganancia = ctx.createGain();
+  const t = ctx.currentTime + inicio;
+  osc.type = forma;
+  osc.frequency.setValueAtTime(frecuencia, t);
+  ganancia.gain.setValueAtTime(0.0001, t);
+  ganancia.gain.exponentialRampToValueAtTime(volumen, t + 0.01);
+  ganancia.gain.exponentialRampToValueAtTime(0.0001, t + duracion);
+  osc.connect(ganancia).connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + duracion + 0.02);
+}
+
+const SONIDOS = {
+  // Cocina: llegó un pedido nuevo (el timbre de siempre, dos notas)
+  pedido: (ctx) => { nota(ctx, 880, 0, 0.3); nota(ctx, 1320, 0.18, 0.3); },
+  // Mesero: el pedido está listo para llevar (tres notas que suben, se oye en el salón)
+  listo: (ctx) => { nota(ctx, 784, 0, 0.25, 0.18); nota(ctx, 988, 0.12, 0.25, 0.18); nota(ctx, 1319, 0.24, 0.5, 0.2); },
+  // Caja: pago registrado (campanita brillante de dos golpes)
+  pago: (ctx) => {
+    nota(ctx, 1568, 0, 0.12, 0.12, 'triangle');
+    nota(ctx, 2093, 0.09, 0.6, 0.16);
+    nota(ctx, 4186, 0.09, 0.25, 0.03);
+  },
+  // Algo salió mal: dos tonos graves cortos
+  error: (ctx) => { nota(ctx, 220, 0, 0.16, 0.14, 'triangle'); nota(ctx, 165, 0.14, 0.24, 0.14, 'triangle'); },
+  // Guardado con éxito: un clic suave
+  exito: (ctx) => { nota(ctx, 1046, 0, 0.12, 0.08); nota(ctx, 1568, 0.05, 0.14, 0.05); },
+};
+
+/** Suena 'pedido', 'listo', 'pago', 'error' o 'exito' (si el sonido no está silenciado). */
+export function sonar(tipo) {
+  if (!sonidoActivo() || !SONIDOS[tipo]) return;
+  const ctx = contexto();
+  if (!ctx) return;
+  try { SONIDOS[tipo](ctx); } catch { /* sin audio: queda solo el aviso en pantalla */ }
+}
+
+/** Botón de la barra para silenciar o activar los sonidos (la preferencia se recuerda en este equipo). */
+function prepararBotonSonido() {
+  const barra = document.querySelector('header.barra');
+  if (!barra) return;
+  let boton = document.getElementById('sonido');
+  if (!boton) {
+    boton = crear('button', { type: 'button', className: 'boton-icono', id: 'sonido' },
+      [crear('span', { className: 'icono', 'aria-hidden': 'true' })]);
+    const antesDe = barra.querySelector('#mi-pin, #cerrar-sesion');
+    if (antesDe) barra.insertBefore(boton, antesDe); else barra.appendChild(boton);
+  }
+  const pintar = () => {
+    const activo = sonidoActivo();
+    boton.setAttribute('aria-pressed', String(activo));
+    boton.title = `Sonidos: ${activo ? 'activados' : 'silenciados'}`;
+    boton.querySelector('.icono').textContent = activo ? 'volume_up' : 'volume_off';
+  };
+  boton.addEventListener('click', () => {
+    const activar = !sonidoActivo();
+    try { localStorage.setItem(CLAVE_SONIDO, activar ? 'si' : 'no'); } catch { /* sin almacenamiento */ }
+    pintar();
+    if (activar) sonar('exito'); // para que se note que volvió el sonido
+  });
+  pintar();
+}
+prepararBotonSonido();
