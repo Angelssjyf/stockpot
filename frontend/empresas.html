@@ -19,15 +19,28 @@
 
   <!-- El súper administrador solo gestiona restaurantes: no ve su inventario, pedidos ni ventas -->
   <main class="contenido">
-    <p class="nota">Aquí creas los restaurantes que usan StockPot y los activas o desactivas.
-      Los datos de cada restaurante (inventario, pedidos, ventas) solo los ve su propio personal.</p>
-    <div class="resumen" id="resumen"></div>
+    <section class="saludo" id="saludo"></section>
+    <div class="resumen resumen-empresas" id="resumen"></div>
+
+    <div class="herramientas-empresas">
+      <form class="campo buscador" id="form-buscar" role="search">
+        <span class="icono" aria-hidden="true">search</span>
+        <input id="buscar" type="search" placeholder="Buscar por nombre, NIT o administrador"
+               aria-label="Buscar restaurantes">
+      </form>
+      <div class="categorias" id="filtros" role="group" aria-label="Filtrar por estado">
+        <button type="button" class="chip filtro" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button type="button" class="chip filtro" data-filtro="activos" aria-pressed="false">Activos</button>
+        <button type="button" class="chip filtro" data-filtro="inactivos" aria-pressed="false">Desactivados</button>
+      </div>
+    </div>
 
     <div class="estado" id="estado" hidden>
       <p id="estado-texto"></p>
       <button type="button" class="boton-texto" id="reintentar" hidden>Reintentar</button>
     </div>
-    <ul class="lista" id="lista"></ul>
+    <ul class="lista lista-empresas" id="lista"></ul>
+    <p class="nota pie-empresas">Los datos de cada restaurante (inventario, pedidos, ventas) solo los ve su propio personal.</p>
   </main>
 
   <button type="button" class="boton-principal boton-flotante" id="boton-nuevo">

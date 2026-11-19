@@ -3708,3 +3708,81 @@ dialog.ventana-pregunta {
 .boton-principal.peligro:hover {
   background: #93000a;
 }
+
+/* ------------------------------------------------------------ Súper administrador: restaurantes */
+.herramientas-empresas {
+  margin-top: 16px;
+}
+
+.herramientas-empresas .categorias {
+  margin: 4px 0 12px;
+}
+
+.fila-empresa .avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--primario);
+}
+
+.fila-empresa.inactiva .avatar {
+  background: var(--superficie-variante);
+  color: var(--texto-suave);
+}
+
+.fila-empresa.inactiva .nombre {
+  color: var(--texto-suave);
+}
+
+.fila-empresa .actividad {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.fila-empresa .actividad .punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--borde);
+  flex-shrink: 0;
+}
+
+.fila-empresa .actividad.en-linea {
+  color: #14532d;
+  font-weight: 500;
+}
+
+.fila-empresa .actividad.en-linea .punto {
+  background: #2e9d4f;
+  box-shadow: 0 0 0 3px #d7f5dd;
+}
+
+.pie-empresas {
+  text-align: center;
+  margin: 16px 0 96px; /* espacio para el botón flotante: ya no tapa al último restaurante */
+}
+
+@media (max-width: 600px) {
+  .fila-empresa {
+    flex-wrap: wrap;
+  }
+
+  .fila-empresa .chips {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 64px; /* debajo del texto, alineados con el nombre */
+  }
+
+  /* cinco tarjetas en dos columnas: la última ocupa todo el ancho */
+  .resumen-empresas > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
