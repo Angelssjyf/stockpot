@@ -1,11 +1,11 @@
 // Módulo de pedidos en mesa (RF-05.1 a RF-05.9): mesas, pedidos, cocina y estado.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, normalizar, pintarSuave } from './ui.js';
+import {
+  $, confirmar, crear, empezarCarga, fechaHora, formato, marcarCampo, mostrarAviso, normalizar, pedirTexto, pintarSuave, tarjetaResumen,
+} from './ui.js';
 
 const yo = await exigirSesion('pedidos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('pedidos.gestionar'); // MESERO, CAJERO, ADMINISTRADOR
-
-const $ = (id) => document.getElementById(id);
 
 const NOMBRES_ESTADO = {
   REGISTRADO: 'Registrado', CONFIRMADO: 'Confirmado', EN_COCINA: 'En cocina',
@@ -21,11 +21,6 @@ function espera(iso) {
   const minutos = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
   if (minutos < 60) return `hace ${minutos} min`;
   return `hace ${Math.floor(minutos / 60)} h ${minutos % 60} min`;
-}
-
-function fechaHora(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 }
 
 function hora(iso) {
@@ -49,14 +44,6 @@ function botonTexto(texto, accion) {
   const boton = crear('button', { type: 'button', className: 'boton-texto', texto });
   boton.addEventListener('click', accion);
   return boton;
-}
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
 }
 
 // =====================================================================
@@ -100,7 +87,7 @@ async function avisosDeCocina() {
     desdeCocina = hora;
     if (listos.length) {
       mostrarAviso(listos.length === 1 ? `Mesa ${listos[0].mesa}: el pedido está listo para llevar`
-        : `Listos para llevar: mesas ${listos.map((p) => p.mesa).join(', ')}`, 'exito');
+        : `Listos para llevar: mesas ${listos.map((p) => p.mesa).join(', ')}`, 'exito', { sonido: 'listo' });
       if (!document.querySelector('dialog[open]')) refrescar();
     }
   } catch { /* si falla, la siguiente consulta lo intenta otra vez */ }
@@ -186,10 +173,10 @@ function tarjetaMesa(mesa) {
     else if (puedeGestionar && reservaCercana(mesa)) {
       const r = mesa.reserva;
       const horaReserva = new Date(r.fecha_hora).toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' });
-      if (confirm(`La mesa ${mesa.numero} está reservada a las ${horaReserva} para ${r.cliente} (${r.personas} personas).
-¿Tomar el pedido de todas formas?`)) {
-        abrirFormulario(null, mesa.id);
-      }
+      confirmar(`La mesa ${mesa.numero} está reservada`, {
+        texto: `A las ${horaReserva} para ${r.cliente} (${r.personas} personas). ¿Tomar el pedido de todas formas?`,
+        aceptar: 'Tomar pedido', icono: 'event_seat',
+      }).then((si) => { if (si) abrirFormulario(null, mesa.id); });
     } else if (puedeGestionar) abrirFormulario(null, mesa.id);
     else mostrarAviso(`La mesa ${mesa.numero} está libre`);
   });
@@ -616,11 +603,6 @@ function revisarDisponibilidad() {
   }, 400);
 }
 
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
-}
-
 function mostrarErrorPedido(mensaje) {
   $('error-pedido').textContent = mensaje;
   $('error-pedido').hidden = false;
@@ -722,8 +704,11 @@ function pintarDetalle(pedido) {
 function pintarAcciones(pedido) {
   const botones = [botonTexto('Cerrar', () => dialogoDetalle.close())];
   if (puedeGestionar && pedido.editable) {
-    botones.push(botonTexto('Cancelar pedido', () => {
-      const motivo = prompt(`¿Por qué se cancela ${pedido.codigo}? (opcional)`, '');
+    botones.push(botonTexto('Cancelar pedido', async () => {
+      const motivo = await pedirTexto(`¿Cancelar ${pedido.codigo}?`, {
+        texto: '¿Por qué se cancela? (opcional)', aceptar: 'Cancelar pedido', cancelar: 'Volver', peligro: true,
+        icono: 'cancel',
+      });
       if (motivo !== null) ejecutar('PATCH', `/pedidos/${pedido.id}/cancelar`, { motivo }, `${pedido.codigo} cancelado`);
     }));
     botones.push(botonTexto('Modificar', () => {

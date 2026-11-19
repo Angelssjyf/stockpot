@@ -1,15 +1,15 @@
 // Módulo de proveedores: RF-02.1 Registrar, RF-02.2 Consultar, RF-02.3 Modificar,
 // RF-02.4 Productos suministrados y RF-02.5 Historial de compras.
 import { api, exigirSesion } from './api.js';
-import { CATEGORIAS_INSUMO, crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import {
+  $, CATEGORIAS_INSUMO, crear, empezarCarga, formato, marcarCampo, mostrarAviso, mostrarEstado, pintarSuave,
+} from './ui.js';
 
 const yo = await exigirSesion('proveedores.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('proveedores.gestionar');
 
 // Las órdenes de compra son parte de este módulo: se llega a ellas desde aquí
 document.getElementById('ir-compras').hidden = !yo.permisos.includes('compras.ver');
-
-const $ = (id) => document.getElementById(id);
 
 let categoriaElegida = ''; // RF-02.9 '' = todas
 
@@ -212,11 +212,6 @@ function pintarHistorial(compras) {
 }
 
 // ---------------------------------------------------- Validar y guardar
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`).classList.toggle('invalido', Boolean(mensaje));
-}
 
 function mostrarError(mensaje) {
   $('error-formulario').textContent = mensaje;

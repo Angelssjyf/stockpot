@@ -1,12 +1,11 @@
 // Módulo de cocina (RF-06.1 a RF-06.7): tablero con los pedidos de mesa y los domicilios por preparar.
 import { api, exigirSesion } from './api.js';
-import { crear, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import { $, crear, mostrarAviso, mostrarEstado, pintarSuave, tarjetaResumen } from './ui.js';
 
 // El tablero queda prendido en la cocina: no se bloquea solo (sí con el botón)
 const yo = await exigirSesion('cocina.ver', { bloqueoAutomatico: false });
 const puedeGestionar = yo.permisos.includes('cocina.gestionar');
 
-const $ = (id) => document.getElementById(id);
 const COLUMNAS = ['POR_PREPARAR', 'PREPARANDO', 'LISTO'];
 const BOTON = {
   EN_PREPARACION: { texto: 'Empezar', icono: 'skillet' },
@@ -14,14 +13,6 @@ const BOTON = {
   ENTREGADO: { texto: 'Entregado', icono: 'room_service' },
 };
 const AVISO_MINUTOS = 15; // desde aquí la tarjeta se pone amarilla; al doble, roja
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
-}
 
 function espera(minutos) {
   if (minutos < 1) return 'recién llegado';
@@ -110,39 +101,14 @@ async function avanzar(orden, boton) {
 //  RF-06.7 Notificar: pregunta cada 10 s qué llegó y suena un timbre corto
 // =====================================================================
 
-let sonidoActivo = true;
-$('sonido').addEventListener('click', () => {
-  sonidoActivo = !sonidoActivo;
-  $('sonido').setAttribute('aria-pressed', String(sonidoActivo));
-  $('sonido').title = `Sonido de pedidos nuevos: ${sonidoActivo ? 'activado' : 'apagado'}`;
-  $('sonido').querySelector('.icono').textContent = sonidoActivo ? 'volume_up' : 'volume_off';
-});
-
-function timbre() {
-  if (!sonidoActivo) return;
-  try {
-    const audio = new AudioContext();
-    for (const [i, frecuencia] of [880, 1320].entries()) {
-      const nota = audio.createOscillator();
-      const volumen = audio.createGain();
-      nota.frequency.value = frecuencia;
-      volumen.gain.setValueAtTime(0.15, audio.currentTime + i * 0.18);
-      volumen.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + i * 0.18 + 0.3);
-      nota.connect(volumen).connect(audio.destination);
-      nota.start(audio.currentTime + i * 0.18);
-      nota.stop(audio.currentTime + i * 0.18 + 0.3);
-    }
-  } catch { /* el navegador no deja sonar sin haber tocado la página: solo queda el aviso */ }
-}
-
 async function revisarNovedades() {
   if (document.hidden || !desde) return;
   try {
     const { hora, nuevos } = await api('GET', `/cocina/novedades?desde=${encodeURIComponent(desde)}`);
     desde = hora;
     if (nuevos.length) {
-      mostrarAviso(nuevos.length === 1 ? `Nuevo pedido: ${nuevos[0].origen}` : `${nuevos.length} pedidos nuevos`);
-      timbre();
+      mostrarAviso(nuevos.length === 1 ? `Nuevo pedido: ${nuevos[0].origen}` : `${nuevos.length} pedidos nuevos`, '',
+        { sonido: 'pedido' });
       cargar();
     }
   } catch { /* si falla una consulta, la siguiente lo intenta otra vez */ }

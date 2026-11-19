@@ -7,12 +7,12 @@ Software **IEEE 1058**, igual que en la entrega del 2.º corte.
 
 | Carpeta | Sección IEEE 1058 | Contenido |
 |---|---|---|
-| `01_Plan_de_gestion_del_proyecto` | 5. Planes del proceso de gestión (inicio, calendario, control) | **Acta de constitución (Project Charter) v0.3** con el **70 % entregado en el 2.º corte, el 15 % entregado en este corte y el 15 % pendiente**, cronograma de hitos actualizado y evidencias |
-| `03_Verificacion_y_validacion` | 7.2 Plan de verificación y validación | **Plan de pruebas al 75 % (50 % + 25 %)**: **78 casos** en el formato de la docente: 53 de los módulos del 70 % (los 33 del 2.º corte + 20 nuevos, por encima del mínimo de 50) y **25 de Pedidos y Cocina** · **Informe de pruebas automatizadas del 15 %** (43 pruebas de pytest, todas aprobadas) |
+| `01_Plan_de_gestion_del_proyecto` | 5. Planes del proceso de gestión (inicio, calendario, control) | **Acta de constitución (Project Charter) v0.3**: 70 % entregado en el 2.º corte, 15 % en este corte y 15 % pendiente, con el título y los objetivos corregidos por la docente · **Excel de puntos de función, PERT y presupuesto** con el presupuesto en **un solo cálculo** (salarios de Bogotá 2026, carga prestacional, materiales y reserva: **BAC $205.875.739**) |
+| `03_Verificacion_y_validacion` | 7.2 Plan de verificación y validación | **Plan de pruebas al 75 % (50 % + 25 %)**: **78 casos** en el formato de la docente: 53 de los módulos del 70 % (los 33 del 2.º corte + 20 nuevos, por encima del mínimo de 50) y **25 de Pedidos y Cocina** · **Informe de pruebas realizadas del 15 %** en el mismo formato del 2.º corte (43 pruebas automatizadas de pedidos y cocina, todas aprobadas; regresión de 402) |
 | `05_Producto_desarrollado` | 6.3 Plan de infraestructura · producto | **Proyecto desarrollado (70 % + 15 %)**: guía de despliegue con ngrok y el código fuente de la versión entregada |
 
 Siguen vigentes, sin cambios, los documentos del 2.º corte que no hacen parte de esta entrega (en
-[`../entrega-2do-corte`](../entrega-2do-corte)): cronograma y Excel de puntos de función (5), métodos, herramientas e
+[`../entrega-2do-corte`](../entrega-2do-corte)): cronograma (5), métodos, herramientas e
 IA utilizada (6.2), matriz de criterios de aceptación y acta UAT (6.4).
 
 El resto de la estructura técnica está en la raíz del repositorio:

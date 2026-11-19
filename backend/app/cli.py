@@ -7,6 +7,19 @@ from .models import Empresa, Rol, Usuario
 
 
 def register_cli(app):
+    @app.cli.command("respaldar")
+    def respaldar_cmd():
+        """Copia de seguridad de la base de datos en database/respaldos (guarda las últimas 15)."""
+        from .respaldos import RespaldoFallido, respaldar
+
+        try:
+            archivo = respaldar()
+        except RespaldoFallido as error:
+            app.logger.error("Respaldo fallido: %s", error)
+            raise click.ClickException(f"No se pudo hacer el respaldo: {error}")
+        app.logger.info("Respaldo listo: %s", archivo.name)
+        click.echo(f"Respaldo listo: database/respaldos/{archivo.name} ({archivo.stat().st_size // 1024} KB)")
+
     @app.cli.command("crear-admin")
     @click.option("--email", prompt="Correo del administrador")
     @click.option("--nombre", prompt="Nombre")
@@ -48,6 +61,11 @@ def register_cli(app):
             accion = "creado"
         else:
             accion = "actualizado"
+            # Si el correo pasa a otro rol o restaurante, el PIN que tenía era de esa otra cuenta:
+            # se quita para que nadie desbloquee ni cobre con un PIN que el nuevo dueño no creó
+            if usuario.pin_hash and (usuario.rol_id != rol.id or usuario.empresa_id != empresa_id):
+                usuario.pin_hash = None
+                accion += " (se le quitó el PIN anterior: crea uno nuevo desde «Mi PIN»)"
 
         usuario.rol = rol
         usuario.empresa_id = empresa_id

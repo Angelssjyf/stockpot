@@ -5,6 +5,7 @@ Cada prueba recibe una base de datos nueva en memoria con:
 - los roles y permisos cargados desde el mismo database/02_seed.sql que usa MySQL.
 """
 
+import logging
 from pathlib import Path
 
 import pytest
@@ -33,6 +34,18 @@ def _cargar_seed():
         conexion.commit()
     finally:
         conexion.close()
+
+
+@pytest.fixture(autouse=True)
+def sin_archivos_de_registro():
+    """El logger de Flask es global: si una prueba le conectó un archivo de registro, se suelta
+    al terminar para que las demás pruebas no escriban en él."""
+    yield
+    logger = logging.getLogger("app")
+    for manejador in list(logger.handlers):
+        if getattr(manejador, "baseFilename", None):
+            manejador.close()
+            logger.removeHandler(manejador)
 
 
 @pytest.fixture()

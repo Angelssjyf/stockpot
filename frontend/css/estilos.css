@@ -50,6 +50,11 @@ h1, h2 {
   font-size: 24px;
   line-height: 1;
   display: inline-block;
+  /* Cuadrado fijo: mientras carga la fuente, el nombre del ícono ("restaurant_menu") no ocupa más
+     espacio ni hace saltar la página cuando aparece el ícono (Lighthouse: estabilidad visual, CLS) */
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
   white-space: nowrap;
   font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
@@ -314,8 +319,15 @@ a.boton-texto {
 
 @media (prefers-reduced-motion: no-preference) {
   .ingreso .login {
-    animation: fundido 0.35s ease-out both;
+    /* Entra con un pequeño desplazamiento y siempre visible: si empezara transparente, en el celular
+       (donde es lo único en pantalla) el navegador no cuenta la primera pintura (Lighthouse NO_FCP) */
+    animation: entrar-login 0.35s ease-out both;
   }
+}
+
+@keyframes entrar-login {
+  from { transform: translateY(10px); }
+  to   { transform: none; }
 }
 
 .login form {
@@ -3437,4 +3449,340 @@ p.nota-producto {
 .datos-orden.costos .separada {
   padding-top: 8px;
   border-top: 1px solid var(--borde);
+}
+
+
+/* ------------------------------------------------------------ Auditoría Lighthouse (accesibilidad y estabilidad) */
+.alertas h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #5c4400;
+}
+
+.alertas .mini-lista li {
+  padding: 0;
+}
+
+button.alerta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+}
+
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.titulo-lista {
+  margin: 20px 0 8px;
+  font-size: 18px;
+}
+
+.esperando-resumen {
+  visibility: hidden;
+}
+
+/* ------------------------------------------------------------ Cierre de caja (arqueo) */
+.aviso-caja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #fff3cd;
+  color: #5c4400;
+  border: 1px solid #e6c870;
+  border-radius: var(--radio);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.aviso-caja > span:nth-child(2) {
+  flex: 1 1 240px;
+}
+
+#turno-caja {
+  margin-bottom: 24px;
+}
+
+.arqueo {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.2fr) minmax(90px, 1fr) minmax(110px, 1fr) minmax(110px, 1.1fr);
+  gap: 8px 12px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.arqueo .encabezado {
+  font-size: 12px;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.arqueo .metodo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.arqueo .valor {
+  font-variant-numeric: tabular-nums;
+}
+
+.arqueo .campo {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .arqueo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .arqueo .encabezado {
+    display: none;
+  }
+
+  .arqueo .metodo {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+
+  /* Sin encabezados en el celular: cada valor dice qué es */
+  .arqueo .esperado::before,
+  .arqueo .contado::before {
+    display: block;
+    font-size: 12px;
+    color: var(--texto-suave);
+  }
+
+  .arqueo .esperado::before { content: "Esperado"; }
+  .arqueo .contado::before { content: "Contado"; }
+}
+
+/* ------------------------------------------------------------ Sugerencia de compra */
+.grupo-sugerencia {
+  margin: 16px 0;
+}
+
+.grupo-sugerencia h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.grupo-sugerencia h3 .chip {
+  margin-left: auto;
+}
+
+.linea-sugerida {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.4fr) minmax(150px, 1.2fr) minmax(110px, 0.8fr) minmax(80px, auto);
+  gap: 8px 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--borde, #ead9d3);
+}
+
+.linea-sugerida .campo {
+  margin: 0;
+}
+
+.linea-sugerida .subtotal {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.linea-sugerida.excluida {
+  opacity: 0.5;
+}
+
+.insumo-sugerido {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.insumo-sugerido input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primario, #8b4a2b);
+  flex: none;
+}
+
+.insumo-sugerido span {
+  display: flex;
+  flex-direction: column;
+}
+
+.insumo-sugerido small {
+  color: var(--texto-suave);
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .linea-sugerida {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .linea-sugerida .insumo-sugerido,
+  .linea-sugerida .proveedor-unico,
+  .linea-sugerida .campo:has(select) {
+    grid-column: 1 / -1;
+  }
+}
+
+.alertas h2 .enlace-sugerir {
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.linea-sugerida .proveedor-unico {
+  font-size: 14px;
+  color: var(--texto-suave);
+}
+
+/* ------------------------------------------------------------ Ventana de confirmación (confirmar / pedirTexto) */
+dialog.ventana-pregunta {
+  width: min(400px, calc(100vw - 32px));
+  text-align: center;
+}
+
+.ventana-pregunta .pregunta-icono {
+  font-size: 32px;
+  color: var(--primario);
+  background: var(--contenedor-primario);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.ventana-pregunta .pregunta-icono.peligro {
+  color: var(--error);
+  background: var(--contenedor-error);
+}
+
+.ventana-pregunta .pregunta-texto {
+  color: var(--texto-suave);
+  line-height: 1.5;
+}
+
+.ventana-pregunta .campo {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.ventana-pregunta .acciones {
+  justify-content: center;
+}
+
+.boton-principal.peligro {
+  background: var(--error);
+}
+
+.boton-principal.peligro:hover {
+  background: #93000a;
+}
+
+/* ------------------------------------------------------------ Súper administrador: restaurantes */
+.herramientas-empresas {
+  margin-top: 16px;
+}
+
+.herramientas-empresas .categorias {
+  margin: 4px 0 12px;
+}
+
+.fila-empresa .avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--primario);
+}
+
+.fila-empresa.inactiva .avatar {
+  background: var(--superficie-variante);
+  color: var(--texto-suave);
+}
+
+.fila-empresa.inactiva .nombre {
+  color: var(--texto-suave);
+}
+
+.fila-empresa .actividad {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.fila-empresa .actividad .punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--borde);
+  flex-shrink: 0;
+}
+
+.fila-empresa .actividad.en-linea {
+  color: #14532d;
+  font-weight: 500;
+}
+
+.fila-empresa .actividad.en-linea .punto {
+  background: #2e9d4f;
+  box-shadow: 0 0 0 3px #d7f5dd;
+}
+
+.pie-empresas {
+  text-align: center;
+  margin: 16px 0 96px; /* espacio para el botón flotante: ya no tapa al último restaurante */
+}
+
+@media (max-width: 600px) {
+  .fila-empresa {
+    flex-wrap: wrap;
+  }
+
+  .fila-empresa .chips {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 64px; /* debajo del texto, alineados con el nombre */
+  }
+
+  /* cinco tarjetas en dos columnas: la última ocupa todo el ancho */
+  .resumen-empresas > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }

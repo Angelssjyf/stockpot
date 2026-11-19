@@ -40,6 +40,12 @@ echo   Para apagar todo: cierra esta ventana y la de ngrok.
 echo ================================================================
 echo.
 
+REM --- Copia de seguridad de la base de datos (guarda las ultimas 15) ---
+echo Haciendo la copia de seguridad de la base de datos...
+".venv\Scripts\flask.exe" respaldar
+if errorlevel 1 echo [AVISO] No se pudo hacer la copia de seguridad; StockPot abre igual.
+echo.
+
 REM --- ngrok: enlace publico (opcional) ---------------------------
 where ngrok >nul 2>nul
 if errorlevel 1 (
@@ -56,7 +62,7 @@ REM --- Abre la app en el navegador cuando el servidor este listo ----
 start "" cmd /c "timeout /t 3 /nobreak >nul & start http://127.0.0.1:5000"
 
 REM --- Servidor (queda corriendo en esta ventana) -------------------
-".venv\Scripts\waitress-serve.exe" --host=127.0.0.1 --port=5000 --call app:create_app
+".venv\Scripts\waitress-serve.exe" --host=127.0.0.1 --port=5000 --ident=StockPot --call app:create_app
 pause
 exit /b
 

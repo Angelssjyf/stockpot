@@ -2,6 +2,9 @@
 
 let temporizadorAviso;
 
+/** Atajo para document.getElementById, el mismo en todas las pantallas. */
+export const $ = (id) => document.getElementById(id);
+
 /** RF-03.10 Categorías de insumos (también subdividen a los proveedores, RF-02.9). */
 export const CATEGORIAS_INSUMO = {
   CARNES: 'Carnes', GRANOS: 'Granos', LACTEOS: 'Lácteos y huevos', FRUTAS_VERDURAS: 'Frutas y verduras',
@@ -26,8 +29,12 @@ function palomita() {
   return svg;
 }
 
-/** Muestra un aviso abajo de la pantalla durante 3 segundos. tipo: 'exito' (palomita) o 'error'. */
-export function mostrarAviso(texto, tipo = '') {
+/**
+ * Muestra un aviso abajo de la pantalla durante 3 segundos. tipo: 'exito' (palomita) o 'error'.
+ * Suena según el tipo; con { sonido: 'pago' | 'listo' | ... } suena otro, y con { sonido: null }, ninguno.
+ */
+export function mostrarAviso(texto, tipo = '', { sonido = tipo === 'exito' || tipo === 'error' ? tipo : null } = {}) {
+  if (sonido) sonar(sonido);
   let aviso = document.getElementById('aviso');
   if (!aviso) {
     aviso = document.createElement('div');
@@ -55,7 +62,11 @@ export function crear(etiqueta, { className, texto, ...atributos } = {}, hijos =
   const elemento = document.createElement(etiqueta);
   if (className) elemento.className = className;
   if (texto !== undefined) elemento.textContent = texto;
-  for (const [nombre, valor] of Object.entries(atributos)) elemento.setAttribute(nombre, valor);
+  for (const [nombre, valor] of Object.entries(atributos)) {
+    // La política de seguridad (CSP) bloquea el atributo style; por CSSOM sí se permite
+    if (nombre === 'style') elemento.style.cssText = valor;
+    else elemento.setAttribute(nombre, valor);
+  }
   for (const hijo of hijos) elemento.appendChild(hijo);
   return elemento;
 }
@@ -134,6 +145,10 @@ export function empezarCarga(contenedor) {
  */
 export function mostrarEstado(texto, { icono = '', detalle = '', accion = null, reintentar = false, cargando = false } = {}) {
   const estado = document.getElementById('estado');
+  // El aviso va después de la lista: así, cuando llegan los datos, la lista ya está en su lugar y no
+  // salta hacia arriba al ocultarse el aviso (Lighthouse: estabilidad visual, CLS)
+  const lista = estado.nextElementSibling;
+  if (lista?.classList.contains('lista')) lista.after(estado);
   // Cargando: filas «esqueleto» con un brillo que pasa, en vez del texto solo
   let esqueleto = estado.querySelector('.esqueleto');
   if (cargando && !esqueleto) {
@@ -418,4 +433,186 @@ if (!sinMovimiento() && 'IntersectionObserver' in window) {
   new MutationObserver((cambios) => cambios.forEach((c) => c.addedNodes.forEach(buscar)))
     .observe(document.body, { childList: true, subtree: true });
   buscar(document.body);
+}
+
+// =====================================================================
+//  Ventanas de confirmación con el estilo de StockPot (reemplazan confirm() y prompt())
+// =====================================================================
+
+let ventanaPregunta;
+
+/**
+ * Abre una ventana con título, texto y los botones Cancelar / Aceptar.
+ * Con `campo` agrega una caja de texto. Devuelve una promesa con:
+ * - confirmar: true o false;
+ * - con campo: el texto escrito ('' si lo deja vacío) o null si cancela.
+ */
+function preguntar({ titulo, texto = '', aceptar = 'Aceptar', cancelar = 'Cancelar', peligro = false,
+  icono = 'help', campo = null }) {
+  if (!ventanaPregunta) {
+    ventanaPregunta = crear('dialog', { className: 'ventana-pregunta', 'aria-labelledby': 'pregunta-titulo' });
+    document.body.appendChild(ventanaPregunta);
+    prepararVentana(ventanaPregunta);
+  }
+  const d = ventanaPregunta;
+  const entrada = campo ? crear('input', { id: 'pregunta-campo', autocomplete: 'off', maxlength: '200',
+    placeholder: campo }) : null;
+  const botonCancelar = crear('button', { type: 'button', className: 'boton-texto', texto: cancelar });
+  const botonAceptar = crear('button', { type: 'submit', className: `boton-principal${peligro ? ' peligro' : ''}`,
+    texto: aceptar });
+  const formulario = crear('form', { method: 'dialog' }, [
+    crear('span', { className: `icono pregunta-icono${peligro ? ' peligro' : ''}`, texto: icono, 'aria-hidden': 'true' }),
+    crear('h2', { id: 'pregunta-titulo', texto: titulo }),
+    ...(texto ? [crear('p', { className: 'pregunta-texto', texto })] : []),
+    ...(entrada ? [crear('div', { className: 'campo' }, [entrada])] : []),
+    crear('div', { className: 'acciones' }, [botonCancelar, botonAceptar]),
+  ]);
+  d.replaceChildren(formulario);
+
+  return new Promise((responder) => {
+    let respuesta = campo ? null : false;
+    botonCancelar.addEventListener('click', () => d.close());
+    formulario.addEventListener('submit', (evento) => {
+      evento.preventDefault();
+      respuesta = campo ? entrada.value.trim() : true;
+      d.close();
+    });
+    d.addEventListener('close', () => responder(respuesta), { once: true });
+    d.showModal();
+    (entrada || botonAceptar).focus();
+  });
+}
+
+/** Pregunta sí o no. Ejemplo: if (!await confirmar('¿Anular el pago?', {peligro: true})) return; */
+export function confirmar(titulo, opciones = {}) {
+  return preguntar({ titulo, ...opciones });
+}
+
+/** Pide un texto opcional (por ejemplo el motivo). Devuelve el texto, o null si cancela. */
+export function pedirTexto(titulo, opciones = {}) {
+  return preguntar({ titulo, campo: 'Escribe aquí (opcional)', ...opciones });
+}
+
+// =====================================================================
+//  Sonidos: se generan en el navegador (sin archivos de audio) y se pueden silenciar
+// =====================================================================
+
+const CLAVE_SONIDO = 'stockpot_sonido';
+let audio = null;
+
+function sonidoActivo() {
+  try { return localStorage.getItem(CLAVE_SONIDO) !== 'no'; } catch { return true; }
+}
+
+/** El navegador no deja sonar hasta que la persona toca la página: el primer toque lo habilita. */
+function contexto() {
+  if (!audio) {
+    try { audio = new AudioContext(); } catch { return null; }
+  }
+  if (audio.state === 'suspended') audio.resume().catch(() => {});
+  return audio;
+}
+['pointerdown', 'keydown'].forEach((evento) => document.addEventListener(evento, contexto, { once: true, capture: true }));
+
+/** Una nota: frecuencia (Hz), cuándo empieza (s), cuánto dura (s), volumen y forma de onda. */
+function nota(ctx, frecuencia, inicio, duracion, volumen = 0.15, forma = 'sine') {
+  const osc = ctx.createOscillator();
+  const ganancia = ctx.createGain();
+  const t = ctx.currentTime + inicio;
+  osc.type = forma;
+  osc.frequency.setValueAtTime(frecuencia, t);
+  ganancia.gain.setValueAtTime(0.0001, t);
+  ganancia.gain.exponentialRampToValueAtTime(volumen, t + 0.01);
+  ganancia.gain.exponentialRampToValueAtTime(0.0001, t + duracion);
+  osc.connect(ganancia).connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + duracion + 0.02);
+}
+
+const SONIDOS = {
+  // Cocina: llegó un pedido nuevo (el timbre de siempre, dos notas)
+  pedido: (ctx) => { nota(ctx, 880, 0, 0.3); nota(ctx, 1320, 0.18, 0.3); },
+  // Mesero: el pedido está listo para llevar (tres notas que suben, se oye en el salón)
+  listo: (ctx) => { nota(ctx, 784, 0, 0.25, 0.18); nota(ctx, 988, 0.12, 0.25, 0.18); nota(ctx, 1319, 0.24, 0.5, 0.2); },
+  // Caja: pago registrado (campanita brillante de dos golpes)
+  pago: (ctx) => {
+    nota(ctx, 1568, 0, 0.12, 0.12, 'triangle');
+    nota(ctx, 2093, 0.09, 0.6, 0.16);
+    nota(ctx, 4186, 0.09, 0.25, 0.03);
+  },
+  // Algo salió mal: dos tonos graves cortos
+  error: (ctx) => { nota(ctx, 220, 0, 0.16, 0.14, 'triangle'); nota(ctx, 165, 0.14, 0.24, 0.14, 'triangle'); },
+  // Guardado con éxito: un clic suave
+  exito: (ctx) => { nota(ctx, 1046, 0, 0.12, 0.08); nota(ctx, 1568, 0.05, 0.14, 0.05); },
+};
+
+/** Suena 'pedido', 'listo', 'pago', 'error' o 'exito' (si el sonido no está silenciado). */
+export function sonar(tipo) {
+  if (!sonidoActivo() || !SONIDOS[tipo]) return;
+  const ctx = contexto();
+  if (!ctx) return;
+  try { SONIDOS[tipo](ctx); } catch { /* sin audio: queda solo el aviso en pantalla */ }
+}
+
+/** Botón de la barra para silenciar o activar los sonidos (la preferencia se recuerda en este equipo). */
+function prepararBotonSonido() {
+  const barra = document.querySelector('header.barra');
+  if (!barra) return;
+  let boton = document.getElementById('sonido');
+  if (!boton) {
+    boton = crear('button', { type: 'button', className: 'boton-icono', id: 'sonido' },
+      [crear('span', { className: 'icono', 'aria-hidden': 'true' })]);
+    const antesDe = barra.querySelector('#mi-pin, #cerrar-sesion');
+    if (antesDe) barra.insertBefore(boton, antesDe); else barra.appendChild(boton);
+  }
+  const pintar = () => {
+    const activo = sonidoActivo();
+    boton.setAttribute('aria-pressed', String(activo));
+    boton.title = `Sonidos: ${activo ? 'activados' : 'silenciados'}`;
+    boton.querySelector('.icono').textContent = activo ? 'volume_up' : 'volume_off';
+  };
+  boton.addEventListener('click', () => {
+    const activar = !sonidoActivo();
+    try { localStorage.setItem(CLAVE_SONIDO, activar ? 'si' : 'no'); } catch { /* sin almacenamiento */ }
+    pintar();
+    if (activar) sonar('exito'); // para que se note que volvió el sonido
+  });
+  pintar();
+}
+prepararBotonSonido();
+
+// =====================================================================
+//  Piezas que se repiten en varias pantallas
+// =====================================================================
+
+/** Tarjeta de resumen: ícono, número grande y título (por ejemplo «12 · Pedidos activos»). */
+export function tarjetaResumen(icono, titulo, valor, clase = '') {
+  return crear('div', { className: `tarjeta-resumen ${clase}`.trim() }, [
+    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
+    crear('div', { className: 'valor', texto: valor }),
+    crear('div', { texto: titulo }),
+  ]);
+}
+
+/** "2026-11-18T22:10:00" -> "18 nov, 10:10 p. m." ('—' si no hay fecha). */
+export function fechaHora(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+}
+
+/** Muestra (o borra, con mensaje vacío) el error de un campo: #error-<nombre> y borde rojo en #campo-<nombre>. */
+export function marcarCampo(nombre, mensaje) {
+  document.getElementById(`error-${nombre}`).textContent = mensaje;
+  document.getElementById(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
+}
+
+/** «Buenas noches, Ángel» y la fecha de hoy («Miércoles, 18 de noviembre»), con un texto opcional al final. */
+export function pintarSaludo(contenedor, nombre, extra = '') {
+  const ahora = new Date();
+  const saludo = ahora.getHours() < 12 ? 'Buenos días' : ahora.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const fecha = ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+  contenedor.replaceChildren(crear('div', {}, [
+    crear('h2', { texto: `${saludo}, ${nombre}` }),
+    crear('p', { className: 'nota', texto: fecha.charAt(0).toUpperCase() + fecha.slice(1) + (extra ? ` · ${extra}` : '') }),
+  ]));
 }

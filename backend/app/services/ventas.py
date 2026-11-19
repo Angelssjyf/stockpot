@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from ..extensions import db
 from ..models import Consumo, Pago, Venta
-from .inventario import registrar_movimiento
+from .inventario import bloquear, registrar_movimiento
 
 IMPOCONSUMO = Decimal("0.08")  # impuesto al consumo de restaurantes, incluido en los precios
 
@@ -134,6 +134,7 @@ def cerrar_venta(orden, usuario):
         for linea in detalle.producto.receta:
             gastado[linea.insumo] += linea.cantidad * detalle.cantidad
 
+    bloquear(gastado)  # todos los insumos de la venta, en orden de id, antes de descontar
     costo_total = Decimal("0")
     for insumo, cantidad in gastado.items():
         movimiento = registrar_movimiento(

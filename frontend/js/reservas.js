@@ -1,11 +1,12 @@
 // Módulo de reservas (RF-07.1 a RF-07.8): reservas del día, mesas libres y estados.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import {
+  $, crear, empezarCarga, marcarCampo, mostrarAviso, mostrarEstado, pedirTexto, pintarSuave, tarjetaResumen,
+} from './ui.js';
 
 const yo = await exigirSesion('reservas.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('reservas.gestionar');
 
-const $ = (id) => document.getElementById(id);
 const ESTADOS = {
   PENDIENTE: 'Pendiente', CONFIRMADA: 'Confirmada', CUMPLIDA: 'Llegó', NO_ASISTIO: 'No asistió', CANCELADA: 'Cancelada',
 };
@@ -17,14 +18,6 @@ const fechaLarga = (texto) => new Date(texto).toLocaleDateString('es-CO', { week
 
 function chip(estado) {
   return crear('span', { className: `chip estado-${CHIP[estado]}`, texto: ESTADOS[estado] });
-}
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
 }
 
 // =====================================================================
@@ -133,8 +126,11 @@ function abrirDetalle(reserva) {
   };
   const botones = [boton('Cerrar', null, 'boton-texto', () => dialogoDetalle.close())];
   if (puedeGestionar && reserva.activa) {
-    botones.push(boton('Cancelar reserva', null, 'boton-texto', () => {
-      const motivo = prompt(`¿Por qué se cancela la reserva de ${reserva.cliente}? (opcional)`, '');
+    botones.push(boton('Cancelar reserva', null, 'boton-texto', async () => {
+      const motivo = await pedirTexto(`¿Cancelar la reserva de ${reserva.cliente}?`, {
+        texto: '¿Por qué se cancela? (opcional)', aceptar: 'Cancelar reserva', cancelar: 'Volver', peligro: true,
+        icono: 'event_busy',
+      });
       if (motivo !== null) cambiar(`/reservas/${reserva.id}/cancelar`, { motivo }, 'Reserva cancelada: la mesa quedó libre');
     }));
     botones.push(boton('Modificar', null, 'boton-texto', () => { dialogoDetalle.close(); abrirFormulario(reserva); }));
@@ -237,11 +233,6 @@ async function buscarMesas() {
   }
 }
 for (const id of ['f-fecha', 'f-hora', 'f-personas', 'f-duracion']) $(id).addEventListener('change', buscarMesas);
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
-}
 
 function validar() {
   const obligatorio = (id) => ($(id).value.trim() ? '' : 'Campo obligatorio');

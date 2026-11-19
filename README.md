@@ -1,5 +1,7 @@
 # StockPot
 
+[![Pruebas](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml/badge.svg?branch=develop)](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml)
+
 Sistema de gestión para restaurantes pequeños y medianos: controla el inventario de insumos,
 gestiona los pedidos, comunica las áreas de atención y cocina, y genera información sobre
 el consumo y las ventas.
@@ -64,25 +66,27 @@ Hitos: **20/10/2026** entrega parcial del 70 % (2.º corte) · **21/10 – 13/11
 ```
 stockpot/
 ├── database/            Scripts SQL
-│   ├── 01_schema.sql    Crea la base y sus 26 tablas (instalación desde cero)
+│   ├── 01_schema.sql    Crea la base y sus 27 tablas (instalación desde cero)
 │   ├── 02_seed.sql      Roles y permisos iniciales
 │   ├── 03_usuario_app.sql   Usuario de MySQL para la aplicación
 │   ├── 04_datos_ejemplo.sql Datos de demostración (insumos, proveedores, carta, clientes)
-│   └── 05 a 16_*.sql    Actualizan una base existente sin borrar datos
+│   └── 05 a 17_*.sql    Actualizan una base existente sin borrar datos
 ├── backend/             API Flask
 │   ├── app/
 │   │   ├── models/      Tablas como clases de Python
 │   │   ├── modules/     Un módulo por cada requisito de la EDT (usuarios, inventario, pagos...)
-│   │   ├── services/    Reglas compartidas (inventario, órdenes, pagos y ventas)
-│   │   └── utils/       Código compartido (permisos, fechas)
-│   └── tests/           Pruebas automáticas (casos CP-XX.X-n)
+│   │   ├── services/    Reglas compartidas (inventario, órdenes, ventas, compras y restaurantes)
+│   │   └── utils/       Código compartido (permisos, sesión, fechas)
+│   ├── tests/           Pruebas automáticas (casos CP-XX.X-n)
+│   ├── requirements.txt     Lo que necesita la app
+│   └── requirements-dev.txt Lo anterior + pytest (solo para programar)
 ├── frontend/            Interfaz web (la sirve Flask)
 │   ├── index.html       Inicio de sesión
 │   ├── menu.html        Menú de módulos según el rol
 │   ├── *.html           Una pantalla por módulo (usuarios, inventario, domicilios, caja...)
 │   ├── css/estilos.css  Diseño de toda la interfaz
 │   └── js/              Lógica de cada pantalla (api.js habla con la API)
-├── docs/                Documentación (modelo de datos, despliegue y entregables)
+├── docs/                Documentación (modelo de datos, despliegue y entregables de cada corte)
 └── iniciar.bat          Enciende el servidor y el enlace público de ngrok
 ```
 
@@ -182,6 +186,30 @@ Quien abra el enlace verá primero una advertencia de ngrok: debe tocar **Visit 
 > ⚠️ Mientras `iniciar.bat` esté abierto, cualquiera con el enlace puede ver la pantalla de
 > login. Usa contraseñas fuertes y cierra las ventanas cuando no lo estén usando.
 
+### Copias de seguridad de la base de datos
+
+Cada vez que se abre `iniciar.bat` se hace una copia de la base MySQL en `database/respaldos/`
+(carpeta que no se sube a GitHub). Se guardan las **últimas 15** copias automáticas
+(`stockpot_auto_AAAA-MM-DD_HHMMSS.sql`); las copias hechas a mano con otro nombre no se borran.
+
+- **Hacer una copia en cualquier momento** (en `backend`): `flask respaldar`
+- **Restaurar una copia** (reemplaza los datos actuales):
+  `mysql -u root -p stockpot < ..\database\respaldos\stockpot_auto_AAAA-MM-DD_HHMMSS.sql`
+
+Si `mysqldump` no está en la ruta normal de MySQL, pon su ubicación en `MYSQLDUMP` dentro de `backend/.env`.
+
+### Registro de eventos y errores
+
+El servidor anota en `backend/logs/stockpot.log` (no se sube a GitHub; rota a 1 MB y guarda 5 anteriores):
+
+- **ERROR**: fallas inesperadas con su detalle técnico. El usuario ve *«Ocurrió un error inesperado
+  (código A1B2C3)»*; busca ese código en el archivo para ver qué pasó.
+- **WARNING**: eventos de seguridad (sin sesión, sin permiso, sesión bloqueada, demasiados intentos de
+  inicio de sesión) y peticiones que tardan más de 2 segundos.
+- **INFO**: arranque del servidor y copias de seguridad.
+
+Nunca se anotan contraseñas, tokens ni el contenido de las peticiones.
+
 ### Para programar
 
 - **Backend con recarga automática:** en vez de `iniciar.bat`, ejecuta en `backend`:
@@ -191,7 +219,10 @@ Quien abra el enlace verá primero una advertencia de ngrok: debe tocar **Visit 
 
 ### 7. Correr las pruebas
 
+Las herramientas de pruebas no van en el servidor: se instalan aparte, una sola vez.
+
 ```powershell
+pip install -r requirements-dev.txt
 pytest -v
 ```
 
@@ -219,6 +250,7 @@ Todas las rutas, excepto `login` y `health`, requieren el encabezado
 | PUT | `/api/roles/<id>/permisos` | RF-01.6 Gestionar permisos de un rol | `roles.gestionar` |
 | GET/POST/PUT | `/api/proveedores` · `/api/proveedores/<id>/insumos` · `/compras` | RF-02.1 a RF-02.5 | `proveedores.*` |
 | GET/POST/PATCH | `/api/ordenes-compra` · `/<id>/estado` | RF-02.6 a RF-02.8 | `compras.*` |
+| GET/POST | `/api/ordenes-compra/sugerencia` | Sugerencia de compra (stock mínimo → órdenes por proveedor) | `compras.*` |
 | GET/POST/PUT | `/api/insumos` · `/api/insumos/<id>/movimientos` | RF-03.1 a RF-03.5, RF-03.7 | `inventario.*` |
 | GET | `/api/inventario/existencias` · `/api/inventario/alertas` | RF-03.6 y RF-03.8 | `inventario.ver` |
 | GET/POST/PUT/PATCH | `/api/productos` · `/<id>/disponibilidad` | RF-04.1 a RF-04.6 | `productos.*` |
@@ -233,6 +265,7 @@ Todas las rutas, excepto `login` y `health`, requieren el encabezado
 | GET | `/api/reservas/disponibilidad` | RF-07.6 y RF-07.7 Mesas libres para una fecha, hora y número de personas | `reservas.ver` |
 | GET/POST/PUT | `/api/clientes` · `/api/domicilios` (+ `asignar`, `estado`, `entrega`, `historial`) | RF-08.1 a RF-08.8 | `domicilios.*` |
 | GET/POST/PATCH | `/api/ordenes/por-cobrar` · `/<id>/cuenta` · `/<id>/pagos` · `/<id>/comprobante` · `/api/pagos` | RF-09.1 a RF-09.7 | `pagos.*` |
+| GET/POST | `/api/caja/turno` · `/api/caja/abrir` · `/api/caja/cerrar` · `/api/caja/turnos` · `/api/caja/turnos/<id>` | Cierre de caja (arqueo) | `pagos.*` |
 | GET/POST | `/api/ventas` · `/mas-vendidos` · `/consumo` | RF-10.1 a RF-10.6 | `ventas.ver` / `pagos.gestionar` |
 | GET | `/api/reportes/inventario` · `ventas` · `consumo` · `productos` · `historico` · `estadisticas` | RF-11.1 a RF-11.6 | `reportes.ver` |
 
@@ -277,15 +310,16 @@ Después abre un **Pull Request hacia `develop`** en GitHub para que otro integr
 StockPot se publica con **ngrok** desde el PC del equipo (opción aprobada por la docente):
 [Guía de despliegue con ngrok](docs/despliegue/Guia_Despliegue_ngrok.md).
 
-## Documentación del 2.º corte
+## Documentación de las entregas
 
-En [docs/entrega-2do-corte](docs/entrega-2do-corte) están los entregables, organizados según la
-sección de procesos técnicos y de soporte de IEEE 1058 (ver su README):
+Los entregables de cada corte están en `docs/`, organizados según las secciones de procesos
+técnicos y de soporte de IEEE 1058 (cada carpeta tiene su README):
 
-| Carpeta | Contenido |
-|---|---|
-| `01_Plan_de_gestion_del_proyecto` | Acta de constitución (70 % entregado / 30 % pendiente) · cronograma de GanttProject con el avance de Jira · Excel de puntos de función y PERT · enlace de Jira |
-| `02_Metodos_herramientas_y_tecnicas` | Prompts e inteligencia artificial utilizada |
-| `03_Verificacion_y_validacion` | Plan de pruebas (casos CRUD) · matriz de criterios de aceptación v1 · informe de pruebas realizadas |
-| `04_Aceptacion_del_producto` | Acta de aceptación del cliente (UAT, Formato 2) |
-| `05_Demostracion` | Video del recorrido por los módulos del 70 % |
+| Entrega | Carpeta | Contenido |
+|---|---|---|
+| 2.º corte (70 %) | [docs/entrega-2do-corte](docs/entrega-2do-corte) | Acta de constitución · cronograma de GanttProject · Excel de puntos de función y PERT · enlace de Jira · prompts e IA utilizada · plan de pruebas CRUD · matriz de criterios de aceptación · informe de pruebas · acta UAT · video y presentación de la demostración |
+| 3.er corte (70 % + 15 %) | [docs/entrega-3er-corte](docs/entrega-3er-corte) | Acta de constitución v0.3 · Excel con el presupuesto en un solo cálculo (BAC) · plan de pruebas de 78 casos · informe de pruebas del 15 % · guía de despliegue con ngrok |
+| Entrega final | [docs/entrega-final](docs/entrega-final) | Pruebas de usabilidad con Lighthouse (en construcción) |
+
+Documentación técnica: [modelo de datos](docs/modelo-datos.md) ·
+[guía de despliegue con ngrok](docs/despliegue/Guia_Despliegue_ngrok.md).

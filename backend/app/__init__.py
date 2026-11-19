@@ -30,6 +30,7 @@ def create_app(config_class=Config):
 
     # Módulos (blueprints): cada uno con su prefijo de URL
     from .modules.auth.routes import bp as auth_bp
+    from .modules.caja.routes import bp as caja_bp
     from .modules.cocina.routes import bp as cocina_bp
     from .modules.compras.routes import bp as compras_bp
     from .modules.domicilios.routes import bp as domicilios_bp
@@ -60,10 +61,15 @@ def create_app(config_class=Config):
     app.register_blueprint(empresas_bp, url_prefix="/api")
     app.register_blueprint(cocina_bp, url_prefix="/api")
     app.register_blueprint(reservas_bp, url_prefix="/api")
+    app.register_blueprint(caja_bp, url_prefix="/api")
 
+    from .cabeceras import register_cabeceras
     from .cli import register_cli
+    from .registro import register_registro
 
     register_cli(app)
+    register_cabeceras(app)  # cabeceras de seguridad HTTP en todas las respuestas
+    register_registro(app)  # logs en backend/logs y respuesta clara ante errores inesperados
 
     @app.get("/api/health")
     def health():

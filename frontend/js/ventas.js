@@ -1,27 +1,12 @@
 // Módulo de ventas y consumo (RF-10.2 a RF-10.6).
 import { api, exigirSesion } from './api.js';
 import { reportarIncidencia } from './reportar.js';
-import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import { $, crear, empezarCarga, fechaHora, formato, mostrarAviso, pintarSuave, tarjetaResumen } from './ui.js';
 
 const yo = await exigirSesion('ventas.ver'); // sin el permiso vuelve al menú
 const puedeVerComprobantes = yo.permisos.includes('pagos.ver');
 
-const $ = (id) => document.getElementById(id);
 const TIPOS = { DOMICILIO: 'Domicilio', MESA: 'Mesa', LLEVAR: 'Para llevar' };
-
-function fechaHora(iso) {
-  return new Date(iso).toLocaleString('es-CO', {
-    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
-  });
-}
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
-}
 
 // Por defecto: los últimos 7 días
 const iso = (fecha) => fecha.toLocaleDateString('en-CA'); // AAAA-MM-DD en hora local
@@ -155,6 +140,9 @@ $('ver-comprobante').addEventListener('click', () => {
   window.open(`comprobante.html?orden=${ventaAbierta.orden_id}`, '_blank');
 });
 
+// Las tarjetas del resumen ocupan su lugar desde el inicio (sin saltos cuando llegan los datos)
+pintarSuave($('resumen'), ...['receipt_long', 'payments', 'shopping_bag', 'trending_up', 'volunteer_activism']
+  .map((icono) => tarjetaResumen(icono, '…', '…')));
 cargar();
 
 // RF-12.2 Reportar un error en la venta abierta (método de pago, monto, producto...)

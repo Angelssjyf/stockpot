@@ -1,7 +1,9 @@
 """Servicio de empresas: crear un restaurante nuevo con sus roles y su administrador."""
 
+from datetime import datetime, timedelta
+
 from ..extensions import db
-from ..models import Empresa, Permiso, Rol, Usuario
+from ..models import Empresa, Permiso, Rol, Sesion, Usuario
 
 MODULO_SUPERADMIN = "empresas"
 
@@ -51,10 +53,16 @@ def resumen(empresa):
     """Datos generales de la empresa para el súper administrador: sin inventario ni ventas."""
     usuarios = Usuario.query.execution_options(todas_las_empresas=True).filter_by(empresa_id=empresa.id).all()
     administradores = [u for u in usuarios if u.rol.nombre == "ADMINISTRADOR"]
+    sesiones = Sesion.query.filter(Sesion.usuario_id.in_([u.id for u in usuarios])).all() if usuarios else []
+    ultima = max((s.ultima_actividad for s in sesiones), default=None)
+    hace_un_rato = datetime.now() - timedelta(minutes=15)
     return {
         **empresa.to_dict(),
         "usuarios": len(usuarios),
         "usuarios_activos": sum(1 for u in usuarios if u.activo),
         "administradores": [{"nombre": f"{u.nombre} {u.apellido}", "email": u.email, "activo": u.activo}
                             for u in administradores],
+        # Uso de la plataforma (no datos del negocio): última actividad y quién está conectado ahora
+        "ultima_actividad": ultima.isoformat(timespec="minutes") if ultima else None,
+        "conectados": len({s.usuario_id for s in sesiones if s.cerrada is None and s.ultima_actividad >= hace_un_rato}),
     }

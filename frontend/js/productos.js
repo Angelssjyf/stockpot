@@ -1,13 +1,6 @@
 // Módulo de productos y menú (RF-04.1 a RF-04.6): carta, recetas, precios y disponibilidad.
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
-
-const yo = await exigirSesion('productos.ver'); // sin el permiso vuelve al menú
-const puedeGestionar = yo.permisos.includes('productos.gestionar');
-// La cocina también puede marcar un plato como agotado (RF-04.6)
-const puedeCambiarDisponibilidad = puedeGestionar || yo.permisos.includes('cocina.gestionar');
-
-const $ = (id) => document.getElementById(id);
+import { $, crear, empezarCarga, formato, marcarCampo, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
 
 const CATEGORIAS = {
   ENTRADA: 'Entradas', PLATO_FUERTE: 'Platos fuertes', BEBIDA: 'Bebidas',
@@ -41,6 +34,14 @@ function pintarCategorias() {
     return boton;
   }));
 }
+
+// Las categorías no dependen de la sesión: se pintan antes de esperarla, así la lista no salta al aparecer
+pintarCategorias();
+
+const yo = await exigirSesion('productos.ver'); // sin el permiso vuelve al menú
+const puedeGestionar = yo.permisos.includes('productos.gestionar');
+// La cocina también puede marcar un plato como agotado (RF-04.6)
+const puedeCambiarDisponibilidad = puedeGestionar || yo.permisos.includes('cocina.gestionar');
 
 async function cargar() {
   if (empezarCarga($('lista'))) mostrarEstado('Cargando…', { cargando: true }); // al recargar, la lista se queda atenuada
@@ -307,11 +308,6 @@ function agregarInsumo() {
 $('agregar-insumo').addEventListener('click', agregarInsumo);
 
 // ---------------------------------------------------- Validar y guardar
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
-}
 
 function validar() {
   const obligatorio = (valor) => (valor.trim() ? '' : 'Campo obligatorio');
