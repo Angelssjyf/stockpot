@@ -61,6 +61,11 @@ def register_cli(app):
             accion = "creado"
         else:
             accion = "actualizado"
+            # Si el correo pasa a otro rol o restaurante, el PIN que tenía era de esa otra cuenta:
+            # se quita para que nadie desbloquee ni cobre con un PIN que el nuevo dueño no creó
+            if usuario.pin_hash and (usuario.rol_id != rol.id or usuario.empresa_id != empresa_id):
+                usuario.pin_hash = None
+                accion += " (se le quitó el PIN anterior: crea uno nuevo desde «Mi PIN»)"
 
         usuario.rol = rol
         usuario.empresa_id = empresa_id
