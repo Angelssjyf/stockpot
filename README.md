@@ -66,25 +66,27 @@ Hitos: **20/10/2026** entrega parcial del 70 % (2.º corte) · **21/10 – 13/11
 ```
 stockpot/
 ├── database/            Scripts SQL
-│   ├── 01_schema.sql    Crea la base y sus 26 tablas (instalación desde cero)
+│   ├── 01_schema.sql    Crea la base y sus 27 tablas (instalación desde cero)
 │   ├── 02_seed.sql      Roles y permisos iniciales
 │   ├── 03_usuario_app.sql   Usuario de MySQL para la aplicación
 │   ├── 04_datos_ejemplo.sql Datos de demostración (insumos, proveedores, carta, clientes)
-│   └── 05 a 16_*.sql    Actualizan una base existente sin borrar datos
+│   └── 05 a 17_*.sql    Actualizan una base existente sin borrar datos
 ├── backend/             API Flask
 │   ├── app/
 │   │   ├── models/      Tablas como clases de Python
 │   │   ├── modules/     Un módulo por cada requisito de la EDT (usuarios, inventario, pagos...)
-│   │   ├── services/    Reglas compartidas (inventario, órdenes, pagos y ventas)
-│   │   └── utils/       Código compartido (permisos, fechas)
-│   └── tests/           Pruebas automáticas (casos CP-XX.X-n)
+│   │   ├── services/    Reglas compartidas (inventario, órdenes, ventas, compras y restaurantes)
+│   │   └── utils/       Código compartido (permisos, sesión, fechas)
+│   ├── tests/           Pruebas automáticas (casos CP-XX.X-n)
+│   ├── requirements.txt     Lo que necesita la app
+│   └── requirements-dev.txt Lo anterior + pytest (solo para programar)
 ├── frontend/            Interfaz web (la sirve Flask)
 │   ├── index.html       Inicio de sesión
 │   ├── menu.html        Menú de módulos según el rol
 │   ├── *.html           Una pantalla por módulo (usuarios, inventario, domicilios, caja...)
 │   ├── css/estilos.css  Diseño de toda la interfaz
 │   └── js/              Lógica de cada pantalla (api.js habla con la API)
-├── docs/                Documentación (modelo de datos, despliegue y entregables)
+├── docs/                Documentación (modelo de datos, despliegue y entregables de cada corte)
 └── iniciar.bat          Enciende el servidor y el enlace público de ngrok
 ```
 
@@ -308,15 +310,16 @@ Después abre un **Pull Request hacia `develop`** en GitHub para que otro integr
 StockPot se publica con **ngrok** desde el PC del equipo (opción aprobada por la docente):
 [Guía de despliegue con ngrok](docs/despliegue/Guia_Despliegue_ngrok.md).
 
-## Documentación del 2.º corte
+## Documentación de las entregas
 
-En [docs/entrega-2do-corte](docs/entrega-2do-corte) están los entregables, organizados según la
-sección de procesos técnicos y de soporte de IEEE 1058 (ver su README):
+Los entregables de cada corte están en `docs/`, organizados según las secciones de procesos
+técnicos y de soporte de IEEE 1058 (cada carpeta tiene su README):
 
-| Carpeta | Contenido |
-|---|---|
-| `01_Plan_de_gestion_del_proyecto` | Acta de constitución (70 % entregado / 30 % pendiente) · cronograma de GanttProject con el avance de Jira · Excel de puntos de función y PERT · enlace de Jira |
-| `02_Metodos_herramientas_y_tecnicas` | Prompts e inteligencia artificial utilizada |
-| `03_Verificacion_y_validacion` | Plan de pruebas (casos CRUD) · matriz de criterios de aceptación v1 · informe de pruebas realizadas |
-| `04_Aceptacion_del_producto` | Acta de aceptación del cliente (UAT, Formato 2) |
-| `05_Demostracion` | Video del recorrido por los módulos del 70 % |
+| Entrega | Carpeta | Contenido |
+|---|---|---|
+| 2.º corte (70 %) | [docs/entrega-2do-corte](docs/entrega-2do-corte) | Acta de constitución · cronograma de GanttProject · Excel de puntos de función y PERT · enlace de Jira · prompts e IA utilizada · plan de pruebas CRUD · matriz de criterios de aceptación · informe de pruebas · acta UAT · video y presentación de la demostración |
+| 3.er corte (70 % + 15 %) | [docs/entrega-3er-corte](docs/entrega-3er-corte) | Acta de constitución v0.3 · Excel con el presupuesto en un solo cálculo (BAC) · plan de pruebas de 78 casos · informe de pruebas del 15 % · guía de despliegue con ngrok |
+| Entrega final | [docs/entrega-final](docs/entrega-final) | Pruebas de usabilidad con Lighthouse (en construcción) |
+
+Documentación técnica: [modelo de datos](docs/modelo-datos.md) ·
+[guía de despliegue con ngrok](docs/despliegue/Guia_Despliegue_ngrok.md).

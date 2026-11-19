@@ -1,14 +1,16 @@
 # Modelo de datos — StockPot
 
-Diagrama entidad-relación de la base `stockpot` (MySQL 8.4): 21 tablas, generado a partir de
+Diagrama entidad-relación de la base `stockpot` (MySQL 8.4): 27 tablas, generado a partir de
 [`database/01_schema.sql`](../database/01_schema.sql). Si cambia el script, se actualiza
 también este diagrama.
 
 **Convenciones:** `PK` llave primaria · `FK` llave foránea · `UK` valor único.
 
-## Modelo completo actual (21 tablas)
+## Modelo completo actual (27 tablas)
 
-Incluye las Iteraciones 1, 2 y 4 (entregadas en el 70 %) y los pedidos en mesa de la Iteración 3.
+Incluye las cuatro iteraciones: usuarios, proveedores, inventario, productos, pedidos en mesa,
+cocina, reservas, domicilios, pagos, ventas y reportes, más las tablas de soporte de la
+aplicación (restaurantes, sesiones, cierre de caja e incidencias).
 GitHub dibuja el diagrama a partir de este código. Se generó desde los modelos de
 `backend/app/models/`, así que coincide campo por campo con la base.
 
@@ -18,19 +20,42 @@ GitHub dibuja el diagrama a partir de este código. Se generó desde los modelos
 erDiagram
     CLIENTES ||--o{ DOMICILIOS : "cliente_id"
     CLIENTES ||--o{ ORDENES : "cliente_id"
+    CODIGOS_INCIDENCIA ||--o{ INCIDENCIAS : "codigo_incidencia_id"
+    DOMICILIOS ||--o{ INCIDENCIAS : "domicilio_id"
+    EMPRESAS ||--o{ CLIENTES : "empresa_id"
+    EMPRESAS ||--o{ DOMICILIOS : "empresa_id"
+    EMPRESAS ||--o{ INCIDENCIAS : "empresa_id"
+    EMPRESAS ||--o{ INSUMOS : "empresa_id"
+    EMPRESAS ||--o{ MESAS : "empresa_id"
+    EMPRESAS ||--o{ MOVIMIENTOS_INVENTARIO : "empresa_id"
+    EMPRESAS ||--o{ ORDENES : "empresa_id"
+    EMPRESAS ||--o{ ORDENES_COMPRA : "empresa_id"
+    EMPRESAS ||--o{ PAGOS : "empresa_id"
+    EMPRESAS ||--o{ PEDIDOS_MESA : "empresa_id"
+    EMPRESAS ||--o{ PRODUCTOS : "empresa_id"
+    EMPRESAS ||--o{ PROVEEDORES : "empresa_id"
+    EMPRESAS ||--o{ RESERVAS : "empresa_id"
+    EMPRESAS ||--o{ ROLES : "empresa_id"
+    EMPRESAS ||--o{ TURNOS_CAJA : "empresa_id"
+    EMPRESAS ||--o{ USUARIOS : "empresa_id"
+    EMPRESAS ||--o{ VENTAS : "empresa_id"
     INSUMOS ||--o{ CONSUMOS : "insumo_id"
     INSUMOS ||--o{ DETALLE_ORDEN_COMPRA : "insumo_id"
     INSUMOS ||--o{ MOVIMIENTOS_INVENTARIO : "insumo_id"
     INSUMOS ||--o{ PROVEEDOR_INSUMOS : "insumo_id"
     INSUMOS ||--o{ RECETAS : "insumo_id"
     MESAS ||--o{ PEDIDOS_MESA : "mesa_id"
+    MESAS ||--o{ RESERVAS : "mesa_id"
     MOVIMIENTOS_INVENTARIO ||--o{ CONSUMOS : "movimiento_id"
+    MOVIMIENTOS_INVENTARIO ||--o{ INCIDENCIAS : "ajuste_id"
+    MOVIMIENTOS_INVENTARIO ||--o{ INCIDENCIAS : "movimiento_id"
     ORDENES ||--o{ DETALLE_ORDENES : "orden_id"
     ORDENES ||--o{ PAGOS : "orden_id"
     ORDENES ||--o| DOMICILIOS : "orden_id"
     ORDENES ||--o| PEDIDOS_MESA : "orden_id"
     ORDENES ||--o| VENTAS : "orden_id"
     ORDENES_COMPRA ||--o{ DETALLE_ORDEN_COMPRA : "orden_compra_id"
+    ORDENES_COMPRA ||--o{ INCIDENCIAS : "orden_compra_id"
     ORDENES_COMPRA ||--o{ MOVIMIENTOS_INVENTARIO : "orden_compra_id"
     PERMISOS ||--o{ ROL_PERMISOS : "permiso_id"
     PRODUCTOS ||--o{ DETALLE_ORDENES : "producto_id"
@@ -40,129 +65,47 @@ erDiagram
     ROLES ||--o{ ROL_PERMISOS : "rol_id"
     ROLES ||--o{ USUARIOS : "rol_id"
     USUARIOS ||--o{ DOMICILIOS : "domiciliario_id"
+    USUARIOS ||--o{ INCIDENCIAS : "reportado_por_id"
+    USUARIOS ||--o{ INCIDENCIAS : "responsable_id"
     USUARIOS ||--o{ MOVIMIENTOS_INVENTARIO : "usuario_id"
     USUARIOS ||--o{ ORDENES : "usuario_id"
     USUARIOS ||--o{ ORDENES_COMPRA : "usuario_id"
     USUARIOS ||--o{ PAGOS : "usuario_id"
+    USUARIOS ||--o{ RESERVAS : "usuario_id"
+    USUARIOS ||--o{ SESIONES : "usuario_id"
+    USUARIOS ||--o{ TURNOS_CAJA : "abierto_por_id"
+    USUARIOS ||--o{ TURNOS_CAJA : "cerrado_por_id"
     USUARIOS ||--o{ VENTAS : "usuario_id"
     VENTAS ||--o{ CONSUMOS : "venta_id"
+    VENTAS ||--o{ INCIDENCIAS : "venta_id"
 
     CLIENTES {
         int id PK
         varchar nombre
-        varchar telefono UK
+        varchar telefono
         varchar email
         varchar direccion
         varchar barrio
         varchar referencia
         datetime created_at
+        int empresa_id FK
     }
-    INSUMOS {
+    CODIGOS_INCIDENCIA {
         int id PK
         varchar codigo UK
+        enum modulo
         varchar nombre
-        enum unidad_medida "KG, G, L, ML, UNIDAD"
-        decimal stock_actual
-        decimal stock_minimo
-        decimal costo_unitario
+        boolean corrige_stock
+        boolean causa_externa
         boolean activo
-        datetime created_at
     }
-    MESAS {
+    CONSUMOS {
         int id PK
-        int numero UK
-        int capacidad
-        varchar ubicacion
-        boolean activa
-        datetime created_at
-    }
-    PERMISOS {
-        int id PK
-        varchar codigo UK
-        varchar modulo
-        varchar descripcion
-    }
-    PRODUCTOS {
-        int id PK
-        varchar codigo UK
-        varchar nombre
-        varchar descripcion
-        enum categoria "ENTRADA, PLATO_FUERTE, BEBIDA, POSTRE, ADICIONAL"
-        decimal precio_venta
-        boolean disponible
-        boolean activo
-        datetime created_at
-    }
-    PROVEEDORES {
-        int id PK
-        varchar nit UK
-        varchar razon_social
-        varchar contacto
-        varchar telefono
-        varchar email
-        varchar direccion
-        boolean activo
-        datetime created_at
-        datetime updated_at
-    }
-    ROLES {
-        int id PK
-        varchar nombre UK
-        varchar descripcion
-        boolean activo
-        datetime created_at
-    }
-    PROVEEDOR_INSUMOS {
-        int proveedor_id PK, FK
-        int insumo_id PK, FK
-        decimal precio_referencia
-    }
-    RECETAS {
-        int producto_id PK, FK
-        int insumo_id PK, FK
+        int venta_id FK
+        int insumo_id FK
         decimal cantidad
-    }
-    ROL_PERMISOS {
-        int rol_id PK, FK
-        int permiso_id PK, FK
-    }
-    USUARIOS {
-        int id PK
-        varchar nombre
-        varchar apellido
-        varchar email UK
-        varchar password_hash
-        varchar telefono
-        int rol_id FK
-        boolean activo
-        datetime ultimo_acceso
-        datetime created_at
-        datetime updated_at
-    }
-    ORDENES {
-        int id PK
-        varchar codigo UK
-        enum tipo "MESA, DOMICILIO, LLEVAR"
-        enum estado "ABIERTA, CERRADA, CANCELADA"
-        int cliente_id FK
-        int usuario_id FK
-        decimal subtotal
-        varchar observaciones
-        datetime created_at
-    }
-    ORDENES_COMPRA {
-        int id PK
-        varchar codigo UK
-        int proveedor_id FK
-        int usuario_id FK
-        datetime fecha_orden
-        date fecha_entrega_estimada
-        datetime fecha_recepcion
-        enum estado "PENDIENTE, ENVIADA, RECIBIDA, CANCELADA"
-        decimal total
-        varchar observaciones
-        datetime created_at
-        datetime updated_at
+        decimal costo_unitario
+        int movimiento_id FK
     }
     DETALLE_ORDEN_COMPRA {
         int id PK
@@ -190,7 +133,7 @@ erDiagram
         varchar referencia
         varchar telefono_contacto
         decimal costo_envio
-        enum estado "RECIBIDO, EN_PREPARACION, LISTO, EN_CAMINO, ENTREGADO, CANCELADO"
+        enum estado
         int domiciliario_id FK
         datetime fecha_asignacion
         datetime fecha_salida
@@ -198,42 +141,237 @@ erDiagram
         varchar recibido_por
         varchar observacion_entrega
         datetime created_at
+        int empresa_id FK
+    }
+    EMPRESAS {
+        int id PK
+        varchar nombre
+        varchar nit UK
+        varchar telefono
+        varchar email
+        varchar direccion
+        boolean activa
+        datetime created_at
+    }
+    INCIDENCIAS {
+        int id PK
+        varchar codigo UK
+        int codigo_incidencia_id FK
+        int movimiento_id FK
+        int venta_id FK
+        int orden_compra_id FK
+        int domicilio_id FK
+        int responsable_id FK
+        int reportado_por_id FK
+        varchar observacion
+        decimal cantidad_registrada
+        decimal cantidad_real
+        int ajuste_id FK
+        datetime created_at
+        int empresa_id FK
+    }
+    INSUMOS {
+        int id PK
+        varchar codigo
+        varchar nombre
+        enum categoria
+        enum unidad_medida
+        decimal stock_actual
+        decimal stock_minimo
+        decimal costo_unitario
+        boolean activo
+        datetime created_at
+        int empresa_id FK
+    }
+    MESAS {
+        int id PK
+        int numero
+        int capacidad
+        varchar ubicacion
+        boolean activa
+        datetime created_at
+        int empresa_id FK
     }
     MOVIMIENTOS_INVENTARIO {
         int id PK
         int insumo_id FK
-        enum tipo "ENTRADA, SALIDA"
-        enum motivo "COMPRA, AJUSTE, DEVOLUCION, CONSUMO, MERMA"
+        enum tipo
+        enum motivo
         decimal cantidad
         decimal stock_resultante
         int orden_compra_id FK
         int usuario_id FK
         varchar observacion
         datetime created_at
+        int empresa_id FK
+    }
+    ORDENES {
+        int id PK
+        varchar codigo UK
+        enum tipo
+        enum estado
+        int cliente_id FK
+        int usuario_id FK
+        decimal subtotal
+        varchar observaciones
+        boolean incluye_propina
+        datetime created_at
+        int empresa_id FK
+    }
+    ORDENES_COMPRA {
+        int id PK
+        varchar codigo UK
+        int proveedor_id FK
+        int usuario_id FK
+        datetime fecha_orden
+        date fecha_entrega_estimada
+        datetime fecha_recepcion
+        enum estado
+        decimal total
+        varchar observaciones
+        datetime created_at
+        datetime updated_at
+        int empresa_id FK
     }
     PAGOS {
         int id PK
         int orden_id FK
-        enum metodo "EFECTIVO, TARJETA, TRANSFERENCIA"
+        enum metodo
         decimal monto
         decimal recibido
         decimal cambio
         varchar referencia
-        enum estado "APROBADO, ANULADO"
+        enum estado
         int usuario_id FK
         datetime created_at
+        int empresa_id FK
     }
     PEDIDOS_MESA {
         int id PK
         int orden_id FK, UK
         int mesa_id FK
         int comensales
-        enum estado "REGISTRADO, CONFIRMADO, EN_COCINA, EN_PREPARACION, LISTO, ENTREGADO, CANCELADO"
+        enum estado
         datetime fecha_confirmacion
         datetime fecha_envio_cocina
         datetime fecha_listo
         datetime fecha_entrega
         datetime created_at
+        int empresa_id FK
+    }
+    PERMISOS {
+        int id PK
+        varchar codigo UK
+        varchar modulo
+        varchar descripcion
+    }
+    PRODUCTOS {
+        int id PK
+        varchar codigo
+        varchar nombre
+        varchar descripcion
+        enum categoria
+        decimal precio_venta
+        boolean disponible
+        boolean activo
+        datetime created_at
+        int empresa_id FK
+    }
+    PROVEEDOR_INSUMOS {
+        int proveedor_id PK, FK
+        int insumo_id PK, FK
+        decimal precio_referencia
+    }
+    PROVEEDORES {
+        int id PK
+        varchar nit
+        varchar razon_social
+        varchar contacto
+        varchar telefono
+        varchar email
+        varchar direccion
+        boolean activo
+        datetime created_at
+        datetime updated_at
+        int empresa_id FK
+    }
+    RECETAS {
+        int producto_id PK, FK
+        int insumo_id PK, FK
+        decimal cantidad
+    }
+    RESERVAS {
+        int id PK
+        varchar codigo UK
+        int mesa_id FK
+        varchar cliente
+        varchar telefono
+        int personas
+        datetime fecha_hora
+        int duracion_minutos
+        enum estado
+        varchar observaciones
+        int usuario_id FK
+        datetime created_at
+        datetime updated_at
+        int empresa_id FK
+    }
+    ROL_PERMISOS {
+        int rol_id PK, FK
+        int permiso_id PK, FK
+    }
+    ROLES {
+        int id PK
+        int empresa_id FK
+        varchar nombre
+        varchar descripcion
+        boolean activo
+        datetime created_at
+    }
+    SESIONES {
+        int id PK
+        varchar jti UK
+        int usuario_id FK
+        datetime creada
+        datetime ultima_actividad
+        boolean bloqueada
+        int intentos_pin
+        datetime cerrada
+        enum motivo_cierre
+    }
+    TURNOS_CAJA {
+        int id PK
+        enum estado
+        decimal base_inicial
+        int abierto_por_id FK
+        datetime abierto_en
+        int cerrado_por_id FK
+        datetime cerrado_en
+        decimal esperado_efectivo
+        decimal esperado_tarjeta
+        decimal esperado_transferencia
+        decimal contado_efectivo
+        decimal contado_tarjeta
+        decimal contado_transferencia
+        int num_pagos
+        decimal propinas
+        varchar observacion
+        int empresa_id FK
+    }
+    USUARIOS {
+        int id PK
+        int empresa_id FK
+        varchar nombre
+        varchar apellido
+        varchar email UK
+        varchar password_hash
+        varchar pin_hash
+        varchar telefono
+        int rol_id FK
+        boolean activo
+        datetime ultimo_acceso
+        datetime created_at
+        datetime updated_at
     }
     VENTAS {
         int id PK
@@ -243,16 +381,10 @@ erDiagram
         decimal costo_envio
         decimal total
         decimal costo_insumos
+        decimal propina
         int usuario_id FK
         datetime created_at
-    }
-    CONSUMOS {
-        int id PK
-        int venta_id FK
-        int insumo_id FK
-        decimal cantidad
-        decimal costo_unitario
-        int movimiento_id FK
+        int empresa_id FK
     }
 ```
 
@@ -386,7 +518,7 @@ erDiagram
 | ILF08 Mesas | `mesas` | 3 |
 | ILF09 Pedidos | `ordenes` (domicilio, mesa o para llevar) y `pedidos_mesa` (datos propios del pedido en mesa) | 4 y 3 |
 | ILF10 Detalle de pedidos | `detalle_ordenes` | 4 y 3 |
-| ILF11 Reservas | — (pendiente, RF-07) | 3 |
+| ILF11 Reservas | `reservas` | 3 |
 | ILF12 Clientes | `clientes` | 4 |
 | ILF13 Domicilios | `domicilios` | 4 |
 | ILF14 Pagos | `pagos` | 4 |
