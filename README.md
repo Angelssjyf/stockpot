@@ -217,7 +217,10 @@ Nunca se anotan contraseñas, tokens ni el contenido de las peticiones.
 
 ### 7. Correr las pruebas
 
+Las herramientas de pruebas no van en el servidor: se instalan aparte, una sola vez.
+
 ```powershell
+pip install -r requirements-dev.txt
 pytest -v
 ```
 

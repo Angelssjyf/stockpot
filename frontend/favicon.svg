@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Ícono de StockPot: una olla con vapor, en los colores de la marca -->
+  <rect width="64" height="64" rx="14" fill="#8f4c2c"/>
+  <g fill="none" stroke="#e7a85f" stroke-width="3.5" stroke-linecap="round">
+    <path d="M24 10c-3 3 3 5 0 8M32 8c-3 3 3 5 0 8M40 10c-3 3 3 5 0 8"/>
+  </g>
+  <rect x="12" y="24" width="40" height="5" rx="2.5" fill="#fff8f5"/>
+  <path d="M15 31h34v13a10 10 0 0 1-10 10H25a10 10 0 0 1-10-10z" fill="#fff8f5"/>
+  <path d="M15 35H9M49 35h6" stroke="#fff8f5" stroke-width="4" stroke-linecap="round"/>
+</svg>
