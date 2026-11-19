@@ -1,6 +1,6 @@
 // Menú principal: muestra solo los módulos que el rol del usuario puede ver.
 import { api, cerrarSesion, exigirSesion } from './api.js';
-import { contarHasta, crear, formato, mostrarAviso } from './ui.js';
+import { contarHasta, crear, formato, mostrarAviso, pintarSaludo } from './ui.js';
 
 /**
  * Los 11 módulos de StockPot, en el orden de las iteraciones.
@@ -72,12 +72,7 @@ const haceSeis = iso(new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDa
 const compacto = (valor) => new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 }).format(valor);
 
 // Saludo según la hora, con la fecha de hoy
-const saludo = ahora.getHours() < 12 ? 'Buenos días' : ahora.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches';
-const fechaLarga = ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
-document.getElementById('saludo').replaceChildren(crear('div', {}, [
-  crear('h2', { texto: `${saludo}, ${usuario.nombre}` }),
-  crear('p', { className: 'nota', texto: fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1) }),
-]));
+pintarSaludo(document.getElementById('saludo'), usuario.nombre);
 
 /** Una tarjeta del día: ícono, número grande (con conteo) y detalle; al tocarla abre su módulo. */
 function tarjetaHoy({ icono, titulo, valor, formatear = String, texto, detalle, pagina, alerta = false }) {

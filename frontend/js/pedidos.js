@@ -1,11 +1,11 @@
 // Módulo de pedidos en mesa (RF-05.1 a RF-05.9): mesas, pedidos, cocina y estado.
 import { api, exigirSesion } from './api.js';
-import { confirmar, crear, empezarCarga, formato, mostrarAviso, normalizar, pedirTexto, pintarSuave } from './ui.js';
+import {
+  $, confirmar, crear, empezarCarga, fechaHora, formato, marcarCampo, mostrarAviso, normalizar, pedirTexto, pintarSuave, tarjetaResumen,
+} from './ui.js';
 
 const yo = await exigirSesion('pedidos.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('pedidos.gestionar'); // MESERO, CAJERO, ADMINISTRADOR
-
-const $ = (id) => document.getElementById(id);
 
 const NOMBRES_ESTADO = {
   REGISTRADO: 'Registrado', CONFIRMADO: 'Confirmado', EN_COCINA: 'En cocina',
@@ -21,11 +21,6 @@ function espera(iso) {
   const minutos = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
   if (minutos < 60) return `hace ${minutos} min`;
   return `hace ${Math.floor(minutos / 60)} h ${minutos % 60} min`;
-}
-
-function fechaHora(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 }
 
 function hora(iso) {
@@ -49,14 +44,6 @@ function botonTexto(texto, accion) {
   const boton = crear('button', { type: 'button', className: 'boton-texto', texto });
   boton.addEventListener('click', accion);
   return boton;
-}
-
-function tarjetaResumen(icono, titulo, valor) {
-  return crear('div', { className: 'tarjeta-resumen' }, [
-    crear('span', { className: 'icono', texto: icono, 'aria-hidden': 'true' }),
-    crear('div', { className: 'valor', texto: valor }),
-    crear('div', { texto: titulo }),
-  ]);
 }
 
 // =====================================================================
@@ -614,11 +601,6 @@ function revisarDisponibilidad() {
       $('disponibilidad').hidden = true; // no bloquea: al guardar el servidor vuelve a revisar
     }
   }, 400);
-}
-
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`)?.classList.toggle('invalido', Boolean(mensaje));
 }
 
 function mostrarErrorPedido(mensaje) {

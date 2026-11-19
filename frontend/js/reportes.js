@@ -1,12 +1,11 @@
 // Módulo de reportes y estadísticas (RF-11.1 a RF-11.7).
 import { api, exigirSesion } from './api.js';
-import { crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
+import { $, crear, empezarCarga, formato, mostrarAviso, pintarSuave } from './ui.js';
 
 const yo = await exigirSesion('reportes.ver'); // solo el ADMINISTRADOR
 const puedeVerIncidencias = yo.permisos.includes('incidencias.ver'); // RF-12.4
 const puedeGestionarCodigos = yo.permisos.includes('incidencias.gestionar'); // RF-12.1
 
-const $ = (id) => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
 
 const ESTADOS = { OK: 'OK', BAJO: 'En el mínimo', AGOTADO: 'Agotado' };

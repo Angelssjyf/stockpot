@@ -1,12 +1,12 @@
 // Módulo de usuarios: RF-01.1 Registrar, RF-01.2 Consultar, RF-01.3 Modificar, RF-01.5 Asignar roles.
 import { api, exigirSesion } from './api.js';
-import { confirmar, crear, empezarCarga, iniciales, mostrarAviso, mostrarEstado, pintarSuave } from './ui.js';
+import {
+  $, confirmar, crear, empezarCarga, iniciales, marcarCampo, mostrarAviso, mostrarEstado, pintarSuave,
+} from './ui.js';
 
 const yo = await exigirSesion('usuarios.ver'); // sin el permiso vuelve al menú
 const puedeGestionar = yo.permisos.includes('usuarios.gestionar');
 const puedeCambiarRol = yo.permisos.includes('roles.gestionar');
-
-const $ = (id) => document.getElementById(id);
 
 // =====================================================================
 //  RF-01.2 Consultar usuarios: lista con buscador
@@ -113,12 +113,6 @@ async function cargarRoles() {
   } catch (error) {
     mostrarErrorFormulario(error.message);
   }
-}
-
-/** Marca un campo con su mensaje de error (o lo limpia si el mensaje está vacío). */
-function marcarCampo(nombre, mensaje) {
-  $(`error-${nombre}`).textContent = mensaje;
-  $(`campo-${nombre}`).classList.toggle('invalido', Boolean(mensaje));
 }
 
 function mostrarErrorFormulario(mensaje) {

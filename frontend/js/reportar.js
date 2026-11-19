@@ -1,9 +1,8 @@
 // RF-12.2 Reportar un error (incidencia) sobre un movimiento, una venta o una orden de compra.
 // La ventana se arma una sola vez y la comparten inventario, ventas y compras.
 import { api } from './api.js';
-import { crear, formato, mostrarAviso, prepararVentana } from './ui.js';
+import { $, crear, formato, mostrarAviso, prepararVentana } from './ui.js';
 
-const $ = (id) => document.getElementById(id);
 let dialogo = null;
 let contexto = null; // lo que se está reportando (ver reportarIncidencia)
 let codigos = [];
