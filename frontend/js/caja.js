@@ -23,9 +23,11 @@ function abrirComprobante(ordenId) {
 /**
  * Pinta el formulario de pago dentro del contenedor.
  * montoFijo: función que devuelve el total a cobrar (mostrador), o null si el monto se edita.
+ * permitirAbono: en una cuenta, si el efectivo recibido no alcanza se abona lo recibido y el resto
+ * se cobra después con otro método (cobro mixto). En el mostrador no: la venta se paga completa.
  */
-function formularioDePago(contenedor, { montoInicial = 0, montoFijo = null } = {}) {
-  let metodo = 'EFECTIVO';
+function formularioDePago(contenedor, { montoInicial = 0, montoFijo = null, permitirAbono = false, metodoInicial = 'EFECTIVO' } = {}) {
+  let metodo = metodoInicial;
   const botones = crear('div', { className: 'categorias', role: 'group', 'aria-label': 'Método de pago' });
   const monto = crear('input', { type: 'number', min: '0', step: 'any', 'aria-label': 'Monto' });
   monto.value = montoInicial;
@@ -34,7 +36,8 @@ function formularioDePago(contenedor, { montoInicial = 0, montoFijo = null } = {
   const cambio = crear('p', { className: 'cambio' });
 
   const bloqueMonto = crear('div', {}, [
-    crear('label', { className: 'etiqueta', texto: 'Monto a pagar ($)' }), crear('div', { className: 'campo' }, [monto]),
+    crear('label', { className: 'etiqueta', texto: permitirAbono ? 'Monto de este pago ($)' : 'Monto a pagar ($)' }),
+    crear('div', { className: 'campo' }, [monto]),
   ]);
   const bloqueRecibido = crear('div', {}, [
     crear('label', { className: 'etiqueta', texto: 'Efectivo recibido ($)' }), crear('div', { className: 'campo' }, [recibido]),
@@ -55,9 +58,16 @@ function formularioDePago(contenedor, { montoInicial = 0, montoFijo = null } = {
     bloqueReferencia.hidden = metodo === 'EFECTIVO';
     const diferencia = (Number(recibido.value) || 0) - valorMonto();
     cambio.hidden = metodo !== 'EFECTIVO' || !recibido.value;
-    cambio.textContent = diferencia >= 0 ? `Cambio: ${formato.dinero(diferencia)}`
-      : `Faltan ${formato.dinero(-diferencia)}`;
-    cambio.classList.toggle('falta', diferencia < 0);
+    if (diferencia >= 0) {
+      cambio.textContent = `Cambio: ${formato.dinero(diferencia)}`;
+    } else if (permitirAbono && Number(recibido.value) > 0) {
+      // Cobro mixto: lo recibido se abona y el resto queda para otro método
+      cambio.textContent = `Se abonan ${formato.dinero(Number(recibido.value))} en efectivo; `
+        + `quedan ${formato.dinero(-diferencia)} por cobrar con otro método`;
+    } else {
+      cambio.textContent = `Faltan ${formato.dinero(-diferencia)}`;
+    }
+    cambio.classList.toggle('falta', diferencia < 0 && !permitirAbono);
   }
 
   for (const [valor, texto] of Object.entries(METODOS)) {
@@ -71,7 +81,15 @@ function formularioDePago(contenedor, { montoInicial = 0, montoFijo = null } = {
   }
   for (const campo of [monto, recibido]) campo.addEventListener('input', actualizar);
 
-  contenedor.replaceChildren(botones, crear('div', { className: 'dos-columnas' }, [bloqueMonto, bloqueRecibido, bloqueReferencia]), cambio);
+  const piezas = [botones, crear('div', { className: 'dos-columnas' }, [bloqueMonto, bloqueRecibido, bloqueReferencia]), cambio];
+  if (permitirAbono) {
+    piezas.push(crear('p', {
+      className: 'nota',
+      texto: '¿Paga con dos métodos? Registra primero la parte en efectivo (escribe lo que recibiste) '
+        + 'y después cobra el saldo con tarjeta o transferencia.',
+    }));
+  }
+  contenedor.replaceChildren(...piezas);
   actualizar();
 
   return {
@@ -82,7 +100,11 @@ function formularioDePago(contenedor, { montoInicial = 0, montoFijo = null } = {
       if (!(datos.monto > 0)) return 'Escribe un monto mayor que cero';
       if (metodo === 'EFECTIVO' && recibido.value) {
         datos.recibido = Number(recibido.value);
-        if (datos.recibido < datos.monto) return 'El efectivo recibido no alcanza';
+        if (datos.recibido <= 0) return 'Escribe cuánto efectivo recibiste';
+        if (datos.recibido < datos.monto) {
+          if (!permitirAbono) return 'El efectivo recibido no alcanza';
+          datos.monto = datos.recibido; // cobro mixto: se abona lo recibido, sin cambio
+        }
       }
       if (metodo !== 'EFECTIVO') datos.referencia = referencia.value.trim();
       return datos;
@@ -159,7 +181,8 @@ async function abrirCuenta(ordenId) {
   }
 }
 
-function pintarCuenta(cuenta) {
+/** siguienteMetodo: tras un abono, el método que queda elegido para cobrar el saldo. */
+function pintarCuenta(cuenta, siguienteMetodo = 'EFECTIVO') {
   cuentaAbierta = cuenta;
   $('error-cuenta').hidden = true;
   $('cuenta-titulo').replaceChildren(
@@ -209,7 +232,9 @@ function pintarCuenta(cuenta) {
 
   const puedePagar = puedeCobrar && cuenta.estado_orden === 'ABIERTA' && cuenta.saldo > 0;
   $('bloque-nuevo-pago').hidden = !puedePagar;
-  if (puedePagar) pagoCuenta = formularioDePago($('c-pago'), { montoInicial: cuenta.saldo });
+  if (puedePagar) {
+    pagoCuenta = formularioDePago($('c-pago'), { montoInicial: cuenta.saldo, permitirAbono: true, metodoInicial: siguienteMetodo });
+  }
 
   const cerrar = crear('button', { type: 'button', className: 'boton-texto', texto: 'Cerrar' });
   cerrar.addEventListener('click', () => dialogoCuenta.close());
@@ -270,8 +295,10 @@ async function registrarPago(boton) {
   boton.disabled = true;
   try {
     const { cuenta } = await api('POST', `/ordenes/${cuentaAbierta.orden_id}/pagos`, datos); // RF-09.1
-    mostrarAviso(cuenta.venta ? `Pagado. Venta ${cuenta.venta} registrada` : 'Abono registrado', 'exito', { sonido: 'pago' });
-    pintarCuenta(cuenta);
+    mostrarAviso(cuenta.venta ? `Pagado. Venta ${cuenta.venta} registrada`
+      : `Abono registrado. Falta cobrar ${formato.dinero(cuenta.saldo)}`, 'exito', { sonido: 'pago' });
+    // Cobro mixto: si se abonó en efectivo, el saldo queda listo para cobrarlo con tarjeta
+    pintarCuenta(cuenta, datos.metodo === 'EFECTIVO' ? 'TARJETA' : 'EFECTIVO');
     cargarPorCobrar();
   } catch (error) {
     mostrarErrorCuenta(error.message); // por ejemplo "El monto supera el saldo pendiente"
