@@ -1,10 +1,72 @@
+<div align="center">
+
 # StockPot
 
-[![Pruebas](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml/badge.svg?branch=develop)](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml)
+**Sistema web de gestión de inventario, pedidos y ventas para restaurantes pequeños y medianos**
 
-Sistema de gestión para restaurantes pequeños y medianos: controla el inventario de insumos,
-gestiona los pedidos, comunica las áreas de atención y cocina, y genera información sobre
-el consumo y las ventas.
+[![Pruebas](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml/badge.svg?branch=main)](https://github.com/Angelssjyf/stockpot/actions/workflows/pruebas.yml)
+![Versión](https://img.shields.io/badge/versión-v1.0.0-8a4b2f)
+![Pruebas](https://img.shields.io/badge/pruebas-438%20aprobadas-2e7d32)
+![Cobertura](https://img.shields.io/badge/cobertura-96%25-2e7d32)
+![Lighthouse](https://img.shields.io/badge/Lighthouse-100-2e7d32)
+![Python](https://img.shields.io/badge/Python-3.11-3776ab)
+![Flask](https://img.shields.io/badge/Flask-API%20REST-000000)
+![MySQL](https://img.shields.io/badge/MySQL-8.4%20LTS-4479a1)
+
+Proyecto de Ingeniería del Software II · Universidad Simón Bolívar, sede Cúcuta · 2026-2<br>
+Cliente: **Sexto Sentido Café & Brunch**
+
+<img src="docs/img/capturas/menu-escritorio.jpg" alt="Panel principal de StockPot" width="820">
+
+</div>
+
+## ¿Qué es StockPot?
+
+StockPot reúne en un solo sistema la operación diaria de un restaurante: el inventario de insumos, las
+compras a proveedores, la carta, los pedidos en mesa y a domicilio, la cocina, las reservas, la caja y los
+reportes. Cada plato vendido descuenta sus insumos según la receta, así el administrador sabe en todo
+momento qué hay en bodega, qué se debe comprar y cuánto se vendió.
+
+Muchos restaurantes pequeños llevan estos procesos en papel, cuadernos u hojas de cálculo sueltas, lo que
+produce errores entre la sala y la cocina, insumos vencidos o agotados y decisiones sin datos. StockPot
+reemplaza esos registros por información en tiempo real, con un rol y permisos para cada trabajador.
+
+## Funcionalidades
+
+| Módulo | Qué hace |
+|---|---|
+| **RF-01 Usuarios y roles** | Usuarios, 6 roles (administrador, mesero, cocinero, cajero, bodeguero y domiciliario) y permisos configurables |
+| **RF-02 Proveedores y compras** | Proveedores, insumos que ofrece cada uno, órdenes de compra y sugerencia de compra por stock mínimo |
+| **RF-03 Inventario** | Insumos por categoría, entradas y salidas, existencias y alertas de stock mínimo |
+| **RF-04 Productos y menú** | Carta con recetas: cada plato sabe qué insumos consume |
+| **RF-05 Pedidos en mesa** | Mapa de mesas, toma de pedidos, validación de insumos disponibles y envío a cocina |
+| **RF-06 Cocina** | Tablero de comandas por llegada: por preparar, en preparación, listo y entregado |
+| **RF-07 Reservas** | Reservas por fecha, hora y número de personas, con las mesas disponibles |
+| **RF-08 Domicilios** | Clientes, asignación al domiciliario, estados del envío e historial |
+| **RF-09 Pagos** | Cobro en efectivo, tarjeta o transferencia (también mixto), comprobante y cierre de caja |
+| **RF-10 Ventas y consumo** | Ventas, productos más vendidos y consumo real de insumos |
+| **RF-11 Reportes** | Inventario, ventas, consumo, productos, histórico y estadísticas |
+
+La interfaz funciona en computador, tableta y celular.
+
+<table>
+<tr>
+<td width="68%"><img src="docs/img/capturas/pedidos-escritorio.jpg" alt="Pedidos en mesa"><br><sub>Pedidos en mesa</sub></td>
+<td rowspan="2" width="32%" align="center"><img src="docs/img/capturas/cocina-celular.jpg" alt="Cocina en el celular" width="230"><br><sub>Cocina en el celular</sub></td>
+</tr>
+<tr>
+<td><img src="docs/img/capturas/cocina-escritorio.jpg" alt="Tablero de cocina"><br><sub>Tablero de cocina</sub></td>
+</tr>
+<tr>
+<td><img src="docs/img/capturas/insumos-escritorio.jpg" alt="Inventario"><br><sub>Inventario de insumos</sub></td>
+<td rowspan="2" align="center"><img src="docs/img/capturas/pedidos-celular.jpg" alt="Pedidos en el celular" width="230"><br><sub>Pedidos en el celular</sub></td>
+</tr>
+<tr>
+<td><img src="docs/img/capturas/reportes-escritorio.jpg" alt="Reportes"><br><sub>Reportes</sub></td>
+</tr>
+</table>
+
+## Arquitectura
 
 ```
 Página web (HTML/CSS/JS)  ──HTTP/JSON + token JWT──►  API Flask (Python)  ──SQLAlchemy──►  MySQL 8.4
@@ -13,11 +75,26 @@ frontend/                                              backend/                 
 
 | Capa | Tecnología |
 |---|---|
-| Base de datos | MySQL 8.4 LTS + MySQL Workbench |
-| Backend (API REST) | Python 3.11, Flask, SQLAlchemy, Flask-JWT-Extended |
-| Presentación (interfaz web) | HTML, CSS y JavaScript (sin frameworks) |
-| Pruebas | pytest |
-| Control de versiones | Git + GitHub con GitFlow |
+| Base de datos | MySQL 8.4 LTS (27 tablas) |
+| Backend (API REST) | Python 3.11, Flask, SQLAlchemy, Flask-JWT-Extended, Waitress |
+| Presentación (interfaz web) | HTML, CSS y JavaScript sin frameworks, con diseño adaptable |
+| Pruebas | pytest, pytest-cov, Google Lighthouse y GitHub Actions |
+| Gestión | Scrum en 4 iteraciones, Jira, GanttProject y GitFlow |
+| Despliegue | Waitress + ngrok desde el equipo del proyecto |
+
+## Calidad
+
+| Indicador | Resultado |
+|---|---|
+| Pruebas automatizadas | **438 aprobadas**, con pruebas de seguridad por rol en cada módulo |
+| Cobertura del backend | **96 %** |
+| Plan de pruebas funcionales | **88 casos CRUD** sobre los 11 módulos |
+| Usabilidad (Google Lighthouse) | **100** en rendimiento, accesibilidad, buenas prácticas y SEO en 14 pantallas |
+| Prueba de carga | 50 usuarios simultáneos, 1.000 peticiones, **0 errores**, percentil 95 de 0,48 s |
+| Aceptación de usuarios (UAT) | 21 trabajadores de restaurante: **91 %** de tareas sin problema y satisfacción de **4,32 / 5** |
+
+Las pruebas corren en GitHub Actions en cada envío a `main` y `develop`; solo se integra código si toda la
+suite pasa.
 
 ## Equipo e iteraciones
 
@@ -28,38 +105,26 @@ frontend/                                              backend/                 
 | 3 | Yovany Peñaranda | Pedidos en mesa (RF-05) · Cocina (RF-06) · Reservas (RF-07) | ✅ Terminado |
 | 4 | Ángel David Rodríguez Vega (líder) | Domicilios (RF-08) · Pagos (RF-09) · Ventas y consumo (RF-10) · Reportes (RF-11) | ✅ Terminado |
 
-**Entrega del 2.º corte (20/10/2026): 70 % del software** = Iteraciones 1, 2 y 4 → 233 de 330 puntos
-de función (376 de 515 PFSA). 267 pruebas automáticas aprobadas (41 de ellas unitarias), 95 % de cobertura del backend.
+También integra el equipo Jhan Carlos Urbina. Docente: Ing. Nataly Duque Páez.
 
-**Entrega final (3.er corte): 100 % del software** = las 4 iteraciones → 330 de 330 puntos de función.
-La Iteración 3 terminó pedidos en mesa (RF-05), cocina (RF-06) y reservas (RF-07).
-402 pruebas automáticas aprobadas, 95 % de cobertura del backend.
+| Entrega | Alcance | Puntos de función |
+|---|---|---|
+| 2.º corte (20/10/2026) | 70 %: Iteraciones 1, 2 y 4 | 233 de 330 |
+| 3.er corte (13/11/2026) | + 15 %: Pedidos (RF-05) y Cocina (RF-06) | 301 de 330 |
+| **Entrega final (24/11/2026)** | **100 %**: + Reservas (RF-07) | **330 de 330** |
 
-**Versión publicada:** `main` (v0.8.1) · en línea con ngrok desde el PC del equipo
-([guía de despliegue](docs/despliegue/Guia_Despliegue_ngrok.md)).
+**Versión entregada:** [`v1.0.0`](https://github.com/Angelssjyf/stockpot/tree/v1.0.0) en la rama `main`, en línea
+con ngrok desde el equipo del proyecto ([guía de despliegue](docs/despliegue/Guia_Despliegue_ngrok.md)).
 
 ## Gestión del proyecto
 
 | Qué | Dónde |
 |---|---|
-| Cliente | Restaurante Sexto Sentido Café & Brunch |
-| Tablero de tareas | [Jira – proyecto STOC](https://mateopuentes1227.atlassian.net/jira/software/projects/STOC/boards/34) |
-| Cronograma | [Cronograma_StockPot.gan](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Cronograma_StockPot.gan) (GanttProject) · [imagen](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Cronograma_StockPot.png) |
-| Duración | 10/08/2026 – 13/11/2026 · lunes a sábado, sin domingos ni festivos de Colombia |
-| Estimación | Puntos de función y PERT ([Excel](docs/entrega-2do-corte/01_Plan_de_gestion_del_proyecto/Puntos_de_Funcion_y_PERT_StockPot.xlsx)) |
-
-Estado del tablero de Jira al 19/10/2026 (166 tareas, una por cada fila del plan PERT):
-
-| Iteración | Listo | En curso | Por hacer | Avance en el cronograma |
-|---|---|---|---|---|
-| 1 – Mateo | 32 | 0 | 0 | 100 % |
-| 2 – Jhorman | 38 | 0 | 0 | 100 % |
-| 3 – Yovany | 3 | 21 | 22 | 28 % (análisis y diseño en curso; codificación y pruebas pendientes) |
-| 4 – Ángel | 50 | 0 | 0 | 100 % |
-| **Total** | **123** | **21** | **22** | |
-
-Hitos: **20/10/2026** entrega parcial del 70 % (2.º corte) · **21/10 – 13/11/2026** Iteración 3
-(30 % restante), pruebas de aceptación y entrega final.
+| Tablero de tareas | [Jira – proyecto STOC](https://mateopuentes1227.atlassian.net/jira/software/projects/STOC/boards/34): 166 tareas, todas en Listo |
+| Cronograma | [Cronograma_StockPot.gan](docs/entrega-final/01_Plan_de_gestion_del_proyecto/Cronograma_StockPot.gan) (GanttProject) al 100 % |
+| Duración | 10/08/2026 – 24/11/2026 · lunes a sábado, sin domingos ni festivos de Colombia |
+| Estimación | 458,35 puntos de función ajustados (2.750 horas), PERT y COCOMO II ([Excel](docs/entrega-final/01_Plan_de_gestion_del_proyecto)) |
+| Presupuesto | BAC de $205.875.739 con salarios de referencia de Bogotá; control con valor ganado (SPI final de 1,00) |
 
 ## Estructura del proyecto
 
@@ -115,10 +180,10 @@ En MySQL Workbench, conectado como `root`, ejecuta en este orden (rayo ⚡):
 4. *(Opcional)* `database/04_datos_ejemplo.sql`: insumos, proveedores, 8 platos con sus recetas y
    3 clientes y 8 mesas de ejemplo. Se puede ejecutar más de una vez sin duplicar datos.
 
-Verifica con `SHOW TABLES FROM stockpot;`: deben salir 26 tablas.
+Verifica con `SHOW TABLES FROM stockpot;`: deben salir 27 tablas.
 
 **¿Ya tenías la base creada de antes?** No vuelvas a ejecutar el `01` (borra todo). Ejecuta solo
-los scripts de actualización que te falten, en orden numérico, del `05` al `16`
+los scripts de actualización que te falten, en orden numérico, del `05` al `17`
 (por ejemplo `09_iteracion3_pedidos.sql` y `15_reservas.sql`).
 Solo agregan columnas y tablas; tus datos se conservan.
 
@@ -278,7 +343,7 @@ Códigos de respuesta: `200/201` correcto · `401` sin sesión · `403` sin perm
 
 | Rama | Para qué |
 |---|---|
-| `main` | Versiones entregadas, una por iteración terminada |
+| `main` | Versiones entregadas (etiquetas `v0.7` a `v1.0.0`) |
 | `develop` | Integración del trabajo del equipo |
 | `feature/RF-XX-nombre` | Un requisito o módulo; sale de `develop` y vuelve por Pull Request |
 
