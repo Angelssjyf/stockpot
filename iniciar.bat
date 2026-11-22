@@ -54,15 +54,15 @@ if errorlevel 1 (
     set "DOMINIO="
     if exist "%~dp0ngrok-dominio.txt" set /p DOMINIO=<"%~dp0ngrok-dominio.txt"
     call :abrir_ngrok
-    REM Cuando ngrok este listo, muestra el enlace publico aqui y lo copia al portapapeles
-    start "" /b powershell -NoProfile -Command "Start-Sleep 6; try { $u = (Invoke-RestMethod http://127.0.0.1:4040/api/tunnels).tunnels | Where-Object proto -eq 'https' | Select-Object -First 1 -ExpandProperty public_url; Set-Clipboard $u; Write-Host ''; Write-Host ('  Enlace publico: ' + $u + '   (copiado al portapapeles)') -ForegroundColor Green; Write-Host '' } catch { Write-Host '  [AVISO] No se pudo leer el enlace de ngrok; miralo en su ventana.' -ForegroundColor Yellow }"
+    REM Espera hasta 1 minuto a que ngrok este listo; muestra el enlace aqui y lo copia al portapapeles
+    start "" /b powershell -NoProfile -Command "$u = $null; for ($i = 0; $i -lt 30 -and -not $u; $i++) { Start-Sleep 2; try { $u = (Invoke-RestMethod http://127.0.0.1:4040/api/tunnels).tunnels | Where-Object proto -eq 'https' | Select-Object -First 1 -ExpandProperty public_url } catch {} }; if ($u) { Set-Clipboard $u; Write-Host ''; Write-Host ('  Enlace publico: ' + $u + '   (copiado al portapapeles)') -ForegroundColor Green; Write-Host '' } else { Write-Host '  [AVISO] ngrok no dio el enlace en 1 minuto; miralo en su ventana.' -ForegroundColor Yellow }"
 )
 
 REM --- Abre la app en el navegador cuando el servidor este listo ----
 start "" cmd /c "timeout /t 3 /nobreak >nul & start http://127.0.0.1:5000"
 
-REM --- Servidor (queda corriendo en esta ventana) -------------------
-".venv\Scripts\waitress-serve.exe" --host=127.0.0.1 --port=5000 --ident=StockPot --call app:create_app
+REM --- Servidor (queda corriendo en esta ventana); 8 hilos para varios celulares a la vez ---
+".venv\Scripts\waitress-serve.exe" --host=127.0.0.1 --port=5000 --threads=8 --ident=StockPot --call app:create_app
 pause
 exit /b
 

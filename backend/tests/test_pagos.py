@@ -102,6 +102,21 @@ def test_cp_09_1_2_completar_pago_registra_venta(client, cajero_headers, domicil
     assert all("VTA-000001" in m.observacion for m in salidas)
 
 
+def test_cp_09_1_4_cobro_mixto_efectivo_y_tarjeta(client, cajero_headers, domicilio):
+    """CP-09.1-4 | RF-09.1, RF-09.2 | Cobro mixto (caso UAT-04): una parte en efectivo, sin cambio,
+    y el resto con tarjeta cierran la cuenta con dos pagos."""
+    orden_id = domicilio["orden"]["id"]
+    r = _pagar(client, cajero_headers, orden_id, metodo="EFECTIVO", monto=20000, recibido=20000)
+    assert r.status_code == 201
+    assert r.get_json()["pago"]["cambio"] == 0.0
+    assert (r.get_json()["cuenta"]["saldo"], r.get_json()["cuenta"]["estado_pago"]) == (33000.0, "PARCIAL")
+    r = _pagar(client, cajero_headers, orden_id, metodo="TARJETA", monto=33000, referencia="APR-4521")
+    assert r.status_code == 201
+    cuenta = r.get_json()["cuenta"]
+    assert (cuenta["estado_pago"], cuenta["saldo"]) == ("PAGADO", 0.0)
+    assert sorted((p["metodo"], p["monto"]) for p in cuenta["pagos"]) == [("EFECTIVO", 20000.0), ("TARJETA", 33000.0)]
+
+
 @pytest.mark.parametrize("datos, mensaje", [
     ({"metodo": "BITCOIN", "monto": 1000}, "Método de pago inválido"),
     ({"metodo": "EFECTIVO", "monto": 60000}, "supera el saldo"),

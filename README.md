@@ -319,7 +319,7 @@ técnicos y de soporte de IEEE 1058 (cada carpeta tiene su README):
 |---|---|---|
 | 2.º corte (70 %) | [docs/entrega-2do-corte](docs/entrega-2do-corte) | Acta de constitución · cronograma de GanttProject · Excel de puntos de función y PERT · enlace de Jira · prompts e IA utilizada · plan de pruebas CRUD · matriz de criterios de aceptación · informe de pruebas · acta UAT · video y presentación de la demostración |
 | 3.er corte (70 % + 15 %) | [docs/entrega-3er-corte](docs/entrega-3er-corte) | Acta de constitución v0.3 · Excel con el presupuesto en un solo cálculo (BAC) · plan de pruebas de 78 casos · informe de pruebas del 15 % · guía de despliegue con ngrok |
-| Entrega final | [docs/entrega-final](docs/entrega-final) | Pruebas de usabilidad con Lighthouse (en construcción) |
+| Entrega final (100 %) | [docs/entrega-final](docs/entrega-final) | Acta de constitución v1.0 con mockups · cronograma y Jira al 100 % · plan de pruebas de 88 casos · informe de pruebas final · matriz de criterios de aceptación · COCOMO II + EVM + SQA · pruebas de usabilidad con Lighthouse · acta UAT · enlace del despliegue · presentación y videos · código fuente v1.0.0 |
 
 Documentación técnica: [modelo de datos](docs/modelo-datos.md) ·
 [guía de despliegue con ngrok](docs/despliegue/Guia_Despliegue_ngrok.md).
