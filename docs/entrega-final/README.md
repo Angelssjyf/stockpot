@@ -13,6 +13,7 @@ correcciones de la docente, actualizada al 100 %.
 | `03_Verificacion_y_validacion` | 7.2 Plan de verificación y validación | **Plan de pruebas al 100 %: 88 casos CRUD** (78 del 3.er corte + 10 de Reservas) · **Informe de pruebas realizadas final** (11 módulos, 438 pruebas automatizadas, cobertura del 96 %, 12 defectos cerrados) · **Matriz de criterios de aceptación** (12 criterios aprobados) · **COCOMO II + EVM + SQA** (estimación, valor ganado por corte, matriz de riesgos de calidad y prueba de carga) · **Pruebas de usabilidad con Google Lighthouse** (14 pantallas, celular y escritorio) |
 | `04_Aceptacion_del_producto` | 6.4 Plan de aceptación | **Acta de aceptación del cliente (FORMATO 2 – UAT)** con la prueba del 17/11/2026: 21 usuarios externos, 91 % de tareas sin problema y satisfacción de 4,32 de 5 |
 | `05_Producto_desarrollado` | 6.3 Plan de infraestructura · producto | **Enlace del despliegue** · guía de despliegue con ngrok · código fuente de la versión entregada (v1.0.0) |
+| `05_Demostracion` | Sustentación | **Presentación final** (28 diapositivas en PDF, por los 4 criterios de la rúbrica) · **video promocional** (1 minuto) · **video de demostración** del 2.º corte |
 
 El resto de la estructura técnica está en la raíz del repositorio:
 
